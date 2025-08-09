@@ -353,15 +353,22 @@
           body: JSON.stringify({username, password}),
           headers: {'Content-Type':'application/json'}
         });
+        // Check HTTP status
+        if (!res.ok) {
+          showAlert('error', 'เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ (HTTP ' + res.status + ')');
+          return;
+        }
         const data = await res.json();
         if (data.status === 'success') {
           setUser(data.user);
           showAlert('success', 'เข้าสู่ระบบสำเร็จ', '');
         } else {
-          showAlert('error', 'เข้าสู่ระบบล้มเหลว', data.message || '');
+          // แสดงข้อความผิดพลาดจาก server ถ้ามี
+          showAlert('error', 'เข้าสู่ระบบล้มเหลว', data.message || 'ไม่สามารถเข้าสู่ระบบได้');
         }
-      } catch {
-        showAlert('error', 'เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์');
+      } catch (err) {
+        // เพิ่มรายละเอียด error
+        showAlert('error', 'เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ (' + (err.message || 'Unknown error') + ')');
       }
     };
 
@@ -378,15 +385,19 @@
           body: JSON.stringify({username, password, name}),
           headers: {'Content-Type':'application/json'}
         });
+        if (!res.ok) {
+          showAlert('error', 'เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ (HTTP ' + res.status + ')');
+          return;
+        }
         const data = await res.json();
         if (data.status === 'success') {
           showAlert('success', 'สมัครสมาชิกสำเร็จ', 'เข้าสู่ระบบอัตโนมัติ');
           setUser(data.user);
         } else {
-          showAlert('error', 'สมัครสมาชิกล้มเหลว', data.message || '');
+          showAlert('error', 'สมัครสมาชิกล้มเหลว', data.message || 'ไม่สามารถสมัครสมาชิกได้');
         }
-      } catch {
-        showAlert('error', 'เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์');
+      } catch (err) {
+        showAlert('error', 'เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ (' + (err.message || 'Unknown error') + ')');
       }
     };
 
@@ -420,7 +431,10 @@
     function fetchJobs() {
       // Call GS API to get jobs for current user
       fetch(GS_API + '?action=getJobs&username=' + encodeURIComponent(currentUser.username))
-        .then(r => r.json())
+        .then(r => {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        })
         .then(data => {
           if (data.status === 'success') {
             jobs = data.jobs || [];
@@ -433,13 +447,15 @@
             updateHomeStats();
             renderHistory();
             renderMonthlyReport();
+            showAlert('error', 'ดึงข้อมูลล้มเหลว', data.message || 'ไม่สามารถโหลดข้อมูลงาน');
           }
         })
-        .catch(() => {
+        .catch((err) => {
           jobs = [];
           updateHomeStats();
           renderHistory();
           renderMonthlyReport();
+          showAlert('error', 'เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ (' + (err.message || 'Unknown error') + ')');
         });
     }
 
@@ -512,6 +528,10 @@
           body: JSON.stringify(job),
           headers: {'Content-Type':'application/json'}
         });
+        if (!res.ok) {
+          showAlert('error', 'เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ (HTTP ' + res.status + ')');
+          return;
+        }
         const data = await res.json();
         if (data.status === 'success') {
           showAlert('success', 'บันทึกงานสำเร็จ', '');
@@ -520,10 +540,10 @@
           fetchJobs();
           showSection('history-section');
         } else {
-          showAlert('error', 'บันทึกงานล้มเหลว', data.message || '');
+          showAlert('error', 'บันทึกงานล้มเหลว', data.message || 'ไม่สามารถบันทึกงาน');
         }
-      } catch {
-        showAlert('error', 'เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์');
+      } catch (err) {
+        showAlert('error', 'เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ (' + (err.message || 'Unknown error') + ')');
       }
     };
 
@@ -641,16 +661,20 @@
           body: JSON.stringify(job),
           headers: {'Content-Type':'application/json'}
         });
+        if (!res.ok) {
+          showAlert('error', 'เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ (HTTP ' + res.status + ')');
+          return;
+        }
         const data = await res.json();
         if (data.status === 'success') {
           showAlert('success', 'แก้ไขงานสำเร็จ', '');
           editJobModal.classList.add('hidden');
           fetchJobs();
         } else {
-          showAlert('error', 'แก้ไขงานล้มเหลว', data.message || '');
+          showAlert('error', 'แก้ไขงานล้มเหลว', data.message || 'ไม่สามารถแก้ไขงาน');
         }
-      } catch {
-        showAlert('error', 'เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์');
+      } catch (err) {
+        showAlert('error', 'เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ (' + (err.message || 'Unknown error') + ')');
       }
     };
     deleteJobBtn.onclick = async function() {
@@ -669,16 +693,20 @@
               body: JSON.stringify({id: editingJobId, username: currentUser.username}),
               headers: {'Content-Type':'application/json'}
             });
+            if (!res.ok) {
+              showAlert('error', 'เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ (HTTP ' + res.status + ')');
+              return;
+            }
             const data = await res.json();
             if (data.status === 'success') {
               showAlert('success', 'ลบงานสำเร็จ', '');
               editJobModal.classList.add('hidden');
               fetchJobs();
             } else {
-              showAlert('error', 'ลบงานล้มเหลว', data.message || '');
+              showAlert('error', 'ลบงานล้มเหลว', data.message || 'ไม่สามารถลบงาน');
             }
-          } catch {
-            showAlert('error', 'เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์');
+          } catch (err) {
+            showAlert('error', 'เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ (' + (err.message || 'Unknown error') + ')');
           }
         }
       });
