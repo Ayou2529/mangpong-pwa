@@ -1,34 +1,37 @@
-const CACHE_NAME = 'mangpong-v1';
-const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png',
-  // เพิ่มไฟล์ asset อื่นๆตามต้องการ เช่น css js รูปภาพ ฯลฯ
+const CACHE_NAME = "mangpong-cache-v1";
+const STATIC_ASSETS = [
+  "/",
+  "/index.html",
+  "/manifest.json",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png"
 ];
 
-self.addEventListener('install', event => {
+self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache =>
-      cache.addAll(urlsToCache)
+    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
+  );
+});
+
+self.addEventListener("activate", event => {
+  event.waitUntil(
+    caches.keys().then(keys => 
+      Promise.all(keys.map(k => (k !== CACHE_NAME ? caches.delete(k) : null)))
     )
   );
 });
 
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))
-    )
-  );
-});
+self.addEventListener("fetch", event => {
+  const url = event.request.url;
+  
+  // อย่าแคช JSONP ของ Google Apps Script เพื่อให้ได้ข้อมูลล่าสุดเสมอ
+  if (url.includes("script.google.com/macros/s/")) {
+    return; // ปล่อยให้ network จัดการ
+  }
 
-self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
-      .catch(() => caches.match('/index.html'))
+    caches.match(event.request).then(resp => {
+      return resp || fetch(event.request);
+    })
   );
 });
