@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>แมงป่อง เทรดดิ้ง - Mangpong Delivery</title>
-    <!-- ใช้ Tailwind CSS จาก CDN ทางเลือก -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -75,7 +73,7 @@
         }
         /* Improve touch targets for mobile */
         button, input, select, textarea {
-            font-size: 16px;
+            font-size: 16px; /* Prevents iOS zoom on focus */
         }
         .touch-target {
             min-height: 44px;
@@ -141,30 +139,15 @@
             max-width: 400px;
             margin: 1rem;
         }
-        #loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            display: none;
-        }
     </style>
+    <script>
+// แก้ไขปัญหา Cloudflare
+if(typeof window.__CF$cv$params === 'undefined') {
+  window.__CF$cv$params = {r:'0', t:'0'};
+}
+</script>
 </head>
 <body>
-    <!-- Loading Indicator -->
-    <div id="loading" class="hidden">
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-            <p class="mt-4 text-center">กำลังโหลด...</p>
-        </div>
-    </div>
-
     <!-- Login Screen -->
     <div id="login-screen" class="auth-container">
         <div class="auth-card">
@@ -597,11 +580,6 @@
             document.getElementById('register-screen').classList.add('hidden');
         }
 
-        // Show loading indicator
-        function showLoading(show) {
-            document.getElementById('loading').style.display = show ? 'flex' : 'none';
-        }
-
         // Login form submission
         document.getElementById('login-form').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -609,7 +587,16 @@
             const username = document.getElementById('login-username').value;
             const password = document.getElementById('login-password').value;
             
-            showLoading(true);
+            // Show loading
+            Swal.fire({
+                title: 'กำลังเข้าสู่ระบบ...',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
             
             try {
                 const response = await submitToGoogleSheets({
@@ -622,6 +609,7 @@
                     currentUser = response.user;
                     localStorage.setItem('mangpongUser', JSON.stringify(currentUser));
                     
+                    // Show success and redirect
                     await Swal.fire({
                         icon: 'success',
                         title: 'เข้าสู่ระบบสำเร็จ!',
@@ -630,10 +618,12 @@
                         confirmButtonColor: '#10b981'
                     });
                     
+                    // Show main app
                     document.getElementById('login-screen').classList.add('hidden');
                     document.getElementById('app').classList.remove('hidden');
                     document.getElementById('user-display-name').textContent = currentUser.fullName;
                     
+                    // Initialize app
                     initializeApp();
                     
                 } else {
@@ -654,8 +644,6 @@
                     confirmButtonText: 'ตกลง',
                     confirmButtonColor: '#ef4444'
                 });
-            } finally {
-                showLoading(false);
             }
         });
 
@@ -670,6 +658,7 @@
             const phone = document.getElementById('register-phone').value;
             const email = document.getElementById('register-email').value;
             
+            // Validate password confirmation
             if (password !== confirmPassword) {
                 await Swal.fire({
                     icon: 'error',
@@ -681,7 +670,16 @@
                 return;
             }
             
-            showLoading(true);
+            // Show loading
+            Swal.fire({
+                title: 'กำลังสมัครสมาชิก...',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
             
             try {
                 const response = await submitToGoogleSheets({
@@ -702,6 +700,7 @@
                         confirmButtonColor: '#10b981'
                     });
                     
+                    // Clear form and show login screen
                     document.getElementById('register-form').reset();
                     showLoginScreen();
                     
@@ -723,8 +722,6 @@
                     confirmButtonText: 'ตกลง',
                     confirmButtonColor: '#ef4444'
                 });
-            } finally {
-                showLoading(false);
             }
         });
 
@@ -732,6 +729,7 @@
         function updateDateTime() {
             const now = new Date();
             
+            // Convert to Thai Buddhist calendar
             const thaiYear = now.getFullYear() + 543;
             const thaiMonths = [
                 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
@@ -746,22 +744,26 @@
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             
-            document.getElementById('current-date-time').textContent = `${dayName} ${day} ${month} ${year} ${hours}:${minutes}`;
+            const dateTimeString = `${dayName} ${day} ${month} ${year} ${hours}:${minutes}`;
+            document.getElementById('current-date-time').textContent = dateTimeString;
             
             const monthYearString = `${month} ${year}`;
             document.getElementById('current-month').textContent = monthYearString;
             
+            // Set default date for history to today
             const selectedDateInput = document.getElementById('selected-date');
             if (selectedDateInput) {
                 selectedDateInput.value = formatDate(now);
             }
             
+            // Set default date for job date picker to today
             const jobDatePicker = document.getElementById('job-date-picker');
             if (jobDatePicker) {
                 jobDatePicker.value = formatDate(now);
             }
         }
         
+        // Format date as DD/MM/YYYY for Thai input
         function formatThaiDateInput(date) {
             const day = String(date.getDate()).padStart(2, '0');
             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -769,6 +771,7 @@
             return `${day}/${month}/${year}`;
         }
         
+        // Format date as YYYY-MM-DD for input[type="date"]
         function formatDate(date) {
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -776,6 +779,7 @@
             return `${year}-${month}-${day}`;
         }
 
+        // Convert date to Thai format for display
         function formatThaiDate(dateString) {
             const date = new Date(dateString);
             const thaiYear = date.getFullYear() + 543;
@@ -791,12 +795,14 @@
             return `${day}/${month}/${year}`;
         }
         
+        // Check incomplete and draft jobs from localStorage
         function checkJobStatus() {
             const savedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
             
             const incompleteJobs = savedJobs.filter(job => job.status === 'incomplete');
             const draftJobs = savedJobs.filter(job => job.status === 'draft');
             
+            // Handle incomplete jobs
             const incompleteCard = document.getElementById('incomplete-jobs-card');
             const incompleteList = document.getElementById('incomplete-jobs-list');
             
@@ -815,6 +821,7 @@
                 incompleteCard.classList.add('hidden');
             }
             
+            // Handle draft jobs
             const draftCard = document.getElementById('draft-jobs-card');
             const draftList = document.getElementById('draft-jobs-list');
             
@@ -834,35 +841,44 @@
             }
         }
         
+        // Screen navigation
         function showScreen(screenId) {
+            // Hide all screens
             document.getElementById('home-screen').classList.add('hidden');
             document.getElementById('new-job-screen').classList.add('hidden');
             document.getElementById('history-screen').classList.add('hidden');
             
+            // Show the selected screen
             document.getElementById(screenId).classList.remove('hidden');
             
+            // Update navigation
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
             });
             
+            // Set active nav item and refresh data
             if (screenId === 'home-screen') {
                 document.querySelectorAll('.nav-item')[0].classList.add('active');
                 checkJobStatus();
                 updateStats();
             } else if (screenId === 'new-job-screen') {
                 document.querySelectorAll('.nav-item')[1].classList.add('active');
+                // Clear form if not editing
                 const form = document.getElementById('new-job-form');
                 if (!form.getAttribute('data-editing-job-id')) {
                     form.reset();
                     
+                    // Reset job date picker to today
                     const jobDatePicker = document.getElementById('job-date-picker');
                     if (jobDatePicker) {
                         jobDatePicker.value = formatDate(new Date());
                     }
                     
+                    // Clear additional job details and fees
                     const jobDetailsContainer = document.getElementById('job-details-container');
                     const additionalFeesContainer = document.getElementById('additional-fees-container');
                     
+                    // Reset to single job detail
                     jobDetailsContainer.innerHTML = `
                         <div class="job-detail-card border border-gray-200 rounded-md p-3 mb-3">
                             <div class="mb-2">
@@ -892,8 +908,10 @@
                         </div>
                     `;
                     
+                    // Clear additional fees
                     additionalFeesContainer.innerHTML = '';
                     
+                    // Re-add event listeners
                     jobDetailsContainer.querySelector('.amount-input').addEventListener('input', updateTotalAmount);
                     updateTotalAmount();
                 }
@@ -903,6 +921,7 @@
             }
         }
         
+        // Add job detail
         document.getElementById('add-job-detail').addEventListener('click', function() {
             const container = document.getElementById('job-details-container');
             const jobDetailCount = container.querySelectorAll('.job-detail-card').length;
@@ -946,17 +965,20 @@
                 `;
                 container.appendChild(newDetail);
                 
+                // Add event listener to remove button
                 newDetail.querySelector('.remove-job-detail').addEventListener('click', function() {
                     container.removeChild(newDetail);
                     updateTotalAmount();
                 });
                 
+                // Add event listener to amount input
                 newDetail.querySelector('.amount-input').addEventListener('input', updateTotalAmount);
             } else {
                 alert('คุณสามารถเพิ่มรายละเอียดงานได้สูงสุด 5 รายการ');
             }
         });
         
+        // Add additional fee
         document.getElementById('add-fee').addEventListener('click', function() {
             const container = document.getElementById('additional-fees-container');
             const feeItem = document.createElement('div');
@@ -982,34 +1004,52 @@
             `;
             container.appendChild(feeItem);
             
+            // Add event listener to remove button
             feeItem.querySelector('.remove-fee').addEventListener('click', function() {
                 container.removeChild(feeItem);
                 updateTotalAmount();
             });
             
+            // Add event listener to fee amount input
             feeItem.querySelector('.fee-amount').addEventListener('input', updateTotalAmount);
         });
         
+        // Update total amount
         function updateTotalAmount() {
             let total = 0;
             
+            // Sum job detail amounts
             document.querySelectorAll('.amount-input').forEach(input => {
                 const value = parseFloat(input.value) || 0;
                 total += value;
             });
             
+            // Update main service fee
             document.getElementById('main-service-fee').textContent = total.toFixed(2) + ' บาท';
             
+            // Sum additional fees
             document.querySelectorAll('.fee-amount').forEach(input => {
                 const value = parseFloat(input.value) || 0;
                 total += value;
             });
             
+            // Update total
             document.getElementById('total-amount').textContent = total.toFixed(2) + ' บาท';
         }
         
+        // Save job as draft (floating button)
         document.getElementById('floating-save-btn').addEventListener('click', async function() {
-            showLoading(true);
+            // Show loading alert
+            Swal.fire({
+                title: 'กำลังบันทึกร่าง...',
+                text: 'กรุณารอสักครู่',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
             
             try {
                 const formData = collectFormData();
@@ -1017,6 +1057,7 @@
                 
                 const response = await saveJob(formData, true);
                 
+                // Show success message
                 await Swal.fire({
                     icon: 'info',
                     title: 'บันทึกร่างสำเร็จ!',
@@ -1025,8 +1066,10 @@
                     confirmButtonColor: '#3b82f6'
                 });
                 
+                // Update stats
                 updateStats();
                 
+                // Add to draft jobs list
                 const draftJobs = [
                     { id: formData.jobId, company: formData.company || 'แมงป่อง เทรดดิ้ง' }
                 ];
@@ -1045,15 +1088,18 @@
                     draftList.appendChild(li);
                 });
                 
+                // Reset form
                 const form = document.getElementById('new-job-form');
                 form.reset();
                 updateTotalAmount();
                 
+                // Go back to home screen
                 showScreen('home-screen');
                 
             } catch (error) {
                 console.error('Error saving draft:', error);
                 
+                // Show error message
                 await Swal.fire({
                     icon: 'error',
                     title: 'เกิดข้อผิดพลาด!',
@@ -1061,32 +1107,48 @@
                     confirmButtonText: 'ตกลง',
                     confirmButtonColor: '#ef4444'
                 });
-            } finally {
-                showLoading(false);
             }
         });
         
-        async function submitToGoogleSheets(data) {
-            try {
-                showLoading(true);
-                const response = await fetch(`${GOOGLE_SCRIPT_URL}?${new URLSearchParams(data)}`);
-                return await response.json();
-            } catch (error) {
-                console.error('Error submitting to Google Sheets:', error);
-                throw new Error('เกิดข้อผิดพลาดในการเชื่อมต่อ Google Sheets');
-            } finally {
-                showLoading(false);
-            }
+        // Google Sheets connection using JSONP
+        function submitToGoogleSheets(data) {
+            return new Promise((resolve, reject) => {
+                const callbackName = 'jsonpCallback_' + Date.now();
+
+                window[callbackName] = function(response) {
+                    resolve(response);
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                };
+
+                const queryParams = new URLSearchParams();
+                for (let key in data) {
+                    queryParams.append(key, data[key]);
+                }
+                queryParams.append('callback', callbackName);
+
+                const script = document.createElement('script');
+                script.src = `${GOOGLE_SCRIPT_URL}?${queryParams.toString()}`;
+                script.onerror = function() {
+                    reject(new Error('เกิดข้อผิดพลาดในการเชื่อมต่อ Google Sheets'));
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                };
+
+                document.body.appendChild(script);
+            });
         }
         
         function collectFormData() {
             const form = document.getElementById('new-job-form');
             const formData = new FormData(form);
             
+            // วันที่บันทึกงาน
             const jobDatePicker = document.getElementById('job-date-picker');
             const selectedDate = new Date(jobDatePicker.value);
             const thaiDateValue = formatThaiDateInput(selectedDate);
             
+            // ข้อมูลหลักของงาน
             const base = {
                 timestamp: selectedDate.toISOString(),
                 jobDate: thaiDateValue,
@@ -1099,6 +1161,7 @@
                 pickupDistrict: form.querySelector('input[placeholder="เขต/อำเภอ"]').value
             };
             
+            // รายละเอียดงาน (แบบโครงสร้างสำหรับใช้ในแอป)
             const jobDetails = [];
             const jobDetailCards = document.querySelectorAll('.job-detail-card');
             jobDetailCards.forEach((card) => {
@@ -1113,6 +1176,7 @@
                 });
             });
             
+            // ค่าบริการเพิ่มเติม (แบบโครงสร้างสำหรับใช้ในแอป)
             const additionalFees = [];
             const feeItems = document.querySelectorAll('#additional-fees-container > div');
             feeItems.forEach(item => {
@@ -1126,10 +1190,12 @@
                 }
             });
             
+            // รวมยอดเงิน
             const mainServiceFee = jobDetails.reduce((sum, j) => sum + (parseFloat(j.amount) || 0), 0);
             const additionalFeesTotal = additionalFees.reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0);
             const totalAmount = mainServiceFee + additionalFeesTotal;
             
+            // แปลงเป็นรูปแบบแนวนอน flat สูงสุด 5 งาน และ 10 ค่าบริการเพิ่มเติม (ปรับได้ตามต้องการ)
             const flat = {};
             jobDetails.forEach((d, i) => {
                 const idx = i + 1;
@@ -1149,17 +1215,22 @@
             });
             flat.feeCount = additionalFees.length;
             
+            // ส่งออกทั้งแบบโครงสร้าง (เพื่อให้แอปยังแสดงผลได้) และแบบแนวนอน (เพื่อบันทึกลงชีตหนึ่งแถว/งาน)
             return {
                 ...base,
+                // โครงสร้างเดิมสำหรับหน้าประวัติและดูรายละเอียด
                 jobDetails: JSON.stringify(jobDetails),
                 additionalFees: JSON.stringify(additionalFees),
+                // ตัวเลขสรุป
                 mainServiceFee,
                 additionalFeesTotal,
                 totalAmount,
+                // ฟิลด์แบบแบนแนวนอน
                 ...flat
             };
         }
         
+        // Parse Thai date format DD/MM/YYYY to Date object
         function parseThaiDate(thaiDateStr) {
             if (!thaiDateStr || !thaiDateStr.includes('/')) {
                 return new Date();
@@ -1171,26 +1242,39 @@
             }
             
             const day = parseInt(parts[0]);
-            const month = parseInt(parts[1]) - 1;
+            const month = parseInt(parts[1]) - 1; // Month is 0-indexed
             const thaiYear = parseInt(parts[2]);
             const gregorianYear = thaiYear - 543;
             
             return new Date(gregorianYear, month, day);
         }
         
+        // Form submission
         document.getElementById('new-job-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            // Check if form is valid
             const form = document.getElementById('new-job-form');
             const isValid = form.checkValidity();
             
             if (isValid) {
-                showLoading(true);
+                // Show loading alert
+                Swal.fire({
+                    title: 'กำลังบันทึกข้อมูล...',
+                    text: 'กรุณารอสักครู่',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
                 
                 try {
                     const formData = collectFormData();
                     const response = await saveJob(formData, false);
                     
+                    // Show success message
                     await Swal.fire({
                         icon: 'success',
                         title: 'บันทึกสำเร็จ!',
@@ -1199,14 +1283,18 @@
                         confirmButtonColor: '#10b981'
                     });
                     
+                    // Update stats
                     updateStats();
                     
+                    // Reset form and clear editing state
                     form.reset();
                     form.removeAttribute('data-editing-job-id');
                     
+                    // Clear additional job details and fees
                     const jobDetailsContainer = document.getElementById('job-details-container');
                     const additionalFeesContainer = document.getElementById('additional-fees-container');
                     
+                    // Reset to single job detail
                     jobDetailsContainer.innerHTML = `
                         <div class="job-detail-card border border-gray-200 rounded-md p-3 mb-3">
                             <div class="mb-2">
@@ -1236,16 +1324,20 @@
                         </div>
                     `;
                     
+                    // Clear additional fees
                     additionalFeesContainer.innerHTML = '';
                     
+                    // Re-add event listeners
                     jobDetailsContainer.querySelector('.amount-input').addEventListener('input', updateTotalAmount);
                     updateTotalAmount();
                     
+                    // Go back to home screen
                     showScreen('home-screen');
                     
                 } catch (error) {
                     console.error('Error submitting form:', error);
                     
+                    // Show error message
                     await Swal.fire({
                         icon: 'error',
                         title: 'เกิดข้อผิดพลาด!',
@@ -1253,10 +1345,9 @@
                         confirmButtonText: 'ตกลง',
                         confirmButtonColor: '#ef4444'
                     });
-                } finally {
-                    showLoading(false);
                 }
             } else {
+                // If form is not valid, show incomplete job notification
                 const result = await Swal.fire({
                     icon: 'warning',
                     title: 'ข้อมูลไม่ครบถ้วน',
@@ -1269,7 +1360,17 @@
                 });
                 
                 if (result.isConfirmed) {
-                    showLoading(true);
+                    // Show loading alert
+                    Swal.fire({
+                        title: 'กำลังบันทึกข้อมูล...',
+                        text: 'กรุณารอสักครู่',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
                     
                     try {
                         const formData = collectFormData();
@@ -1278,6 +1379,7 @@
                         
                         const response = await saveJob(formData, false);
                         
+                        // Show success message
                         await Swal.fire({
                             icon: 'warning',
                             title: 'บันทึกแบบไม่สมบูรณ์',
@@ -1286,6 +1388,7 @@
                             confirmButtonColor: '#f97316'
                         });
                         
+                        // Update stats and show incomplete job card
                         updateStats();
                         
                         const incompleteJobs = [
@@ -1306,14 +1409,17 @@
                             incompleteList.appendChild(li);
                         });
                         
+                        // Reset form
                         form.reset();
                         updateTotalAmount();
                         
+                        // Go back to home screen
                         showScreen('home-screen');
                         
                     } catch (error) {
                         console.error('Error submitting incomplete form:', error);
                         
+                        // Show error message
                         await Swal.fire({
                             icon: 'error',
                             title: 'เกิดข้อผิดพลาด!',
@@ -1321,15 +1427,15 @@
                             confirmButtonText: 'ตกลง',
                             confirmButtonColor: '#ef4444'
                         });
-                    } finally {
-                        showLoading(false);
                     }
                 }
             }
         });
         
+        // Filter jobs by status
         document.querySelectorAll('.status-filter').forEach(button => {
             button.addEventListener('click', function() {
+                // Update active filter button
                 document.querySelectorAll('.status-filter').forEach(btn => {
                     btn.classList.remove('active');
                     btn.classList.remove('bg-blue-100');
@@ -1342,6 +1448,7 @@
                 this.classList.add('bg-blue-100');
                 this.classList.add('border-blue-300');
                 
+                // Filter jobs
                 const status = this.getAttribute('data-status');
                 const jobItems = document.querySelectorAll('.job-item');
                 
@@ -1355,6 +1462,7 @@
             });
         });
         
+        // Display job history
         function displayJobHistory() {
             const savedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
             const container = document.getElementById('job-history-container');
@@ -1367,8 +1475,10 @@
             
             noJobsMessage.style.display = 'none';
             
+            // Sort jobs by timestamp (newest first)
             savedJobs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             
+            // Clear existing job items (except no-jobs-message)
             const existingJobs = container.querySelectorAll('.job-item');
             existingJobs.forEach(job => job.remove());
             
@@ -1440,15 +1550,18 @@
             }
         }
         
+        // Filter by single date
         document.getElementById('filter-date-btn').addEventListener('click', function() {
             const selectedDate = new Date(document.getElementById('selected-date').value);
             
+            // Create date range for the selected day (start of day to end of day)
             const startOfDay = new Date(selectedDate);
             startOfDay.setHours(0, 0, 0, 0);
             
             const endOfDay = new Date(selectedDate);
             endOfDay.setHours(23, 59, 59, 999);
             
+            // Filter jobs by the selected date
             const jobItems = document.querySelectorAll('.job-item');
             let hasVisibleJobs = false;
             
@@ -1456,6 +1569,7 @@
                 const jobDateText = item.querySelector('.text-sm.text-gray-600 p:first-child').textContent;
                 const jobDateStr = jobDateText.replace('วันที่: ', '');
                 
+                // Parse Thai date format back to compare
                 const parts = jobDateStr.split('/');
                 if (parts.length === 3) {
                     const day = parseInt(parts[0]);
@@ -1464,11 +1578,12 @@
                         'ก.ค.': 6, 'ส.ค.': 7, 'ก.ย.': 8, 'ต.ค.': 9, 'พ.ย.': 10, 'ธ.ค.': 11
                     };
                     const month = monthMap[parts[1]];
-                    const year = parseInt(parts[2]) - 543;
+                    const year = parseInt(parts[2]) - 543; // Convert from Buddhist to Gregorian
                     
                     const jobDate = new Date(year, month, day);
                     
                     if (jobDate >= startOfDay && jobDate <= endOfDay) {
+                        // Check if it also matches the current status filter
                         const currentStatusFilter = document.querySelector('.status-filter.active').getAttribute('data-status');
                         if (currentStatusFilter === 'all' || item.getAttribute('data-status') === currentStatusFilter) {
                             item.style.display = 'block';
@@ -1482,6 +1597,7 @@
                 }
             });
             
+            // Show/hide no jobs message
             const noJobsMessage = document.getElementById('no-jobs-message');
             if (hasVisibleJobs) {
                 noJobsMessage.style.display = 'none';
@@ -1490,10 +1606,12 @@
                 noJobsMessage.querySelector('p:first-of-type').textContent = 'ไม่พบงานในวันที่เลือก';
             }
             
+            // Update the header text
             const formattedDate = formatThaiDate(selectedDate.toISOString());
             document.querySelector('#history-screen p.text-xs.text-gray-500').textContent = `แสดงข้อมูลวันที่ ${formattedDate}`;
         });
         
+        // Edit job
         function editJob(jobId) {
             const savedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
             const job = savedJobs.find(j => j.jobId === jobId);
@@ -1508,6 +1626,7 @@
                 return;
             }
             
+            // Populate form with job data
             populateFormWithJobData(job);
             showScreen('new-job-screen');
         }
@@ -1515,6 +1634,7 @@
         function populateFormWithJobData(job) {
             const form = document.getElementById('new-job-form');
             
+            // Basic information
             if (job.company) {
                 const companySelect = form.querySelector('select');
                 companySelect.value = job.company;
@@ -1536,19 +1656,23 @@
                 form.querySelector('input[placeholder="เขต/อำเภอ"]').value = job.pickupDistrict;
             }
             
+            // Set job date - convert from Thai format to date picker format
             if (job.jobDate) {
                 const parsedDate = parseThaiDate(job.jobDate);
                 document.getElementById('job-date-picker').value = formatDate(parsedDate);
             }
             
+            // Job details
             if (job.jobDetails) {
                 const jobDetails = JSON.parse(job.jobDetails);
                 const container = document.getElementById('job-details-container');
                 
+                // Clear existing job details
                 container.innerHTML = '';
                 
                 jobDetails.forEach((detail, index) => {
                     if (index === 0) {
+                        // Use the first job detail card
                         const firstCard = document.createElement('div');
                         firstCard.className = 'job-detail-card border border-gray-200 rounded-md p-3 mb-3';
                         firstCard.innerHTML = `
@@ -1579,8 +1703,10 @@
                         `;
                         container.appendChild(firstCard);
                         
+                        // Add event listener to amount input
                         firstCard.querySelector('.amount-input').addEventListener('input', updateTotalAmount);
                     } else {
+                        // Add additional job detail cards
                         document.getElementById('add-job-detail').click();
                         const newCard = container.lastElementChild;
                         const inputs = newCard.querySelectorAll('input, textarea');
@@ -1594,6 +1720,7 @@
                 });
             }
             
+            // Additional fees
             if (job.additionalFees) {
                 const additionalFees = JSON.parse(job.additionalFees);
                 additionalFees.forEach(fee => {
@@ -1609,11 +1736,14 @@
                 });
             }
             
+            // Update totals
             updateTotalAmount();
             
+            // Store the job ID for updating
             form.setAttribute('data-editing-job-id', job.jobId);
         }
         
+        // View job
         async function viewJob(jobId) {
             const savedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
             const job = savedJobs.find(j => j.jobId === jobId);
@@ -1695,21 +1825,25 @@
             });
         }
         
+        // Update statistics
         function updateStats() {
             const savedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
             const today = new Date();
             const todayStr = today.toDateString();
             
+            // Jobs today
             const jobsToday = savedJobs.filter(job => {
                 const jobDate = new Date(job.timestamp);
                 return jobDate.toDateString() === todayStr;
             }).length;
             
+            // Completed jobs today
             const completedToday = savedJobs.filter(job => {
                 const jobDate = new Date(job.timestamp);
                 return jobDate.toDateString() === todayStr && job.status === 'complete';
             }).length;
             
+            // Monthly jobs
             const currentMonth = today.getMonth();
             const currentYear = today.getFullYear();
             const monthlyJobs = savedJobs.filter(job => {
@@ -1717,55 +1851,59 @@
                 return jobDate.getMonth() === currentMonth && jobDate.getFullYear() === currentYear;
             }).length;
             
+            // Update display
             document.getElementById('jobs-today').textContent = jobsToday;
             document.getElementById('completed-today').textContent = completedToday;
             document.getElementById('monthly-jobs').textContent = monthlyJobs;
         }
         
-        async function saveJob(jobData, isDraft = false) {
+        // Save job to localStorage and Google Sheets
+        function saveJob(jobData, isDraft = false) {
+            // Save to localStorage first
             let savedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
             
+            // Check if editing existing job
             const form = document.getElementById('new-job-form');
             const editingJobId = form.getAttribute('data-editing-job-id');
             
             if (editingJobId) {
+                // Update existing job
                 const jobIndex = savedJobs.findIndex(job => job.jobId === editingJobId);
                 if (jobIndex !== -1) {
                     savedJobs[jobIndex] = { ...savedJobs[jobIndex], ...jobData };
                 }
                 form.removeAttribute('data-editing-job-id');
             } else {
+                // Add new job
                 savedJobs.push(jobData);
             }
             
             localStorage.setItem('mangpongJobs', JSON.stringify(savedJobs));
             
-            const response = await submitToGoogleSheets({
+            // Also submit to Google Sheets
+            return submitToGoogleSheets({
                 action: 'saveJob',
                 ...jobData,
                 isDraft: isDraft
             });
-            
-            return response;
         }
 
+        // Initialize app
         function initializeApp() {
             updateDateTime();
             checkJobStatus();
             updateStats();
             displayJobHistory();
             
+            // Add event listeners to amount inputs
             document.querySelectorAll('.amount-input').forEach(input => {
                 input.addEventListener('input', updateTotalAmount);
             });
         }
         
+        // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Fix Cloudflare issue
-            if(typeof window.__CF$cv$params === 'undefined') {
-                window.__CF$cv$params = {r:'0', t:'0'};
-            }
-            
+            // Check if user is already logged in
             const savedUser = localStorage.getItem('mangpongUser');
             if (savedUser) {
                 currentUser = JSON.parse(savedUser);
@@ -1775,11 +1913,15 @@
                 initializeApp();
             }
             
+
+            
+            // Prevent zoom on iOS when focusing inputs
             const metaViewport = document.querySelector('meta[name=viewport]');
             metaViewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
             
+            // Add fastclick to eliminate 300ms delay on mobile
             document.addEventListener('touchstart', function() {}, {passive: true});
         });
     </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96f3a3c9928ed01e',t:'MTc1NTIwNzkzMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
