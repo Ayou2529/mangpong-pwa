@@ -83,6 +83,7 @@
         /* Fix iOS input styling */
         input, select, textarea {
             -webkit-appearance: none;
+            appearance: none;
             border-radius: 8px;
         }
         /* Floating save button */
@@ -570,7 +571,7 @@
     <script>
         // Global variables
         let currentUser = null;
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwcOeN18ikAiLJN6un76LV2GIb_x2Xn4RHNZr-psa11xp8t4evXwKUOasfiF3RV9FPK/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbza5s6wDjFfcQNdLFa-KtccftmIYBrcS-znOgwndgLk7i98Gs0j_j_nkmnbWOyK2d1zMg/exec';
 
         // Authentication functions
         function showLoginScreen() {
@@ -1171,7 +1172,7 @@
                     clearTimeout(timeout);
                     try {
                         if (response && response.success !== undefined) {
-                            resolve(response);
+                    resolve(response);
                         } else {
                             reject(new Error('ข้อมูลตอบกลับไม่ถูกต้อง'));
                         }
@@ -1193,7 +1194,7 @@
                 const queryParams = new URLSearchParams();
                 for (let key in data) {
                     if (data[key] !== null && data[key] !== undefined) {
-                        queryParams.append(key, data[key]);
+                    queryParams.append(key, data[key]);
                     }
                 }
                 queryParams.append('callback', callbackName);
@@ -1977,10 +1978,10 @@
             // Try to submit to Google Sheets (online)
             try {
                 const response = await submitToGoogleSheets({
-                    action: 'saveJob',
-                    ...jobData,
-                    isDraft: isDraft
-                });
+                action: 'saveJob',
+                ...jobData,
+                isDraft: isDraft
+            });
                 
                 // Mark job as synced
                 if (response.success) {
