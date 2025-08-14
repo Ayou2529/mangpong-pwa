@@ -83,7 +83,6 @@
         /* Fix iOS input styling */
         input, select, textarea {
             -webkit-appearance: none;
-            appearance: none;
             border-radius: 8px;
         }
         /* Floating save button */
@@ -232,7 +231,6 @@
                     <div>
                         <h1 class="text-xl font-bold">แมงป่อง เทรดดิ้ง</h1>
                         <p class="text-xs opacity-80">Mangpong Delivery Appsheet V1.0</p>
-                        <div id="network-status" class="text-xs mt-1 opacity-80"></div>
                     </div>
                     <div class="text-right">
                         <div class="text-sm font-medium" id="user-display-name">ผู้ใช้งาน</div>
@@ -260,21 +258,6 @@
                     <p class="text-gray-500 mb-1">ส่งงานวันนี้</p>
                     <p class="text-2xl font-bold text-green-600" id="completed-today">0</p>
                 </div>
-            </div>
-
-            <div id="sync-status-card" class="card bg-white p-4 mb-4 hidden">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-orange-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                        <span class="text-gray-700">งานที่รอซิงค์:</span>
-                    </div>
-                    <span class="text-lg font-bold text-orange-600" id="unsynced-count">0</span>
-                </div>
-                <button class="mt-2 w-full py-2 bg-orange-100 text-orange-700 rounded-md text-sm font-medium hover:bg-orange-200 transition-colors" onclick="syncAllOfflineJobs()">
-                    ซิงค์ทั้งหมด
-                </button>
             </div>
 
             <div class="card bg-white p-4 mb-4">
@@ -571,7 +554,7 @@
     <script>
         // Global variables
         let currentUser = null;
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbza5s6wDjFfcQNdLFa-KtccftmIYBrcS-znOgwndgLk7i98Gs0j_j_nkmnbWOyK2d1zMg/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwcOeN18ikAiLJN6un76LV2GIb_x2Xn4RHNZr-psa11xp8t4evXwKUOasfiF3RV9FPK/exec';
 
         // Authentication functions
         function showLoginScreen() {
@@ -642,29 +625,17 @@
                     await Swal.fire({
                         icon: 'error',
                         title: 'เข้าสู่ระบบไม่สำเร็จ',
-                        text: response.error || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
+                        text: response.error,
                         confirmButtonText: 'ตกลง',
                         confirmButtonColor: '#ef4444'
                     });
                 }
                 
             } catch (error) {
-                console.error('Login error:', error);
-                
-                let errorMessage = 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ';
-                
-                if (error.message.includes('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์')) {
-                    errorMessage = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตและลองใหม่อีกครั้ง';
-                } else if (error.message.includes('การเชื่อมต่อใช้เวลานาน')) {
-                    errorMessage = 'การเชื่อมต่อใช้เวลานานเกินไป กรุณาลองใหม่อีกครั้ง';
-                } else if (error.message.includes('ข้อมูลตอบกลับไม่ถูกต้อง')) {
-                    errorMessage = 'เซิร์ฟเวอร์ตอบกลับข้อมูลไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง';
-                }
-                
                 await Swal.fire({
                     icon: 'error',
                     title: 'เกิดข้อผิดพลาด',
-                    text: errorMessage,
+                    text: error.message,
                     confirmButtonText: 'ตกลง',
                     confirmButtonColor: '#ef4444'
                 });
@@ -739,22 +710,10 @@
                 }
                 
             } catch (error) {
-                console.error('Register error:', error);
-                
-                let errorMessage = 'เกิดข้อผิดพลาดในการสมัครสมาชิก';
-                
-                if (error.message.includes('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์')) {
-                    errorMessage = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตและลองใหม่อีกครั้ง';
-                } else if (error.message.includes('การเชื่อมต่อใช้เวลานาน')) {
-                    errorMessage = 'การเชื่อมต่อใช้เวลานานเกินไป กรุณาลองใหม่อีกครั้ง';
-                } else if (error.message.includes('ข้อมูลตอบกลับไม่ถูกต้อง')) {
-                    errorMessage = 'เซิร์ฟเวอร์ตอบกลับข้อมูลไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง';
-                }
-                
                 await Swal.fire({
                     icon: 'error',
                     title: 'เกิดข้อผิดพลาด',
-                    text: errorMessage,
+                    text: error.message,
                     confirmButtonText: 'ตกลง',
                     confirmButtonColor: '#ef4444'
                 });
@@ -938,7 +897,7 @@
                                 <textarea class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required></textarea>
                             </div>
                             <div>
-                                <label class="block text-gray-600 mb-1">จำนวนเงิน - บาท</label>
+                                <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
                                 <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" required>
                             </div>
                         </div>
@@ -1146,60 +1105,31 @@
             }
         });
         
-        // Google Sheets connection using JSONP with improved error handling
+        // Google Sheets connection using JSONP
         function submitToGoogleSheets(data) {
             return new Promise((resolve, reject) => {
-                // Add timeout to prevent hanging requests
-                const timeout = setTimeout(() => {
-                    reject(new Error('การเชื่อมต่อใช้เวลานานเกินไป กรุณาลองใหม่อีกครั้ง'));
-                    cleanup();
-                }, 30000); // 30 second timeout
-
                 const callbackName = 'jsonpCallback_' + Date.now();
-                let script;
-
-                function cleanup() {
-                    clearTimeout(timeout);
-                    if (window[callbackName]) {
-                        delete window[callbackName];
-                    }
-                    if (script && script.parentNode) {
-                        script.parentNode.removeChild(script);
-                    }
-                }
 
                 window[callbackName] = function(response) {
-                    clearTimeout(timeout);
-                    try {
-                        if (response && response.success !== undefined) {
                     resolve(response);
-                        } else {
-                            reject(new Error('ข้อมูลตอบกลับไม่ถูกต้อง'));
-                        }
-                    } catch (error) {
-                        reject(new Error('เกิดข้อผิดพลาดในการประมวลผลข้อมูล'));
-                    } finally {
-                        cleanup();
-                    }
-                };
-
-                // Add error handling for script loading
-                script = document.createElement('script');
-                script.onerror = function() {
-                    clearTimeout(timeout);
-                    reject(new Error('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต'));
-                    cleanup();
+                    delete window[callbackName];
+                    document.body.removeChild(script);
                 };
 
                 const queryParams = new URLSearchParams();
                 for (let key in data) {
-                    if (data[key] !== null && data[key] !== undefined) {
                     queryParams.append(key, data[key]);
-                    }
                 }
                 queryParams.append('callback', callbackName);
 
+                const script = document.createElement('script');
                 script.src = `${GOOGLE_SCRIPT_URL}?${queryParams.toString()}`;
+                script.onerror = function() {
+                    reject(new Error('เกิดข้อผิดพลาดในการเชื่อมต่อ Google Sheets'));
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                };
+
                 document.body.appendChild(script);
             });
         }
@@ -1561,14 +1491,9 @@
             const statusBadge = getStatusBadge(job.status);
             const jobDate = formatThaiDate(job.timestamp);
             
-            // Add sync status indicator
-            const syncStatus = job.synced ? 
-                '<span class="text-green-600 text-xs ml-2">✓ ซิงค์แล้ว</span>' : 
-                '<span class="text-orange-600 text-xs ml-2">⚠ รอซิงค์</span>';
-            
             jobElement.innerHTML = `
                 <div class="flex justify-between items-start mb-1">
-                    <h3 class="font-medium">${job.jobId}${syncStatus}</h3>
+                    <h3 class="font-medium">${job.jobId}</h3>
                     <span class="px-2 py-1 text-xs rounded-full ${statusBadge.class}">${statusBadge.text}</span>
                 </div>
                 <div class="text-sm text-gray-600 mb-2">
@@ -1587,11 +1512,6 @@
                         <p>สถานะ: บันทึกเป็นร่าง</p>
                     </div>
                 ` : ''}
-                ${!job.synced && job.syncError ? `
-                    <div class="bg-orange-50 border-l-4 border-orange-500 p-2 text-sm text-orange-700 mb-2">
-                        <p>ข้อผิดพลาดการซิงค์: ${job.syncError}</p>
-                    </div>
-                ` : ''}
                 <div class="flex space-x-2">
                     ${job.status === 'complete' ? `
                         <button class="text-sm text-indigo-600 font-medium flex items-center touch-target" onclick="viewJob('${job.jobId}')">
@@ -1608,14 +1528,6 @@
                             </svg>
                         </button>
                     `}
-                    ${!job.synced ? `
-                        <button class="text-sm text-green-600 font-medium flex items-center touch-target" onclick="retrySync('${job.jobId}')">
-                            ลองซิงค์ใหม่
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                        </button>
-                    ` : ''}
                 </div>
             `;
             
@@ -1761,19 +1673,19 @@
                         firstCard.innerHTML = `
                             <div class="mb-2">
                                 <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
-                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" required>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" value="${detail.destinationCompany || ''}" required>
                             </div>
                             <div class="mb-2">
                                 <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
-                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" required>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" value="${detail.deliveryProvince || detail.deliveryLocation || ''}" required>
                             </div>
                             <div class="mb-2">
                                 <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
-                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" required>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" value="${detail.deliveryDistrict || ''}" required>
                             </div>
                             <div class="mb-2">
                                 <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
-                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" required>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" value="${detail.recipient || ''}" required>
                             </div>
                             <div class="mb-2">
                                 <label class="block text-gray-600 mb-1">รายละเอียด</label>
@@ -1934,27 +1846,15 @@
                 return jobDate.getMonth() === currentMonth && jobDate.getFullYear() === currentYear;
             }).length;
             
-            // Unsynced jobs count
-            const unsyncedJobs = savedJobs.filter(job => !job.synced);
-            const syncStatusCard = document.getElementById('sync-status-card');
-            const unsyncedCount = document.getElementById('unsynced-count');
-            
-            if (unsyncedJobs.length > 0) {
-                syncStatusCard.classList.remove('hidden');
-                unsyncedCount.textContent = unsyncedJobs.length;
-            } else {
-                syncStatusCard.classList.add('hidden');
-            }
-            
             // Update display
             document.getElementById('jobs-today').textContent = jobsToday;
             document.getElementById('completed-today').textContent = completedToday;
             document.getElementById('monthly-jobs').textContent = monthlyJobs;
         }
         
-        // Enhanced saveJob function with offline fallback
-        async function saveJob(jobData, isDraft = false) {
-            // Save to localStorage first (offline fallback)
+        // Save job to localStorage and Google Sheets
+        function saveJob(jobData, isDraft = false) {
+            // Save to localStorage first
             let savedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
             
             // Check if editing existing job
@@ -1975,55 +1875,17 @@
             
             localStorage.setItem('mangpongJobs', JSON.stringify(savedJobs));
             
-            // Try to submit to Google Sheets (online)
-            try {
-                const response = await submitToGoogleSheets({
+            // Also submit to Google Sheets
+            return submitToGoogleSheets({
                 action: 'saveJob',
                 ...jobData,
                 isDraft: isDraft
             });
-                
-                // Mark job as synced
-                if (response.success) {
-                    const updatedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
-                    const jobIndex = updatedJobs.findIndex(job => job.jobId === jobData.jobId);
-                    if (jobIndex !== -1) {
-                        updatedJobs[jobIndex].synced = true;
-                        updatedJobs[jobIndex].syncTimestamp = new Date().toISOString();
-                        localStorage.setItem('mangpongJobs', JSON.stringify(updatedJobs));
-                    }
-                }
-                
-                return response;
-                
-            } catch (error) {
-                console.warn('Failed to sync with Google Sheets:', error);
-                
-                // Mark job as not synced for later retry
-                const updatedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
-                const jobIndex = updatedJobs.findIndex(job => job.jobId === jobData.jobId);
-                if (jobIndex !== -1) {
-                    updatedJobs[jobIndex].synced = false;
-                    updatedJobs[jobIndex].syncError = error.message;
-                    localStorage.setItem('mangpongJobs', JSON.stringify(updatedJobs));
-                }
-                
-                // Show offline notification
-                showOfflineNotification(`งาน ${jobData.jobId} ถูกบันทึกในเครื่องแล้ว แต่ยังไม่ได้ซิงค์กับเซิร์ฟเวอร์`);
-                
-                // Return success for offline mode
-                return {
-                    success: true,
-                    message: 'บันทึกข้อมูลในเครื่องแล้ว (ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้)',
-                    offline: true
-                };
-            }
         }
 
         // Initialize app
         function initializeApp() {
             updateDateTime();
-            updateNetworkStatus(); // Add network status check
             checkJobStatus();
             updateStats();
             displayJobHistory();
@@ -2055,420 +1917,184 @@
             // Add fastclick to eliminate 300ms delay on mobile
             document.addEventListener('touchstart', function() {}, {passive: true});
         });
-
-        // Add network status detection
-        function updateNetworkStatus() {
-            const isOnline = navigator.onLine;
-            const statusElement = document.getElementById('network-status');
-            
-            if (statusElement) {
-                if (isOnline) {
-                    statusElement.textContent = 'ออนไลน์';
-                    statusElement.className = 'text-green-600 text-xs';
-                    
-                    // Check if there are offline jobs to sync
-                    const savedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
-                    const offlineJobs = savedJobs.filter(job => !job.synced);
-                    
-                    if (offlineJobs.length > 0) {
-                        showOfflineNotification(`การเชื่อมต่ออินเทอร์เน็ตกลับมาแล้ว มี ${offlineJobs.length} งานที่รอซิงค์`);
-                    }
-                    
-                    // Try to sync offline jobs when coming back online
-                    syncOfflineJobs();
-                } else {
-                    statusElement.textContent = 'ออฟไลน์';
-                    statusElement.className = 'text-red-600 text-xs';
-                    
-                    showOfflineNotification('การเชื่อมต่ออินเทอร์เน็ตขาดหาย ข้อมูลจะถูกบันทึกในเครื่อง');
-                }
-            }
-        }
-
-        // Sync offline jobs when network is available
-        async function syncOfflineJobs() {
-            const savedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
-            const offlineJobs = savedJobs.filter(job => !job.synced);
-            
-            if (offlineJobs.length === 0) return;
-            
-            console.log(`Attempting to sync ${offlineJobs.length} offline jobs...`);
-            
-            for (const job of offlineJobs) {
-                try {
-                    const response = await submitToGoogleSheets({
-                        action: 'saveJob',
-                        ...job,
-                        isDraft: job.status === 'draft'
-                    });
-                    
-                    if (response.success) {
-                        // Mark as synced
-                        const updatedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
-                        const jobIndex = updatedJobs.findIndex(j => j.jobId === job.jobId);
-                        if (jobIndex !== -1) {
-                            updatedJobs[jobIndex].synced = true;
-                            updatedJobs[jobIndex].syncTimestamp = new Date().toISOString();
-                            delete updatedJobs[jobIndex].syncError;
-                            localStorage.setItem('mangpongJobs', JSON.stringify(updatedJobs));
-                        }
-                    }
-                } catch (error) {
-                    console.error(`Failed to sync job ${job.jobId}:`, error);
-                }
-            }
-        }
-
-        // Add network event listeners
-        window.addEventListener('online', updateNetworkStatus);
-        window.addEventListener('offline', updateNetworkStatus);
-
-        // Retry syncing a specific job
-        async function retrySync(jobId) {
-            const savedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
-            const job = savedJobs.find(j => j.jobId === jobId);
-            
-            if (!job) {
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'ไม่พบงาน',
-                    text: 'ไม่สามารถหางานที่ต้องการซิงค์ได้',
-                    confirmButtonText: 'ตกลง'
-                });
-                return;
-            }
-            
-            // Show loading
-            Swal.fire({
-                title: 'กำลังซิงค์ข้อมูล...',
-                text: 'กรุณารอสักครู่',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-            
-            try {
-                const response = await submitToGoogleSheets({
-                    action: 'saveJob',
-                    ...job,
-                    isDraft: job.status === 'draft'
-                });
-                
-                if (response.success) {
-                    // Mark as synced
-                    const updatedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
-                    const jobIndex = updatedJobs.findIndex(j => j.jobId === jobId);
-                    if (jobIndex !== -1) {
-                        updatedJobs[jobIndex].synced = true;
-                        updatedJobs[jobIndex].syncTimestamp = new Date().toISOString();
-                        delete updatedJobs[jobIndex].syncError;
-                        localStorage.setItem('mangpongJobs', JSON.stringify(updatedJobs));
-                    }
-                    
-                    await Swal.fire({
-                        icon: 'success',
-                        title: 'ซิงค์สำเร็จ!',
-                        text: `งาน ${jobId} ถูกซิงค์กับเซิร์ฟเวอร์แล้ว`,
-                        confirmButtonText: 'ตกลง',
-                        confirmButtonColor: '#10b981'
-                    });
-                    
-                    // Refresh job history display
-                    displayJobHistory();
-                    
-                } else {
-                    throw new Error(response.error || 'การซิงค์ไม่สำเร็จ');
-                }
-                
-            } catch (error) {
-                console.error('Sync retry error:', error);
-                
-                // Update sync error
-                const updatedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
-                const jobIndex = updatedJobs.findIndex(j => j.jobId === jobId);
-                if (jobIndex !== -1) {
-                    updatedJobs[jobIndex].syncError = error.message;
-                    localStorage.setItem('mangpongJobs', JSON.stringify(updatedJobs));
-                }
-                
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'ซิงค์ไม่สำเร็จ',
-                    text: error.message,
-                    confirmButtonText: 'ตกลง',
-                    confirmButtonColor: '#ef4444'
-                });
-                
-                // Refresh job history display
-                displayJobHistory();
-            }
-        }
-
-        // Show offline notification
-        function showOfflineNotification(message) {
-            // Create notification element if it doesn't exist
-            let notification = document.getElementById('offline-notification');
-            if (!notification) {
-                notification = document.createElement('div');
-                notification.id = 'offline-notification';
-                notification.className = 'fixed top-4 left-4 right-4 max-w-md mx-auto bg-orange-100 border border-orange-400 text-orange-700 px-4 py-3 rounded z-50';
-                notification.innerHTML = `
-                    <div class="flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span class="text-sm">${message}</span>
-                        <button onclick="this.parentElement.parentElement.remove()" class="ml-auto text-orange-500 hover:text-orange-700">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                            </svg>
-                        </button>
-                    </div>
-                `;
-                document.body.appendChild(notification);
-                
-                // Auto-remove after 10 seconds
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.remove();
-                    }
-                }, 10000);
-            } else {
-                // Update existing notification
-                const messageSpan = notification.querySelector('span');
-                if (messageSpan) {
-                    messageSpan.textContent = message;
-                }
-            }
-        }
-
-        // Sync all offline jobs
-        async function syncAllOfflineJobs() {
-            const savedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
-            const offlineJobs = savedJobs.filter(job => !job.synced);
-            
-            if (offlineJobs.length === 0) {
-                await Swal.fire({
-                    icon: 'info',
-                    title: 'ไม่มีงานที่รอซิงค์',
-                    text: 'งานทั้งหมดถูกซิงค์กับเซิร์ฟเวอร์แล้ว',
-                    confirmButtonText: 'ตกลง',
-                    confirmButtonColor: '#3b82f6'
-                });
-                return;
-            }
-            
-            // Show loading
-            Swal.fire({
-                title: 'กำลังซิงค์ข้อมูล...',
-                text: `กำลังซิงค์ ${offlineJobs.length} งาน`,
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-            
-            let successCount = 0;
-            let errorCount = 0;
-            
-            for (const job of offlineJobs) {
-                try {
-                    const response = await submitToGoogleSheets({
-                        action: 'saveJob',
-                        ...job,
-                        isDraft: job.status === 'draft'
-                    });
-                    
-                    if (response.success) {
-                        // Mark as synced
-                        const updatedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
-                        const jobIndex = updatedJobs.findIndex(j => j.jobId === job.jobId);
-                        if (jobIndex !== -1) {
-                            updatedJobs[jobIndex].synced = true;
-                            updatedJobs[jobIndex].syncTimestamp = new Date().toISOString();
-                            delete updatedJobs[jobIndex].syncError;
-                            localStorage.setItem('mangpongJobs', JSON.stringify(updatedJobs));
-                        }
-                        successCount++;
-                    } else {
-                        errorCount++;
-                    }
-                } catch (error) {
-                    console.error(`Failed to sync job ${job.jobId}:`, error);
-                    errorCount++;
-                }
-            }
-            
-            // Show results
-            let resultMessage = '';
-            if (successCount > 0) {
-                resultMessage += `ซิงค์สำเร็จ: ${successCount} งาน\n`;
-            }
-            if (errorCount > 0) {
-                resultMessage += `ซิงค์ไม่สำเร็จ: ${errorCount} งาน`;
-            }
-            
-            await Swal.fire({
-                icon: successCount > 0 ? 'success' : 'error',
-                title: 'ผลการซิงค์',
-                text: resultMessage,
-                confirmButtonText: 'ตกลง',
-                confirmButtonColor: successCount > 0 ? '#10b981' : '#ef4444'
-            });
-            
-            // Update stats and refresh display
-            updateStats();
-            displayJobHistory();
-        }
     </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96c571e2562337e1',t:'MTc1NDcyMzU0My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
-<!-- BEGIN: JSONP Integration for Mangpong (injected by assistant) -->
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<!-- ===== Mangpong: Mass View (JSONP) — injected block BEGIN ===== -->
+<section id="mass-view" style="margin:16px 0">
+  <h2 style="margin:0 0 8px">รายละเอียดงาน (สูงสุด 5 งานในแถวเดียว)</h2>
+  <div id="mp-job-md" class="markdown-body">กำลังโหลด…</div>
+  <h2 style="margin:18px 0 8px">ค่าบริการเพิ่มเติม</h2>
+  <div id="mp-fee-md" class="markdown-body">กำลังโหลด…</div>
+  <div id="mp-status" style="margin-top:8px;color:#6b7280;font-size:13px"></div>
+  <details style="margin-top:8px">
+    <summary>Debug</summary>
+    <pre id="mp-debug" style="white-space:pre-wrap;word-break:break-word;background:#0b1220;color:#cbd5e1;padding:8px;border-radius:8px"></pre>
+  </details>
+</section>
+
 <script>
-// Namespaced functions to avoid collision: mangpong_jsonp_*
-const mangpong_jsonp_config = {
-  gsUrl: 'https://script.google.com/macros/s/AKfycbwcOeN18ikAiLJN6un76LV2GIb_x2Xn4RHNZr-psa11xp8t4evXwKUOasfiF3RV9FPK/exec',
-  maxJobs: 5,
-  maxFees: 10
-};
+(function(){
+  const GS_JSONP_URL = "https://script.google.com/macros/s/AKfycbwcOeN18ikAiLJN6un76LV2GIb_x2Xn4RHNZr-psa11xp8t4evXwKUOasfiF3RV9FPK/exec";
+  const MAX_JOBS = 5;
+  const FEE_ORDER = ["บรรทุก", "ล่วงเวลา_OT", "กลับ", "รอ"]; // display: บรรทุก, ล่วงเวลา, กลับ, รอ
 
-function mangpong_jsonp_load() {
-  const cb = 'mangpong_jsonp_cb_' + Date.now();
-  window[cb] = function(resp) {
-    try { mangpong_jsonp_render(resp); } catch(e){ console.error(e); }
-    // cleanup
-    delete window[cb];
-    const s = document.getElementById(cb + '_s');
-    if (s) s.remove();
-  };
-  const s = document.createElement('script');
-  s.id = cb + '_s';
-  s.src = mangpong_jsonp_config.gsUrl + '?callback=' + cb;
-  s.onerror = function(){ console.error('JSONP load failed'); };
-  document.body.appendChild(s);
-}
+  const $ = (s) => document.querySelector(s);
+  const safe = (v) => (v === undefined || v === null || v === "" ? null : v);
+  const money = (v) => (v !== undefined && v !== null && v !== "" && !isNaN(v) ? Number(v).toFixed(2) + " บาท" : "-");
+  const moneyInt = (v) => (v !== undefined && v !== null && v !== "" && !isNaN(v) ? String(Math.round(Number(v))) + " บาท" : "-");
 
-function mangpong_jsonp_safe(v){ return (v===undefined||v===null||v==='')?null:v; }
-
-function mangpong_jsonp_render(rows) {
-  if (!rows || !rows.length) {
-    console.warn('No data');
-    const jd = document.getElementById('jobDetailsFromSheet');
-    const af = document.getElementById('additionalFeesFromSheet');
-    if (jd) jd.textContent = 'ไม่มีข้อมูล';
-    if (af) af.textContent = 'ไม่มีข้อมูล';
-    return;
+  function log(msg, obj) {
+    const dbg = $("#mp-debug");
+    dbg.textContent += "
+" + msg + (obj ? " " + JSON.stringify(obj, null, 2) : "");
   }
-  // For this system, we render the FIRST row (typically the latest summary row). Adjust if you want to render all rows.
-  const row = rows[0];
+  function setStatus(t, ok=true) {
+    const el = $("#mp-status");
+    el.textContent = t;
+    el.style.color = ok ? "#a7f3d0" : "#fecaca";
+  }
 
-  // If jobDetails/additionalFees stored as JSON string, parse and flatten into row fields destinationCompany_1 ...
-  if (row.jobDetails && typeof row.jobDetails === 'string' && row.jobDetails.trim().startsWith('[')) {
+  // JSONP loader (namespaced)
+  function mp_loadJSONP(url) {
+    return new Promise((resolve, reject) => {
+      const cb = "mp_jsonp_" + Date.now();
+      window[cb] = (payload) => {
+        try { resolve(payload); }
+        finally {
+          delete window[cb];
+          const s = document.getElementById(cb);
+          if (s) s.remove();
+        }
+      };
+      const s = document.createElement("script");
+      s.id = cb;
+      s.src = url + (url.includes("?") ? "&" : "?") + "callback=" + cb;
+      s.onerror = () => reject(new Error("โหลด JSONP ไม่สำเร็จ"));
+      document.body.appendChild(s);
+    });
+  }
+
+  function pickRow(rows) {
+    if (!rows || !rows.length) return null;
+    for (let i = rows.length - 1; i >= 0; i--) {
+      const r = rows[i];
+      if (r && Object.keys(r).length > 0) return r;
+    }
+    return rows[0];
+  }
+
+  function ensureFlatten(row) {
+    if (!row) return row;
+    // jobDetails
     try {
-      const arr = JSON.parse(row.jobDetails);
-      arr.forEach((obj, idx)=>{
-        const n = idx+1;
-        for (const k in obj) row[k + '_' + n] = obj[k];
-      });
-    } catch(e){ console.warn('jobDetails parse error', e); }
-  }
-  if (row.additionalFees && typeof row.additionalFees === 'string' && row.additionalFees.trim().startsWith('[')) {
+      if (typeof row.jobDetails === "string" && row.jobDetails.trim().startsWith("[")) {
+        const arr = JSON.parse(row.jobDetails);
+        arr.forEach((obj, idx) => {
+          const n = idx + 1;
+          for (const k in obj) row[k + "_" + n] = obj[k];
+        });
+      }
+    } catch(e) { log("! jobDetails parse error", {error: String(e)}); }
+    // additionalFees
     try {
-      const arr = JSON.parse(row.additionalFees);
-      arr.forEach((obj, idx)=>{
-        const n = idx+1;
-        for (const k in obj) row[k + '_' + n] = obj[k];
-      });
-    } catch(e){ console.warn('additionalFees parse error', e); }
+      if (typeof row.additionalFees === "string" && row.additionalFees.trim().startsWith("[")) {
+        const arr = JSON.parse(row.additionalFees);
+        arr.forEach((obj, idx) => {
+          const n = idx + 1;
+          for (const k in obj) row[k + "_" + n] = obj[k];
+        });
+      }
+    } catch(e) { log("! additionalFees parse error", {error: String(e)}); }
+    return row;
   }
 
-  // Build job details table
-  const jdContainer = document.getElementById('jobDetailsFromSheet');
-  if (jdContainer) jdContainer.innerHTML = mangpong_jsonp_buildJobHtml(row);
+  function renderJobMarkdown(row) {
+    const headers = [];
+    const values = [];
+    for (let i = 1; i <= MAX_JOBS; i++) {
+      headers.push(
+        `บริษัทปลายทาง #${i}`, `จังหวัด #${i}`, `เขต/อำเภอ #${i}`,
+        `ผู้รับงาน #${i}`, `รายละเอียด #${i}`, `จำนวนเงิน #${i}`
+      );
+      const dest = safe(row["destinationCompany_" + i]) || "ไม่ระบุ";
+      const prov = safe(row["deliveryProvince_" + i]) || "ไม่ระบุ";
+      const dist = safe(row["deliveryDistrict_" + i]) || "ไม่ระบุ";
+      const recp = safe(row["recipient_" + i]) || "ไม่ระบุ";
+      const desc = safe(row["description_" + i]) || "ไม่ระบุ";
+      const amt  = money(row["amount_" + i]);
+      values.push(dest, prov, dist, recp, desc, amt);
+    }
 
-  // Build additional fees table
-  const afContainer = document.getElementById('additionalFeesFromSheet');
-  if (afContainer) afContainer.innerHTML = mangpong_jsonp_buildFeeHtml(row);
-}
+    const headerLine = "| " + headers.join(" | ") + " |";
+    const alignLine  = "| " + headers.map((_, idx) => (idx % 6 === 5 ? "----:" : ":---")).join(" | ") + " |";
+    const valueLine  = "| " + values.join(" | ") + " |";
 
-function mangpong_jsonp_buildJobHtml(row) {
-  const max = mangpong_jsonp_config.maxJobs;
-  const headers = [];
-  const values = [];
-  for (let i=1;i<=max;i++) {
-    headers.push('บริษัทปลายทาง #' + i, 'จังหวัด #' + i, 'เขต/อำเภอ #' + i, 'ผู้รับงาน #' + i, 'รายละเอียด #' + i, 'จำนวนเงิน #' + i);
-    const dest = mangpong_jsonp_safe(row['destinationCompany_' + i]) || mangpong_jsonp_safe(row['companyTo' + i]) || 'ไม่ระบุ';
-    const prov = mangpong_jsonp_safe(row['deliveryProvince_' + i]) || mangpong_jsonp_safe(row['province' + i]) || 'ไม่ระบุ';
-    const dist = mangpong_jsonp_safe(row['deliveryDistrict_' + i]) || mangpong_jsonp_safe(row['district' + i]) || 'ไม่ระบุ';
-    const rcpt = mangpong_jsonp_safe(row['recipient_' + i]) || 'ไม่ระบุ';
-    const desc = mangpong_jsonp_safe(row['description_' + i]) || mangpong_jsonp_safe(row['detail' + i]) || 'ไม่ระบุ';
-    let aRaw = row['amount_' + i] || row['amount' + i];
-    const amt = (aRaw!==undefined && aRaw!==null && aRaw!=='') ? Number(aRaw).toFixed(2) + ' บาท' : '-';
-    values.push(dest, prov, dist, rcpt, desc, amt);
+    return [headerLine, alignLine, valueLine].join("
+");
   }
 
-  const headerLine = '| ' + headers.join(' | ') + ' |';
-  const alignLine = '| ' + headers.map((h,idx)=> (idx%6===5) ? '----:' : ':---').join(' | ') + ' |';
-  const valueLine = '| ' + values.join(' | ') + ' |';
-  const md = headerLine + '\\n' + alignLine + '\\n' + valueLine;
-  try {
-    return marked.parse(md);
-  } catch(e) {
-    // fallback to simple table
-    let html = '<table class=\"job-table\"><thead><tr>';
-    for (const h of headers) html += '<th>' + h + '</th>';
-    html += '</tr></thead><tbody><tr>';
-    for (let v of values) html += (v.match(/\\d\\.\\d{2}\\sบาท$/) ? '<td class=\"amount\">' + v + '</td>' : '<td>' + v + '</td>');
-    html += '</tr></tbody></table>';
-    return html;
-  }
-}
-
-function mangpong_jsonp_buildFeeHtml(row) {
-  const columns = ['บรรทุก','ล่วงเวลา','กลับ','รอ'];
-  const keys = ['บรรทุก','ล่วงเวลา_OT','กลับ','รอ'];
-  const lookup = {};
-
-  // flattened description_x/amount_x or feeNameX/feeAmountX
-  for (let i=1;i<=mangpong_jsonp_config.maxFees;i++) {
-    const d = row['description_' + i] || row['feeName' + i] || row['description' + i];
-    const a = row['amount_' + i] || row['feeAmount' + i] || row['feeAmount' + i] || row['amount' + i];
-    if (d) lookup[d] = a;
+  function renderFeeMarkdown(row) {
+    const map = {};
+    for (let i = 1; i <= 24; i++) {
+      const d = row["description_" + i];
+      const a = row["amount_" + i];
+      if (d) map[d] = a;
+    }
+    const displayHeaders = ["บรรทุก", "ล่วงเวลา", "กลับ", "รอ"];
+    const values = FEE_ORDER.map(key => {
+      const v = map[key];
+      return moneyInt(v).replace(" บาท", " บาท");
+    });
+    const headerLine = "| " + displayHeaders.join(" | ") + " |";
+    const alignLine  = "| " + displayHeaders.map(() => ":---:").join(" | ") + " |";
+    const valueLine  = "| " + values.join(" | ") + " |";
+    return [headerLine, alignLine, valueLine].join("
+");
   }
 
-  // if row.additionalFees JSON present and not flattened, parse
-  if (row.additionalFees && typeof row.additionalFees === 'string' && row.additionalFees.trim().startsWith('[')) {
+  async function mp_refresh() {
     try {
-      const arr = JSON.parse(row.additionalFees);
-      arr.forEach(function(f){ if (f && f.description) lookup[f.description] = f.amount; });
-    } catch(e){ console.warn('additionalFees parse error', e); }
+      setStatus("กำลังโหลด…");
+      const rows = await mp_loadJSONP(GS_JSONP_URL);
+      log("✓ rows", {count: rows?.length || 0});
+      const row = ensureFlatten(pickRow(rows));
+      if (!row) {
+        setStatus("ไม่พบข้อมูล", false);
+        $("#mp-job-md").textContent = "—";
+        $("#mp-fee-md").textContent = "—";
+        return;
+      }
+      const jobMd = renderJobMarkdown(row);
+      const feeMd = renderFeeMarkdown(row);
+
+      function mdTableToHtml(md) {
+        const lines = md.trim().split(/
++/);
+        if (lines.length < 3) return "<div>—</div>";
+        const head = lines[0].slice(1, -1).split(" | ").map(s => s.trim());
+        const vals = lines[2].slice(1, -1).split(" | ").map(s => s.trim());
+        let html = '<table style="border-collapse:collapse;width:100%">';
+        html += '<thead><tr>' + head.map(h => '<th style="border:1px solid #334155;background:#1f2937;color:#e5e7eb;padding:6px;text-align:left">'+h+'</th>').join("") + '</tr></thead>';
+        html += '<tbody><tr>' + vals.map((v, idx) => '<td style="border:1px solid #334155;padding:6px;' + ( (idx % 6 === 5) ? 'text-align:right' : 'text-align:left') + '">'+v+'</td>').join("") + '</tr></tbody>';
+        html += '</table>';
+        return html;
+      }
+
+      $("#mp-job-md").innerHTML = mdTableToHtml(jobMd);
+      $("#mp-fee-md").innerHTML = mdTableToHtml(feeMd);
+      setStatus("โหลดสำเร็จ", true);
+    } catch (err) {
+      setStatus("โหลดข้อมูลล้มเหลว", false);
+      log("! error", {error: String(err)});
+      $("#mp-job-md").innerHTML = '<div style="color:#fecaca">โหลดข้อมูลไม่สำเร็จ</div>';
+      $("#mp-fee-md").innerHTML = "";
+    }
   }
 
-  const values = keys.map(k => {
-    const v = lookup[k];
-    return (v!==undefined && v!==null && v!=='') ? Math.round(Number(v)) + ' บาท' : '-';
-  });
-
-  const md = '| ' + columns.join(' | ') + ' |\\n' + '| ' + columns.map(()=>':---:').join(' | ') + ' |\\n' + '| ' + values.join(' | ') + ' |';
-  try { return marked.parse(md); }
-  catch(e) {
-    let html = '<table class=\"job-table\"><thead><tr>';
-    for (const c of columns) html += '<th>' + c + '</th>';
-    html += '</tr></thead><tbody><tr>';
-    for (const v of values) html += '<td style=\"text-align:center\">' + v + '</td>';
-    html += '</tr></tbody></table>';
-    return html;
-  }
-}
-
-// auto-load once DOM is ready
-document.addEventListener('DOMContentLoaded', function(){ setTimeout(mangpong_jsonp_load, 250); });
+  document.addEventListener("DOMContentLoaded", mp_refresh);
+})();
 </script>
-<!-- END: JSONP Integration -->
+<!-- ===== Mangpong: Mass View (JSONP) — injected block END ===== -->
+
 </body>
 </html>
