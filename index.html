@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>แมงป่อง เทรดดิ้ง - Mangpong Delivery</title>
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -140,12 +141,6 @@
             margin: 1rem;
         }
     </style>
-    <script>
-// แก้ไขปัญหา Cloudflare
-if(typeof window.__CF$cv$params === 'undefined') {
-  window.__CF$cv$params = {r:'0', t:'0'};
-}
-</script>
 </head>
 <body>
     <!-- Login Screen -->
@@ -559,7 +554,7 @@ if(typeof window.__CF$cv$params === 'undefined') {
     <script>
         // Global variables
         let currentUser = null;
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx-RPQxI2T-Sr3nvB_i9gLBXFAlbiJhGwrohKR7aXR_DNcDtT1JDrLTjgQrYXl8TY8/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwcOeN18ikAiLJN6un76LV2GIb_x2Xn4RHNZr-psa11xp8t4evXwKUOasfiF3RV9FPK/exec';
 
         // Authentication functions
         function showLoginScreen() {
@@ -1923,5 +1918,21 @@ if(typeof window.__CF$cv$params === 'undefined') {
             document.addEventListener('touchstart', function() {}, {passive: true});
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96f3a3c9928ed01e',t:'MTc1NTIwNzkzMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96c571e2562337e1',t:'MTc1NDcyMzU0My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+<!-- Debug Panel -->
+<div id="debugPanel" style="position:fixed;bottom:10px;right:10px;width:300px;height:150px;background:rgba(0,0,0,0.8);color:#0f0;font-size:12px;padding:5px;overflow:auto;z-index:9999;font-family:monospace;">
+  <b>DEBUG LOG</b><br>
+</div>
+<script>
+function addDebug(msg){
+  console.log("[DEBUG]", msg);
+  var panel = document.getElementById("debugPanel");
+  if(panel){
+    panel.innerHTML += msg + "<br>";
+    panel.scrollTop = panel.scrollHeight;
+  }
+}
+</script>
+
+</body>
 </html>
