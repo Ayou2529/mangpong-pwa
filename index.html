@@ -6,7 +6,6 @@
     <title>แมงป่อง เทรดดิ้ง - Mangpong Delivery</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.12/marked.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -34,416 +33,1890 @@
         .btn-primary:hover {
             background-color: #2563eb;
         }
-        .text-blue-600 {
-            color: #3b82f6;
+        .btn-secondary {
+            background-color: #e5e7eb;
+            color: #4b5563;
+            transition: all 0.3s ease;
         }
-        .border-blue-600 {
-            border-color: #3b82f6;
+        .btn-secondary:hover {
+            background-color: #d1d5db;
         }
-        .bg-blue-600 {
-            background-color: #3b82f6;
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+            transition: all 0.3s ease;
         }
-        .focus\:ring-blue-500:focus {
-            --tw-ring-color: #3b82f6;
+        .btn-success:hover {
+            background-color: #059669;
         }
-        /* Custom styles for the job/fee tables */
-        .job-table {
-            border-collapse: collapse;
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+        .incomplete-badge {
+            background-color: #ef4444;
+            color: white;
+        }
+        .complete-badge {
+            background-color: #10b981;
+            color: white;
+        }
+        .draft-badge {
+            background-color: #f97316;
+            color: white;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+        }
+        /* Improve touch targets for mobile */
+        button, input, select, textarea {
+            font-size: 16px; /* Prevents iOS zoom on focus */
+        }
+        .touch-target {
+            min-height: 44px;
+            min-width: 44px;
+        }
+        /* Fix iOS input styling */
+        input, select, textarea {
+            -webkit-appearance: none;
+            border-radius: 8px;
+        }
+        /* Floating save button */
+        .floating-save {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            }
+            50% {
+                box-shadow: 0 4px 20px rgba(59, 130, 246, 0.5);
+            }
+            100% {
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            }
+        }
+        .add-fee-btn {
+            background-color: #f0f9ff;
+            border: 1px solid #93c5fd;
+            color: #2563eb;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        .add-fee-btn:hover {
+            background-color: #dbeafe;
+            border-color: #60a5fa;
+        }
+        .section-divider {
+            border-top: 1px solid #e5e7eb;
+            margin: 16px 0;
+        }
+        .auth-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .auth-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
             width: 100%;
-        }
-        .job-table th, .job-table td {
-            border: 1px solid #334155;
-            padding: 6px;
-            text-align: left;
-        }
-        .job-table th {
-            background: #1f2937;
-            color: #e5e7eb;
-        }
-        .job-table td {
-            text-align: left;
+            max-width: 400px;
+            margin: 1rem;
         }
     </style>
 </head>
-<body class="bg-gray-100 flex justify-center items-center md:items-start p-4 min-h-screen">
-
-    <!-- Login/Register Container -->
-    <div id="login-container" class="w-full max-w-sm">
-        <div class="bg-white shadow-md rounded-lg px-8 pt-6 pb-8 mb-4 card">
-            <img src="icon-512.png" alt="Mangpong Logo" class="mx-auto w-24 h-24 mb-6">
-            <h2 class="block text-gray-700 text-2xl font-bold mb-4 text-center">เข้าสู่ระบบ</h2>
-            <form id="login-form" class="mb-4">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
-                        ชื่อผู้ใช้
-                    </label>
-                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="text" placeholder="ชื่อผู้ใช้">
-                </div>
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
-                        รหัสผ่าน
-                    </label>
-                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" placeholder="รหัสผ่าน">
-                </div>
-                <div class="flex items-center justify-between">
-                    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
-                        เข้าสู่ระบบ
-                    </button>
-                    <a class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="#" onclick="switchForm('register')">
-                        สมัครสมาชิก
-                    </a>
-                </div>
-            </form>
-            <div class="text-center">
-                ยังไม่มีบัญชี? <a href="#" class="font-bold text-sm text-blue-500 hover:text-blue-800" onclick="switchForm('register')">สมัครสมาชิก</a>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="auth-container">
+        <div class="auth-card">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold text-gray-800 mb-2">แมงป่อง เทรดดิ้ง</h1>
+                <p class="text-gray-600">Mangpong Delivery System</p>
             </div>
-        </div>
-        <div class="text-center text-xs text-gray-500 mt-4">
-            <p id="app-version">เวอร์ชัน: 2.4.1</p>
-        </div>
-    </div>
-    
-    <!-- Register Container - Hidden by default -->
-    <div id="register-container" class="w-full max-w-sm hidden">
-        <div class="bg-white shadow-md rounded-lg px-8 pt-6 pb-8 mb-4 card">
-            <img src="icon-512.png" alt="Mangpong Logo" class="mx-auto w-24 h-24 mb-6">
-            <h2 class="block text-gray-700 text-2xl font-bold mb-4 text-center">สมัครสมาชิก</h2>
-            <form id="register-form" class="mb-4">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="register-username">
-                        ชื่อผู้ใช้
-                    </label>
-                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="register-username" type="text" placeholder="ชื่อผู้ใช้">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="register-password">
-                        รหัสผ่าน
-                    </label>
-                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="register-password" type="password" placeholder="รหัสผ่าน">
-                </div>
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="confirm-password">
-                        ยืนยันรหัสผ่าน
-                    </label>
-                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="confirm-password" type="password" placeholder="ยืนยันรหัสผ่าน">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="full-name">
-                        ชื่อ-นามสกุล
-                    </label>
-                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="full-name" type="text" placeholder="ชื่อ-นามสกุล">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="phone">
-                        เบอร์โทรศัพท์
-                    </label>
-                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="phone" type="tel" placeholder="เบอร์โทรศัพท์">
-                </div>
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
-                        อีเมล
-                    </label>
-                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email" type="email" placeholder="อีเมล (ไม่บังคับ)">
-                </div>
-                <div class="flex items-center justify-between">
-                    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
-                        สมัครสมาชิก
-                    </button>
-                    <a class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="#" onclick="switchForm('login')">
-                        เข้าสู่ระบบ
-                    </a>
-                </div>
-            </form>
-            <div class="text-center">
-                มีบัญชีอยู่แล้ว? <a href="#" class="font-bold text-sm text-blue-500 hover:text-blue-800" onclick="switchForm('login')">เข้าสู่ระบบ</a>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- Main App Container - Hidden by default -->
-    <div id="main-app-container" class="w-full max-w-4xl p-4 bg-white rounded-lg shadow-md hidden">
-        <!-- Top Nav and Header -->
-        <header class="flex justify-between items-center mb-6">
-            <div class="flex items-center">
-                <img src="icon-192.png" alt="Logo" class="w-12 h-12 mr-4 rounded-full">
+            
+            <form id="login-form" class="space-y-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-800">Mangpong Delivery</h1>
-                    <p class="text-sm text-gray-600" id="user-greeting">สวัสดี, ผู้ใช้</p>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">ชื่อผู้ใช้</label>
+                    <input type="text" id="login-username" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="กรอกชื่อผู้ใช้" required>
                 </div>
-            </div>
-            <button id="logout-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-full text-sm">
-                ออกจากระบบ
-            </button>
-        </header>
-
-        <!-- Search and Status Section -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div class="card p-6 bg-blue-50 text-blue-800">
-                <h3 class="text-lg font-bold mb-2">สถานะการทำงาน</h3>
-                <div class="flex items-center mb-2">
-                    <div class="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-                    <span class="text-green-600 font-semibold">ออนไลน์</span>
+                
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">รหัสผ่าน</label>
+                    <input type="password" id="login-password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="กรอกรหัสผ่าน" required>
                 </div>
-                <p class="text-sm">พร้อมสำหรับการจัดส่ง</p>
-            </div>
-            <div class="card p-6">
-                <h3 class="text-lg font-bold mb-2 text-gray-800">ค้นหางาน</h3>
-                <form id="search-form" class="flex items-center">
-                    <input id="job-id-input" type="text" placeholder="รหัสงาน (Job ID)" class="w-full px-4 py-2 rounded-l-md border border-gray-300 focus:outline-none focus:border-blue-500">
-                    <button type="submit" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-r-md hover:bg-blue-700">
-                        ค้นหา
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- Job Details Section -->
-        <div id="job-details-section" class="card bg-white p-6 hidden">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">รายละเอียดงาน</h3>
-            <div id="job-details-content" class="text-gray-600 text-sm">
-                <p>กรุณาค้นหารหัสงานเพื่อดูรายละเอียด</p>
+                
+                <button type="submit" class="w-full btn-primary py-3 rounded-lg font-medium">เข้าสู่ระบบ</button>
+            </form>
+            
+            <div class="text-center mt-6">
+                <p class="text-gray-600">ยังไม่มีบัญชี? 
+                    <button class="text-blue-600 font-medium hover:underline" onclick="showRegisterScreen()">สมัครสมาชิก</button>
+                </p>
             </div>
         </div>
     </div>
 
-    <!-- JavaScript -->
-    <script>
-        // กำหนดค่า config ของแอป
-        const mangpong_jsonp_config = {
-            maxFees: 5,
-        };
+    <!-- Register Screen -->
+    <div id="register-screen" class="auth-container hidden">
+        <div class="auth-card">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold text-gray-800 mb-2">สมัครสมาชิก</h1>
+                <p class="text-gray-600">แมงป่อง เทรดดิ้ง</p>
+            </div>
+            
+            <form id="register-form" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">ชื่อผู้ใช้</label>
+                    <input type="text" id="register-username" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="กรอกชื่อผู้ใช้" required>
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">รหัสผ่าน</label>
+                    <input type="password" id="register-password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="กรอกรหัสผ่าน" required>
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">ยืนยันรหัสผ่าน</label>
+                    <input type="password" id="register-confirm-password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="ยืนยันรหัสผ่าน" required>
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">ชื่อ-นามสกุล</label>
+                    <input type="text" id="register-fullname" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="กรอกชื่อ-นามสกุล" required>
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">เบอร์โทรศัพท์</label>
+                    <input type="tel" id="register-phone" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="กรอกเบอร์โทรศัพท์" required>
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">อีเมล</label>
+                    <input type="email" id="register-email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="กรอกอีเมล" required>
+                </div>
+                
+                <button type="submit" class="w-full btn-success py-3 rounded-lg font-medium">สมัครสมาชิก</button>
+            </form>
+            
+            <div class="text-center mt-6">
+                <p class="text-gray-600">มีบัญชีแล้ว? 
+                    <button class="text-blue-600 font-medium hover:underline" onclick="showLoginScreen()">เข้าสู่ระบบ</button>
+                </p>
+            </div>
+        </div>
+    </div>
 
-        const $ = (id) => document.querySelector(id);
-        const loginContainer = $('#login-container');
-        const registerContainer = $('#register-container');
-        const mainAppContainer = $('#main-app-container');
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx-RPQxI2T-Sr3nvB_i9gLBXFAlbiJhGwrohKR7aXR_DNcDtT1JDrLTjgQrYXl8TY8/exec';
-        
-        // ฟังก์ชันสำหรับสลับหน้าฟอร์ม Login / Register
-        function switchForm(form) {
-            if (form === 'login') {
-                loginContainer.classList.remove('hidden');
-                registerContainer.classList.add('hidden');
-            } else if (form === 'register') {
-                registerContainer.classList.remove('hidden');
-                loginContainer.classList.add('hidden');
-            }
-        }
-        
-        // ฟังก์ชันสำหรับเข้าสู่ระบบและแสดงหน้าหลัก
-        function showMainApp() {
-            loginContainer.classList.add('hidden');
-            mainAppContainer.classList.remove('hidden');
-            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-            if (currentUser && currentUser.fullName) {
-                $('#user-greeting').textContent = `สวัสดี, ${currentUser.fullName}`;
-            }
-        }
+    <div id="app" class="max-w-md mx-auto bg-white min-h-screen relative pb-16 hidden">
+        <!-- Home Screen -->
+        <div id="home-screen" class="p-4">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-4 rounded-lg mb-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h1 class="text-xl font-bold">แมงป่อง เทรดดิ้ง</h1>
+                        <p class="text-xs opacity-80">Mangpong Delivery Appsheet V1.0</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm font-medium" id="user-display-name">ผู้ใช้งาน</div>
+                        <button class="text-xs opacity-80 hover:opacity-100" onclick="logout()">ออกจากระบบ</button>
+                    </div>
+                </div>
+                <div class="mt-3 text-xs text-right opacity-70">TTW Source 1.0</div>
+            </div>
 
-        // ฟังก์ชันสำหรับออกจากระบบ
-        $('#logout-btn').addEventListener('click', () => {
-            localStorage.removeItem('currentUser');
-            mainAppContainer.classList.add('hidden');
-            loginContainer.classList.remove('hidden');
-            Swal.fire({
-                icon: 'success',
-                title: 'ออกจากระบบแล้ว',
-                showConfirmButton: false,
-                timer: 1500
-            });
-        });
+            <div class="card bg-white p-3 mb-4">
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <p class="text-gray-700" id="current-date-time"></p>
+                </div>
+            </div>
 
-        // Event Listener สำหรับฟอร์ม Login
-        $('#login-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const username = $('#username').value;
-            const password = $('#password').value;
-            if (!username || !password) {
-                Swal.fire({ icon: 'warning', title: 'กรุณากรอกข้อมูล', text: 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน' });
-                return;
-            }
-            Swal.fire({ title: 'กำลังเข้าสู่ระบบ...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
-            fetch(`${SCRIPT_URL}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
-                .then(response => response.json())
-                .then(data => {
-                    Swal.close();
-                    if (data.success) {
-                        Swal.fire({ icon: 'success', title: 'เข้าสู่ระบบสำเร็จ!', showConfirmButton: false, timer: 1500 }).then(() => {
-                            localStorage.setItem('currentUser', JSON.stringify(data.user));
-                            showMainApp();
-                        });
-                    } else {
-                        Swal.fire({ icon: 'error', title: 'เข้าสู่ระบบไม่สำเร็จ', text: data.error });
-                    }
-                })
-                .catch(error => {
-                    Swal.close();
-                    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้' });
-                    console.error('Error:', error);
-                });
-        });
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="card bg-white p-4 text-center">
+                    <p class="text-gray-500 mb-1">รับงานวันนี้</p>
+                    <p class="text-2xl font-bold text-indigo-600" id="jobs-today">0</p>
+                </div>
+                <div class="card bg-white p-4 text-center">
+                    <p class="text-gray-500 mb-1">ส่งงานวันนี้</p>
+                    <p class="text-2xl font-bold text-green-600" id="completed-today">0</p>
+                </div>
+            </div>
 
-        // Event Listener สำหรับฟอร์ม Register
-        document.getElementById('register-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const registerUsername = document.getElementById('register-username').value;
-            const registerPassword = document.getElementById('register-password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-            const fullName = document.getElementById('full-name').value;
-            const phone = document.getElementById('phone').value;
-            const email = document.getElementById('email').value;
+            <div class="card bg-white p-4 mb-4">
+                <h2 class="font-medium text-gray-700 mb-3">เมนูลัด</h2>
+                <div class="flex flex-col space-y-3">
+                    <button class="py-3 btn-success rounded-lg text-white font-medium flex items-center justify-center touch-target" onclick="showScreen('new-job-screen')">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        งานใหม่
+                    </button>
+                    <button class="py-3 bg-blue-50 rounded-lg text-blue-600 font-medium flex items-center justify-center touch-target border border-blue-200" onclick="showScreen('history-screen')">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        ประวัติ
+                    </button>
+                </div>
+            </div>
 
-            if (registerPassword !== confirmPassword) {
-                Swal.fire({icon: 'error', title: 'รหัสผ่านไม่ตรงกัน',});
-                return;
-            }
-            if (!registerUsername || !registerPassword || !fullName) {
-                 Swal.fire({icon: 'warning',title: 'กรุณากรอกข้อมูล', text: 'กรุณากรอกชื่อผู้ใช้, รหัสผ่าน และชื่อ-นามสกุล'});
-                return;
-            }
+            <div class="card bg-white p-4 mb-4">
+                <h2 class="font-medium text-gray-700 mb-2">รายงานประจำเดือน <span id="current-month" class="text-indigo-600"></span></h2>
+                <div class="flex justify-between">
+                    <p class="text-gray-600">งานทั้งหมด:</p>
+                    <p class="font-medium" id="monthly-jobs">0</p>
+                </div>
+            </div>
 
-            Swal.fire({title: 'กำลังสมัครสมาชิก...', allowOutsideClick: false, didOpen: () => {Swal.showLoading();}});
-            fetch(`${SCRIPT_URL}?action=register&username=${encodeURIComponent(registerUsername)}&password=${encodeURIComponent(registerPassword)}&fullName=${encodeURIComponent(fullName)}&phone=${encodeURIComponent(phone)}&email=${encodeURIComponent(email)}`)
-                .then(response => response.json())
-                .then(data => {
-                    Swal.close();
-                    if (data.success) {
-                        Swal.fire({icon: 'success',title: 'สมัครสมาชิกสำเร็จ!',showConfirmButton: false, timer: 1500}).then(() => {
-                            switchForm('login');
-                        });
-                    } else {
-                        Swal.fire({icon: 'error',title: 'สมัครสมาชิกไม่สำเร็จ',text: data.error});
-                    }
-                })
-                .catch(error => {
-                    Swal.close();
-                    Swal.fire({icon: 'error',title: 'เกิดข้อผิดพลาด',text: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'});
-                    console.error('Error:', error);
-                });
-        });
+            <div id="draft-jobs-card" class="card bg-white p-4 border-l-4 border-amber-500 mb-4 hidden">
+                <div class="flex items-center mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    <h2 class="font-medium text-gray-700">งานที่บันทึกแบบร่าง</h2>
+                </div>
+                <ul id="draft-jobs-list" class="text-sm text-gray-600 ml-7 list-disc">
+                    <!-- Draft jobs will be added here -->
+                </ul>
+                <button class="mt-2 text-sm text-indigo-600 font-medium flex items-center touch-target" onclick="showScreen('history-screen')">
+                    แก้ไข
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </div>
 
-        // ฟังก์ชันสำหรับเรนเดอร์ Markdown table
-        function mdTableToHtml(md) {
-            if (!md) return '';
-            const lines = md.trim().split(/\n+/);
-            if (lines.length < 3) return "<div>—</div>";
-            const head = lines[0].slice(1, -1).split(" | ").map(s => s.trim());
-            const vals = lines[2].slice(1, -1).split(" | ").map(s => s.trim());
-            let html = '<table class="job-table">';
-            html += '<thead><tr>' + head.map(h => '<th>'+h+'</th>').join("") + '</tr></thead>';
-            html += '<tbody><tr>' + vals.map((v, idx) => '<td>'+v+'</td>').join("") + '</tr></tbody>';
-            html += '</table>';
-            return html;
-        }
+            <div id="incomplete-jobs-card" class="card bg-white p-4 border-l-4 border-red-500 mb-4 hidden">
+                <div class="flex items-center mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <h2 class="font-medium text-gray-700">งานที่บันทึกไม่สมบูรณ์</h2>
+                </div>
+                <ul id="incomplete-jobs-list" class="text-sm text-gray-600 ml-7 list-disc">
+                    <!-- Incomplete jobs will be added here -->
+                </ul>
+                <button class="mt-2 text-sm text-indigo-600 font-medium flex items-center touch-target" onclick="showScreen('history-screen')">
+                    แก้ไข
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </div>
+        </div>
 
-        // Event Listener สำหรับฟอร์มค้นหางาน
-        $('#search-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const jobId = $('#job-id-input').value.trim();
-            if (!jobId) {
-                setStatus('กรุณาใส่รหัสงาน', false);
-                return;
-            }
-            setStatus('กำลังค้นหา...', true);
+        <!-- New Job Screen -->
+        <div id="new-job-screen" class="p-4 hidden">
+            <div class="flex items-center mb-4">
+                <button class="mr-2 touch-target" onclick="showScreen('home-screen')">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <h1 class="text-xl font-bold">บันทึกงานใหม่</h1>
+            </div>
 
-            fetch(`${SCRIPT_URL}?action=getJob&jobId=${encodeURIComponent(jobId)}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.job) {
-                        const jobMd = renderJobMarkdown(data.job);
-                        const feeMd = renderFeeMarkdown(data.job);
-                        $('#job-details-content').innerHTML = `
-                            <div class="mb-4">
-                                <h4 class="font-bold text-gray-700">รายละเอียดงาน</h4>
-                                ${mdTableToHtml(jobMd)}
+            <div class="card bg-white p-4 mb-4">
+                <div class="mb-3">
+                    <label class="block text-gray-600 mb-1">วันที่บันทึกงาน</label>
+                    <input type="date" id="job-date-picker" class="w-full p-3 border border-gray-300 rounded-md touch-target" required>
+                </div>
+                <div class="flex items-center text-sm text-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>สามารถเลือกวันที่เพื่อบันทึกงานย้อนหลังได้</span>
+                </div>
+            </div>
+
+            <form id="new-job-form">
+                <div class="card bg-white p-4 mb-4">
+                    <h2 class="font-medium text-gray-700 mb-3">ข้อมูลการรับงาน</h2>
+                    
+                    <!-- รับ -->
+                    <div class="mb-4">
+                        <h3 class="text-gray-600 font-medium mb-2">รับ</h3>
+                        <label class="block text-gray-600 mb-1">บริษัท/สถานที่รับงาน</label>
+                        <select class="w-full p-3 border border-gray-300 rounded-md mb-2 touch-target" required>
+                            <option value="" disabled selected>เลือกบริษัท</option>
+                            <option value="บจก.เวอริโฟน (ชั้น 3.2)">บจก.เวอริโฟน (ชั้น 3.2)</option>
+                            <option value="บจก.เวอริโฟน (ชั้น 20)">บจก.เวอริโฟน (ชั้น 20)</option>
+                            <option value="บจก.ไอมาร์ค">บจก.ไอมาร์ค</option>
+                            <option value="บจก.สนง.ทองทวี">บจก.สนง.ทองทวี</option>
+                            <option value="บจก.ออฟฟิศเอที">บจก.ออฟฟิศเอที</option>
+                        </select>
+                    </div>
+                    
+                    <div class="section-divider"></div>
+                    
+                    <!-- ผู้มอบงาน -->
+                    <div class="mb-4">
+                        <h3 class="text-gray-600 font-medium mb-2">ผู้มอบงาน</h3>
+                        <div class="mb-2">
+                            <label class="block text-gray-600 mb-1">ผู้มอบงาน</label>
+                            <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้มอบงาน" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 mb-1">ติดต่อคุณ</label>
+                            <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ข้อมูลติดต่อ" required>
+                        </div>
+                    </div>
+                    
+                    <div class="section-divider"></div>
+                    
+                    <!-- สถานที่รับของ -->
+                    <div>
+                        <h3 class="text-gray-600 font-medium mb-2">สถานที่รับของ</h3>
+                        <div class="mb-2">
+                            <label class="block text-gray-600 mb-1">จังหวัดรับของ</label>
+                            <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัด" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 mb-1">เขต/อำเภอรับของ</label>
+                            <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอ" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card bg-white p-4 mb-4">
+                    <h2 class="font-medium text-gray-700 mb-3">ค่าบริการหลัก (Main Service Fee)</h2>
+                    <div id="job-details-container">
+                        <div class="job-detail-card border border-gray-200 rounded-md p-3 mb-3">
+                            <div class="mb-2">
+                                <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="block text-gray-600 mb-1">รายละเอียด</label>
+                                <textarea class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required></textarea>
                             </div>
                             <div>
-                                <h4 class="font-bold text-gray-700">ค่าใช้จ่ายเพิ่มเติม</h4>
-                                ${mdTableToHtml(feeMd)}
+                                <label class="block text-gray-600 mb-1">จำนวนเงิน - บาท</label>
+                                <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" required>
                             </div>
-                        `;
-                        $('#job-details-section').classList.remove('hidden');
-                        setStatus('โหลดสำเร็จ', true);
-                    } else {
-                        setStatus('ไม่พบรหัสงานนี้', false);
-                        $('#job-details-content').innerHTML = `<p>${data.error || 'ไม่พบรหัสงาน'}</p>`;
-                        $('#job-details-section').classList.remove('hidden');
-                    }
-                })
-                .catch(error => {
-                    setStatus('เกิดข้อผิดพลาดในการเชื่อมต่อ', false);
-                    console.error('Fetch error:', error);
+                        </div>
+                    </div>
+                    <button type="button" id="add-job-detail" class="w-full py-3 border border-dashed border-indigo-500 rounded-md text-indigo-500 flex items-center justify-center touch-target">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        เพิ่มงาน (สูงสุด 5)
+                    </button>
+                </div>
+
+                <div class="card bg-white p-4 mb-4">
+                    <h2 class="font-medium text-gray-700 mb-2">สรุปค่าบริการ</h2>
+                    <div class="flex justify-between mb-2">
+                        <p class="text-gray-600">ค่าบริการหลัก:</p>
+                        <p class="font-medium" id="main-service-fee">0 บาท</p>
+                    </div>
+                    <div class="mb-2">
+                        <p class="text-gray-600 mb-1">ค่าบริการเพิ่มเติมรวม:</p>
+                        <div id="additional-fees-container">
+                            <!-- Additional fees will be added here -->
+                        </div>
+                        <button type="button" id="add-fee" class="mt-3 add-fee-btn touch-target">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                            เพิ่มค่าบริการเพิ่มเติม
+                        </button>
+                    </div>
+                    <div class="border-t border-gray-200 pt-2 mt-2 flex justify-between">
+                        <p class="font-medium">รวมทั้งหมด:</p>
+                        <p class="font-bold text-indigo-600" id="total-amount">0 บาท</p>
+                    </div>
+                </div>
+
+                <div class="flex space-x-4 mb-20">
+                    <button type="button" class="flex-1 py-3 btn-secondary rounded-md font-medium touch-target" onclick="showScreen('home-screen')">ยกเลิก</button>
+                    <button type="submit" class="flex-1 py-3 btn-primary rounded-md font-medium touch-target">บันทึกงาน</button>
+                </div>
+            </form>
+
+            <!-- Floating SAVE button -->
+            <button id="floating-save-btn" class="floating-save rounded-full bg-green-600 text-white p-3 flex items-center justify-center text-sm font-bold shadow-lg">
+                บันทึกแบบร่าง
+            </button>
+        </div>
+
+        <!-- History Screen -->
+        <div id="history-screen" class="p-4 hidden">
+            <div class="flex items-center mb-4">
+                <button class="mr-2 touch-target" onclick="showScreen('home-screen')">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <div>
+                    <h1 class="text-xl font-bold">ประวัติงาน</h1>
+                    <p class="text-xs text-gray-500">แสดงข้อมูลย้อนหลัง 30 วัน</p>
+                </div>
+            </div>
+
+            <div class="card bg-white p-4 mb-4">
+                <h2 class="font-medium text-gray-700 mb-3">เลือกวันที่</h2>
+                <div class="mb-3">
+                    <label class="block text-gray-600 text-sm mb-1">วันที่</label>
+                    <input type="date" id="selected-date" class="w-full p-3 border border-gray-300 rounded-md touch-target" required>
+                </div>
+                <button id="filter-date-btn" class="w-full py-2 bg-blue-50 rounded-md text-blue-600 font-medium border border-blue-200 touch-target">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    กรองข้อมูล
+                </button>
+            </div>
+
+            <div class="mb-4 flex space-x-2 overflow-x-auto pb-1">
+                <button class="px-3 py-2 bg-blue-100 rounded-full text-sm border border-blue-300 flex items-center status-filter active" data-status="all">
+                    <span class="w-2 h-2 bg-gray-500 rounded-full mr-1"></span>
+                    ทั้งหมด
+                </button>
+                <button class="px-3 py-2 bg-white rounded-full text-sm border border-gray-300 flex items-center status-filter" data-status="complete">
+                    <span class="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                    สมบูรณ์
+                </button>
+                <button class="px-3 py-2 bg-white rounded-full text-sm border border-gray-300 flex items-center status-filter" data-status="incomplete">
+                    <span class="w-2 h-2 bg-red-500 rounded-full mr-1"></span>
+                    ไม่สมบูรณ์
+                </button>
+                <button class="px-3 py-2 bg-white rounded-full text-sm border border-gray-300 flex items-center status-filter" data-status="draft">
+                    <span class="w-2 h-2 bg-orange-500 rounded-full mr-1"></span>
+                    ร่าง
+                </button>
+            </div>
+
+            <div id="job-history-container">
+                <div id="no-jobs-message" class="card bg-white p-4 text-center text-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    <p>ยังไม่มีประวัติงาน</p>
+                    <p class="text-sm">เริ่มบันทึกงานใหม่เพื่อดูประวัติที่นี่</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-2 max-w-md mx-auto">
+            <button class="nav-item flex flex-col items-center px-4 py-1 active touch-target" onclick="showScreen('home-screen')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <span class="text-xs mt-1">หน้าหลัก</span>
+            </button>
+            <button class="nav-item flex flex-col items-center px-4 py-1 touch-target" onclick="showScreen('new-job-screen')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                <span class="text-xs mt-1">งานใหม่</span>
+            </button>
+            <button class="nav-item flex flex-col items-center px-4 py-1 touch-target" onclick="showScreen('history-screen')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <span class="text-xs mt-1">ประวัติ</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx-RPQxI2T-Sr3nvB_i9gLBXFAlbiJhGwrohKR7aXR_DNcDtT1JDrLTjgQrYXl8TY8/exec';
+
+        // Authentication functions
+        function showLoginScreen() {
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('register-screen').classList.add('hidden');
+        }
+
+        function showRegisterScreen() {
+            document.getElementById('register-screen').classList.remove('hidden');
+            document.getElementById('login-screen').classList.add('hidden');
+        }
+
+        function logout() {
+            localStorage.removeItem('mangpongUser');
+            currentUser = null;
+            document.getElementById('app').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('register-screen').classList.add('hidden');
+        }
+
+        // Login form submission
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            // Show loading
+            Swal.fire({
+                title: 'กำลังเข้าสู่ระบบ...',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            try {
+                const response = await submitToGoogleSheets({
+                    action: 'login',
+                    username: username,
+                    password: password
                 });
+                
+                if (response.success) {
+                    currentUser = response.user;
+                    localStorage.setItem('mangpongUser', JSON.stringify(currentUser));
+                    
+                    // Show success and redirect
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'เข้าสู่ระบบสำเร็จ!',
+                        text: `ยินดีต้อนรับ ${currentUser.fullName}`,
+                        confirmButtonText: 'ตกลง',
+                        confirmButtonColor: '#10b981'
+                    });
+                    
+                    // Show main app
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('app').classList.remove('hidden');
+                    document.getElementById('user-display-name').textContent = currentUser.fullName;
+                    
+                    // Initialize app
+                    initializeApp();
+                    
+                } else {
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'เข้าสู่ระบบไม่สำเร็จ',
+                        text: response.error,
+                        confirmButtonText: 'ตกลง',
+                        confirmButtonColor: '#ef4444'
+                    });
+                }
+                
+            } catch (error) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'เกิดข้อผิดพลาด',
+                    text: error.message,
+                    confirmButtonText: 'ตกลง',
+                    confirmButtonColor: '#ef4444'
+                });
+            }
+        });
+
+        // Register form submission
+        document.getElementById('register-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            const fullName = document.getElementById('register-fullname').value;
+            const phone = document.getElementById('register-phone').value;
+            const email = document.getElementById('register-email').value;
+            
+            // Validate password confirmation
+            if (password !== confirmPassword) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'รหัสผ่านไม่ตรงกัน',
+                    text: 'กรุณาตรวจสอบรหัสผ่านและยืนยันรหัสผ่านให้ตรงกัน',
+                    confirmButtonText: 'ตกลง',
+                    confirmButtonColor: '#ef4444'
+                });
+                return;
+            }
+            
+            // Show loading
+            Swal.fire({
+                title: 'กำลังสมัครสมาชิก...',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            try {
+                const response = await submitToGoogleSheets({
+                    action: 'register',
+                    username: username,
+                    password: password,
+                    fullName: fullName,
+                    phone: phone,
+                    email: email
+                });
+                
+                if (response.success) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'สมัครสมาชิกสำเร็จ!',
+                        text: 'คุณสามารถเข้าสู่ระบบได้แล้ว',
+                        confirmButtonText: 'ตกลง',
+                        confirmButtonColor: '#10b981'
+                    });
+                    
+                    // Clear form and show login screen
+                    document.getElementById('register-form').reset();
+                    showLoginScreen();
+                    
+                } else {
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'สมัครสมาชิกไม่สำเร็จ',
+                        text: response.error,
+                        confirmButtonText: 'ตกลง',
+                        confirmButtonColor: '#ef4444'
+                    });
+                }
+                
+            } catch (error) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'เกิดข้อผิดพลาด',
+                    text: error.message,
+                    confirmButtonText: 'ตกลง',
+                    confirmButtonColor: '#ef4444'
+                });
+            }
+        });
+
+        // Initialize date and time with Thai Buddhist calendar
+        function updateDateTime() {
+            const now = new Date();
+            
+            // Convert to Thai Buddhist calendar
+            const thaiYear = now.getFullYear() + 543;
+            const thaiMonths = [
+                'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+                'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+            ];
+            const thaiDays = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+            
+            const dayName = thaiDays[now.getDay()];
+            const day = now.getDate();
+            const month = thaiMonths[now.getMonth()];
+            const year = thaiYear;
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            const dateTimeString = `${dayName} ${day} ${month} ${year} ${hours}:${minutes}`;
+            document.getElementById('current-date-time').textContent = dateTimeString;
+            
+            const monthYearString = `${month} ${year}`;
+            document.getElementById('current-month').textContent = monthYearString;
+            
+            // Set default date for history to today
+            const selectedDateInput = document.getElementById('selected-date');
+            if (selectedDateInput) {
+                selectedDateInput.value = formatDate(now);
+            }
+            
+            // Set default date for job date picker to today
+            const jobDatePicker = document.getElementById('job-date-picker');
+            if (jobDatePicker) {
+                jobDatePicker.value = formatDate(now);
+            }
+        }
+        
+        // Format date as DD/MM/YYYY for Thai input
+        function formatThaiDateInput(date) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear() + 543;
+            return `${day}/${month}/${year}`;
+        }
+        
+        // Format date as YYYY-MM-DD for input[type="date"]
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // Convert date to Thai format for display
+        function formatThaiDate(dateString) {
+            const date = new Date(dateString);
+            const thaiYear = date.getFullYear() + 543;
+            const thaiMonths = [
+                'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
+                'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'
+            ];
+            
+            const day = date.getDate();
+            const month = thaiMonths[date.getMonth()];
+            const year = thaiYear;
+            
+            return `${day}/${month}/${year}`;
+        }
+        
+        // Check incomplete and draft jobs from localStorage
+        function checkJobStatus() {
+            const savedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
+            
+            const incompleteJobs = savedJobs.filter(job => job.status === 'incomplete');
+            const draftJobs = savedJobs.filter(job => job.status === 'draft');
+            
+            // Handle incomplete jobs
+            const incompleteCard = document.getElementById('incomplete-jobs-card');
+            const incompleteList = document.getElementById('incomplete-jobs-list');
+            
+            if (incompleteJobs.length > 0) {
+                incompleteCard.classList.remove('hidden');
+                incompleteList.innerHTML = '';
+                
+                incompleteJobs.forEach(job => {
+                    const li = document.createElement('li');
+                    li.textContent = `${job.jobId}: ${job.incompleteReason || 'ข้อมูลไม่ครบถ้วน'}`;
+                    li.className = 'cursor-pointer hover:text-indigo-600';
+                    li.onclick = function() { editJob(job.jobId); };
+                    incompleteList.appendChild(li);
+                });
+            } else {
+                incompleteCard.classList.add('hidden');
+            }
+            
+            // Handle draft jobs
+            const draftCard = document.getElementById('draft-jobs-card');
+            const draftList = document.getElementById('draft-jobs-list');
+            
+            if (draftJobs.length > 0) {
+                draftCard.classList.remove('hidden');
+                draftList.innerHTML = '';
+                
+                draftJobs.forEach(job => {
+                    const li = document.createElement('li');
+                    li.textContent = `${job.jobId}: ${job.company || 'ไม่ระบุบริษัท'}`;
+                    li.className = 'cursor-pointer hover:text-indigo-600';
+                    li.onclick = function() { editJob(job.jobId); };
+                    draftList.appendChild(li);
+                });
+            } else {
+                draftCard.classList.add('hidden');
+            }
+        }
+        
+        // Screen navigation
+        function showScreen(screenId) {
+            // Hide all screens
+            document.getElementById('home-screen').classList.add('hidden');
+            document.getElementById('new-job-screen').classList.add('hidden');
+            document.getElementById('history-screen').classList.add('hidden');
+            
+            // Show the selected screen
+            document.getElementById(screenId).classList.remove('hidden');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Set active nav item and refresh data
+            if (screenId === 'home-screen') {
+                document.querySelectorAll('.nav-item')[0].classList.add('active');
+                checkJobStatus();
+                updateStats();
+            } else if (screenId === 'new-job-screen') {
+                document.querySelectorAll('.nav-item')[1].classList.add('active');
+                // Clear form if not editing
+                const form = document.getElementById('new-job-form');
+                if (!form.getAttribute('data-editing-job-id')) {
+                    form.reset();
+                    
+                    // Reset job date picker to today
+                    const jobDatePicker = document.getElementById('job-date-picker');
+                    if (jobDatePicker) {
+                        jobDatePicker.value = formatDate(new Date());
+                    }
+                    
+                    // Clear additional job details and fees
+                    const jobDetailsContainer = document.getElementById('job-details-container');
+                    const additionalFeesContainer = document.getElementById('additional-fees-container');
+                    
+                    // Reset to single job detail
+                    jobDetailsContainer.innerHTML = `
+                        <div class="job-detail-card border border-gray-200 rounded-md p-3 mb-3">
+                            <div class="mb-2">
+                                <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="block text-gray-600 mb-1">รายละเอียด</label>
+                                <textarea class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
+                                <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" required>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Clear additional fees
+                    additionalFeesContainer.innerHTML = '';
+                    
+                    // Re-add event listeners
+                    jobDetailsContainer.querySelector('.amount-input').addEventListener('input', updateTotalAmount);
+                    updateTotalAmount();
+                }
+            } else if (screenId === 'history-screen') {
+                document.querySelectorAll('.nav-item')[2].classList.add('active');
+                displayJobHistory();
+            }
+        }
+        
+        // Add job detail
+        document.getElementById('add-job-detail').addEventListener('click', function() {
+            const container = document.getElementById('job-details-container');
+            const jobDetailCount = container.querySelectorAll('.job-detail-card').length;
+            
+            if (jobDetailCount < 5) {
+                const newDetail = document.createElement('div');
+                newDetail.className = 'job-detail-card border border-gray-200 rounded-md p-3 mb-3';
+                newDetail.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-medium">รายละเอียดงาน #${jobDetailCount + 1}</h3>
+                        <button type="button" class="text-red-500 remove-job-detail touch-target">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
+                        <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
+                        <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
+                        <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
+                        <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-gray-600 mb-1">รายละเอียด</label>
+                        <textarea class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-gray-600 mb-1">จำนวนเงิน - บาท</label>
+                        <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" required>
+                    </div>
+                `;
+                container.appendChild(newDetail);
+                
+                // Add event listener to remove button
+                newDetail.querySelector('.remove-job-detail').addEventListener('click', function() {
+                    container.removeChild(newDetail);
+                    updateTotalAmount();
+                });
+                
+                // Add event listener to amount input
+                newDetail.querySelector('.amount-input').addEventListener('input', updateTotalAmount);
+            } else {
+                alert('คุณสามารถเพิ่มรายละเอียดงานได้สูงสุด 5 รายการ');
+            }
         });
         
-        function setStatus(message, isSuccess) {
+        // Add additional fee
+        document.getElementById('add-fee').addEventListener('click', function() {
+            const container = document.getElementById('additional-fees-container');
+            const feeItem = document.createElement('div');
+            feeItem.className = 'flex justify-between items-center mb-2';
+            feeItem.innerHTML = `
+                <div class="flex-1 mr-2">
+                    <select class="w-full p-3 border border-gray-300 rounded-md touch-target" required>
+                        <option value="" disabled selected>เลือกรายการ</option>
+                        <option value="บรรทุก">บรรทุก</option>
+                        <option value="ล่วงเวลา_OT">ล่วงเวลา_OT</option>
+                        <option value="กลับ">กลับ</option>
+                        <option value="รอ">รอ</option>
+                    </select>
+                </div>
+                <div class="w-24 mr-2">
+                    <input type="number" class="w-full p-3 border border-gray-300 rounded-md fee-amount touch-target" placeholder="0.00" min="0" step="0.01" required>
+                </div>
+                <button type="button" class="text-red-500 remove-fee touch-target">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            `;
+            container.appendChild(feeItem);
+            
+            // Add event listener to remove button
+            feeItem.querySelector('.remove-fee').addEventListener('click', function() {
+                container.removeChild(feeItem);
+                updateTotalAmount();
+            });
+            
+            // Add event listener to fee amount input
+            feeItem.querySelector('.fee-amount').addEventListener('input', updateTotalAmount);
+        });
+        
+        // Update total amount
+        function updateTotalAmount() {
+            let total = 0;
+            
+            // Sum job detail amounts
+            document.querySelectorAll('.amount-input').forEach(input => {
+                const value = parseFloat(input.value) || 0;
+                total += value;
+            });
+            
+            // Update main service fee
+            document.getElementById('main-service-fee').textContent = total.toFixed(2) + ' บาท';
+            
+            // Sum additional fees
+            document.querySelectorAll('.fee-amount').forEach(input => {
+                const value = parseFloat(input.value) || 0;
+                total += value;
+            });
+            
+            // Update total
+            document.getElementById('total-amount').textContent = total.toFixed(2) + ' บาท';
+        }
+        
+        // Save job as draft (floating button)
+        document.getElementById('floating-save-btn').addEventListener('click', async function() {
+            // Show loading alert
             Swal.fire({
-                icon: isSuccess ? 'success' : 'error',
-                title: message,
+                title: 'กำลังบันทึกร่าง...',
+                text: 'กรุณารอสักครู่',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
                 showConfirmButton: false,
-                timer: 1500
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            try {
+                const formData = collectFormData();
+                formData.status = 'draft';
+                
+                const response = await saveJob(formData, true);
+                
+                // Show success message
+                await Swal.fire({
+                    icon: 'info',
+                    title: 'บันทึกร่างสำเร็จ!',
+                    text: `งาน ${formData.jobId} ถูกบันทึกเป็นร่างแล้ว`,
+                    confirmButtonText: 'ตกลง',
+                    confirmButtonColor: '#3b82f6'
+                });
+                
+                // Update stats
+                updateStats();
+                
+                // Add to draft jobs list
+                const draftJobs = [
+                    { id: formData.jobId, company: formData.company || 'แมงป่อง เทรดดิ้ง' }
+                ];
+                
+                const draftCard = document.getElementById('draft-jobs-card');
+                const draftList = document.getElementById('draft-jobs-list');
+                
+                draftCard.classList.remove('hidden');
+                draftList.innerHTML = '';
+                
+                draftJobs.forEach(job => {
+                    const li = document.createElement('li');
+                    li.textContent = `${job.id}: ${job.company}`;
+                    li.className = 'cursor-pointer hover:text-indigo-600';
+                    li.onclick = function() { editJob(job.id); };
+                    draftList.appendChild(li);
+                });
+                
+                // Reset form
+                const form = document.getElementById('new-job-form');
+                form.reset();
+                updateTotalAmount();
+                
+                // Go back to home screen
+                showScreen('home-screen');
+                
+            } catch (error) {
+                console.error('Error saving draft:', error);
+                
+                // Show error message
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'เกิดข้อผิดพลาด!',
+                    text: error.message,
+                    confirmButtonText: 'ตกลง',
+                    confirmButtonColor: '#ef4444'
+                });
+            }
+        });
+        
+        // Google Sheets connection using JSONP
+        function submitToGoogleSheets(data) {
+            return new Promise((resolve, reject) => {
+                const callbackName = 'jsonpCallback_' + Date.now();
+
+                window[callbackName] = function(response) {
+                    resolve(response);
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                };
+
+                const queryParams = new URLSearchParams();
+                for (let key in data) {
+                    queryParams.append(key, data[key]);
+                }
+                queryParams.append('callback', callbackName);
+
+                const script = document.createElement('script');
+                script.src = `${GOOGLE_SCRIPT_URL}?${queryParams.toString()}`;
+                script.onerror = function() {
+                    reject(new Error('เกิดข้อผิดพลาดในการเชื่อมต่อ Google Sheets'));
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                };
+
+                document.body.appendChild(script);
             });
         }
-
-        function renderJobMarkdown(row) {
-            if (!row || !row.jobId) return "";
-            const keys = ['jobId', 'orderDate', 'pickupTime', 'customerName', 'customerPhone', 'location'];
-            const columns = ['รหัสงาน', 'วันที่สั่ง', 'เวลารับ', 'ลูกค้า', 'เบอร์โทร', 'สถานที่'];
-            const lookup = {};
-            for (const k of keys) lookup[k] = row[k] || "-";
-
-            const values = keys.map(k => lookup[k]);
-            const md = '| ' + columns.join(' | ') + ' |\n' + '| ' + columns.map(() => ':---:').join(' | ') + ' |\n' + '| ' + values.join(' | ') + ' |';
-            return md;
+        
+        function collectFormData() {
+            const form = document.getElementById('new-job-form');
+            const formData = new FormData(form);
+            
+            // วันที่บันทึกงาน
+            const jobDatePicker = document.getElementById('job-date-picker');
+            const selectedDate = new Date(jobDatePicker.value);
+            const thaiDateValue = formatThaiDateInput(selectedDate);
+            
+            // ข้อมูลหลักของงาน
+            const base = {
+                timestamp: selectedDate.toISOString(),
+                jobDate: thaiDateValue,
+                jobId: 'JOB-' + Math.floor(10000 + Math.random() * 90000),
+                username: currentUser ? currentUser.username : 'unknown',
+                company: form.querySelector('select').value,
+                assignedBy: form.querySelector('input[placeholder="ชื่อผู้มอบงาน"]').value,
+                contact: form.querySelector('input[placeholder="ข้อมูลติดต่อ"]').value,
+                pickupProvince: form.querySelector('input[placeholder="จังหวัด"]').value,
+                pickupDistrict: form.querySelector('input[placeholder="เขต/อำเภอ"]').value
+            };
+            
+            // รายละเอียดงาน (แบบโครงสร้างสำหรับใช้ในแอป)
+            const jobDetails = [];
+            const jobDetailCards = document.querySelectorAll('.job-detail-card');
+            jobDetailCards.forEach((card) => {
+                const inputs = card.querySelectorAll('input, textarea');
+                jobDetails.push({
+                    destinationCompany: inputs[0].value,
+                    deliveryProvince: inputs[1].value,
+                    deliveryDistrict: inputs[2].value,
+                    recipient: inputs[3].value,
+                    description: inputs[4].value,
+                    amount: parseFloat(inputs[5].value) || 0
+                });
+            });
+            
+            // ค่าบริการเพิ่มเติม (แบบโครงสร้างสำหรับใช้ในแอป)
+            const additionalFees = [];
+            const feeItems = document.querySelectorAll('#additional-fees-container > div');
+            feeItems.forEach(item => {
+                const select = item.querySelector('select');
+                const input = item.querySelector('input');
+                if (select && input) {
+                    additionalFees.push({
+                        description: select.value,
+                        amount: parseFloat(input.value) || 0
+                    });
+                }
+            });
+            
+            // รวมยอดเงิน
+            const mainServiceFee = jobDetails.reduce((sum, j) => sum + (parseFloat(j.amount) || 0), 0);
+            const additionalFeesTotal = additionalFees.reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0);
+            const totalAmount = mainServiceFee + additionalFeesTotal;
+            
+            // แปลงเป็นรูปแบบแนวนอน flat สูงสุด 5 งาน และ 10 ค่าบริการเพิ่มเติม (ปรับได้ตามต้องการ)
+            const flat = {};
+            jobDetails.forEach((d, i) => {
+                const idx = i + 1;
+                flat['companyTo' + idx] = d.destinationCompany || '';
+                flat['province' + idx]   = d.deliveryProvince || '';
+                flat['district' + idx]   = d.deliveryDistrict || '';
+                flat['recipient' + idx]  = d.recipient || '';
+                flat['detail' + idx]     = d.description || '';
+                flat['amount' + idx]     = (parseFloat(d.amount) || 0);
+            });
+            flat.jobCount = jobDetails.length;
+            
+            additionalFees.forEach((f, i) => {
+                const idx = i + 1;
+                flat['feeName' + idx]   = f.description || '';
+                flat['feeAmount' + idx] = (parseFloat(f.amount) || 0);
+            });
+            flat.feeCount = additionalFees.length;
+            
+            // ส่งออกทั้งแบบโครงสร้าง (เพื่อให้แอปยังแสดงผลได้) และแบบแนวนอน (เพื่อบันทึกลงชีตหนึ่งแถว/งาน)
+            return {
+                ...base,
+                // โครงสร้างเดิมสำหรับหน้าประวัติและดูรายละเอียด
+                jobDetails: JSON.stringify(jobDetails),
+                additionalFees: JSON.stringify(additionalFees),
+                // ตัวเลขสรุป
+                mainServiceFee,
+                additionalFeesTotal,
+                totalAmount,
+                // ฟิลด์แบบแบนแนวนอน
+                ...flat
+            };
         }
-
-        function renderFeeMarkdown(row) {
-            if (!row) return "";
-            const keys = ['ค่ารถ', 'ค่าที่พัก', 'ค่าใช้จ่าย'];
-            const columns = ['ประเภท', 'จำนวนเงิน'];
-            const lookup = {};
-
-            // Flatten fees from object/array
-            for (let i = 1; i <= mangpong_jsonp_config.maxFees; i++) {
-                const d = row['description_' + i] || row['feeName' + i] || row['description' + i];
-                const a = row['amount_' + i] || row['feeAmount' + i] || row['feeAmount' + i] || row['amount' + i];
-                if (d) lookup[d] = a;
+        
+        // Parse Thai date format DD/MM/YYYY to Date object
+        function parseThaiDate(thaiDateStr) {
+            if (!thaiDateStr || !thaiDateStr.includes('/')) {
+                return new Date();
             }
-            if (row.additionalFees && typeof row.additionalFees === 'string' && row.additionalFees.trim().startsWith('[')) {
+            
+            const parts = thaiDateStr.split('/');
+            if (parts.length !== 3) {
+                return new Date();
+            }
+            
+            const day = parseInt(parts[0]);
+            const month = parseInt(parts[1]) - 1; // Month is 0-indexed
+            const thaiYear = parseInt(parts[2]);
+            const gregorianYear = thaiYear - 543;
+            
+            return new Date(gregorianYear, month, day);
+        }
+        
+        // Form submission
+        document.getElementById('new-job-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Check if form is valid
+            const form = document.getElementById('new-job-form');
+            const isValid = form.checkValidity();
+            
+            if (isValid) {
+                // Show loading alert
+                Swal.fire({
+                    title: 'กำลังบันทึกข้อมูล...',
+                    text: 'กรุณารอสักครู่',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
                 try {
-                    const arr = JSON.parse(row.additionalFees);
-                    arr.forEach(function(f){ if (f && f.description) lookup[f.description] = f.amount; });
-                } catch(e){ console.warn('additionalFees parse error', e); }
+                    const formData = collectFormData();
+                    const response = await saveJob(formData, false);
+                    
+                    // Show success message
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'บันทึกสำเร็จ!',
+                        text: `งาน ${formData.jobId} ถูกบันทึกเรียบร้อยแล้ว`,
+                        confirmButtonText: 'ตกลง',
+                        confirmButtonColor: '#10b981'
+                    });
+                    
+                    // Update stats
+                    updateStats();
+                    
+                    // Reset form and clear editing state
+                    form.reset();
+                    form.removeAttribute('data-editing-job-id');
+                    
+                    // Clear additional job details and fees
+                    const jobDetailsContainer = document.getElementById('job-details-container');
+                    const additionalFeesContainer = document.getElementById('additional-fees-container');
+                    
+                    // Reset to single job detail
+                    jobDetailsContainer.innerHTML = `
+                        <div class="job-detail-card border border-gray-200 rounded-md p-3 mb-3">
+                            <div class="mb-2">
+                                <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="block text-gray-600 mb-1">รายละเอียด</label>
+                                <textarea class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
+                                <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" required>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Clear additional fees
+                    additionalFeesContainer.innerHTML = '';
+                    
+                    // Re-add event listeners
+                    jobDetailsContainer.querySelector('.amount-input').addEventListener('input', updateTotalAmount);
+                    updateTotalAmount();
+                    
+                    // Go back to home screen
+                    showScreen('home-screen');
+                    
+                } catch (error) {
+                    console.error('Error submitting form:', error);
+                    
+                    // Show error message
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'เกิดข้อผิดพลาด!',
+                        text: error.message,
+                        confirmButtonText: 'ตกลง',
+                        confirmButtonColor: '#ef4444'
+                    });
+                }
+            } else {
+                // If form is not valid, show incomplete job notification
+                const result = await Swal.fire({
+                    icon: 'warning',
+                    title: 'ข้อมูลไม่ครบถ้วน',
+                    text: 'กรุณาตรวจสอบข้อมูลที่กรอก ต้องการบันทึกงานแบบไม่สมบูรณ์หรือไม่?',
+                    showCancelButton: true,
+                    confirmButtonText: 'บันทึกแบบไม่สมบูรณ์',
+                    cancelButtonText: 'ยกเลิก',
+                    confirmButtonColor: '#f97316',
+                    cancelButtonColor: '#6b7280'
+                });
+                
+                if (result.isConfirmed) {
+                    // Show loading alert
+                    Swal.fire({
+                        title: 'กำลังบันทึกข้อมูล...',
+                        text: 'กรุณารอสักครู่',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    try {
+                        const formData = collectFormData();
+                        formData.status = 'incomplete';
+                        formData.incompleteReason = 'ข้อมูลไม่ครบถ้วน';
+                        
+                        const response = await saveJob(formData, false);
+                        
+                        // Show success message
+                        await Swal.fire({
+                            icon: 'warning',
+                            title: 'บันทึกแบบไม่สมบูรณ์',
+                            text: `งาน ${formData.jobId} ถูกบันทึกแล้ว แต่ข้อมูลไม่สมบูรณ์`,
+                            confirmButtonText: 'ตกลง',
+                            confirmButtonColor: '#f97316'
+                        });
+                        
+                        // Update stats and show incomplete job card
+                        updateStats();
+                        
+                        const incompleteJobs = [
+                            { id: formData.jobId, reason: 'ข้อมูลไม่ครบถ้วน' }
+                        ];
+                        
+                        const incompleteCard = document.getElementById('incomplete-jobs-card');
+                        const incompleteList = document.getElementById('incomplete-jobs-list');
+                        
+                        incompleteCard.classList.remove('hidden');
+                        incompleteList.innerHTML = '';
+                        
+                        incompleteJobs.forEach(job => {
+                            const li = document.createElement('li');
+                            li.textContent = `${job.id}: ${job.reason}`;
+                            li.className = 'cursor-pointer hover:text-indigo-600';
+                            li.onclick = function() { editJob(job.id); };
+                            incompleteList.appendChild(li);
+                        });
+                        
+                        // Reset form
+                        form.reset();
+                        updateTotalAmount();
+                        
+                        // Go back to home screen
+                        showScreen('home-screen');
+                        
+                    } catch (error) {
+                        console.error('Error submitting incomplete form:', error);
+                        
+                        // Show error message
+                        await Swal.fire({
+                            icon: 'error',
+                            title: 'เกิดข้อผิดพลาด!',
+                            text: error.message,
+                            confirmButtonText: 'ตกลง',
+                            confirmButtonColor: '#ef4444'
+                        });
+                    }
+                }
             }
-
-            const values = keys.map(k => {
-                const v = lookup[k];
-                return (v !== undefined && v !== null && v !== '') ? `${Math.round(Number(v))} บาท` : '-';
+        });
+        
+        // Filter jobs by status
+        document.querySelectorAll('.status-filter').forEach(button => {
+            button.addEventListener('click', function() {
+                // Update active filter button
+                document.querySelectorAll('.status-filter').forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.classList.remove('bg-blue-100');
+                    btn.classList.remove('border-blue-300');
+                    btn.classList.add('bg-white');
+                    btn.classList.add('border-gray-300');
+                });
+                
+                this.classList.add('active');
+                this.classList.add('bg-blue-100');
+                this.classList.add('border-blue-300');
+                
+                // Filter jobs
+                const status = this.getAttribute('data-status');
+                const jobItems = document.querySelectorAll('.job-item');
+                
+                jobItems.forEach(item => {
+                    if (status === 'all' || item.getAttribute('data-status') === status) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
             });
-
-            const md = '| ' + columns.join(' | ') + ' |\n' + '| ' + columns.map(() => ':---:').join(' | ') + ' |\n' + '| ' + values.join(' | ') + ' |';
-            return md;
+        });
+        
+        // Display job history
+        function displayJobHistory() {
+            const savedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
+            const container = document.getElementById('job-history-container');
+            const noJobsMessage = document.getElementById('no-jobs-message');
+            
+            if (savedJobs.length === 0) {
+                noJobsMessage.style.display = 'block';
+                return;
+            }
+            
+            noJobsMessage.style.display = 'none';
+            
+            // Sort jobs by timestamp (newest first)
+            savedJobs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            // Clear existing job items (except no-jobs-message)
+            const existingJobs = container.querySelectorAll('.job-item');
+            existingJobs.forEach(job => job.remove());
+            
+            savedJobs.forEach(job => {
+                const jobElement = createJobHistoryItem(job);
+                container.insertBefore(jobElement, noJobsMessage);
+            });
+        }
+        
+        function createJobHistoryItem(job) {
+            const jobElement = document.createElement('div');
+            jobElement.className = 'card bg-white p-4 mb-4 job-item';
+            jobElement.setAttribute('data-status', job.status || 'complete');
+            
+            const statusBadge = getStatusBadge(job.status);
+            const jobDate = formatThaiDate(job.timestamp);
+            
+            jobElement.innerHTML = `
+                <div class="flex justify-between items-start mb-1">
+                    <h3 class="font-medium">${job.jobId}</h3>
+                    <span class="px-2 py-1 text-xs rounded-full ${statusBadge.class}">${statusBadge.text}</span>
+                </div>
+                <div class="text-sm text-gray-600 mb-2">
+                    <p>วันที่: ${jobDate}</p>
+                    <p>บริษัท: ${job.company || 'ไม่ระบุ'}</p>
+                    <p>ผู้ติดต่อ: ${job.assignedBy || 'ไม่ระบุ'}</p>
+                    <p>จำนวน: ${job.totalAmount ? job.totalAmount.toFixed(2) : '0.00'} บาท</p>
+                </div>
+                ${job.status === 'incomplete' ? `
+                    <div class="bg-red-50 border-l-4 border-red-500 p-2 text-sm text-red-700 mb-2">
+                        <p>เหตุผลไม่สมบูรณ์: ${job.incompleteReason || 'ข้อมูลไม่ครบถ้วน'}</p>
+                    </div>
+                ` : ''}
+                ${job.status === 'draft' ? `
+                    <div class="bg-amber-50 border-l-4 border-amber-500 p-2 text-sm text-amber-700 mb-2">
+                        <p>สถานะ: บันทึกเป็นร่าง</p>
+                    </div>
+                ` : ''}
+                <div class="flex space-x-2">
+                    ${job.status === 'complete' ? `
+                        <button class="text-sm text-indigo-600 font-medium flex items-center touch-target" onclick="viewJob('${job.jobId}')">
+                            ดูรายละเอียด
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    ` : `
+                        <button class="text-sm text-indigo-600 font-medium flex items-center touch-target" onclick="editJob('${job.jobId}')">
+                            ${job.status === 'draft' ? 'แก้ไขร่าง' : 'แก้ไขงาน'}
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                        </button>
+                    `}
+                </div>
+            `;
+            
+            return jobElement;
+        }
+        
+        function getStatusBadge(status) {
+            switch (status) {
+                case 'incomplete':
+                    return { class: 'incomplete-badge', text: 'ไม่สมบูรณ์' };
+                case 'draft':
+                    return { class: 'draft-badge', text: 'ร่าง' };
+                default:
+                    return { class: 'complete-badge', text: 'สมบูรณ์' };
+            }
+        }
+        
+        // Filter by single date
+        document.getElementById('filter-date-btn').addEventListener('click', function() {
+            const selectedDate = new Date(document.getElementById('selected-date').value);
+            
+            // Create date range for the selected day (start of day to end of day)
+            const startOfDay = new Date(selectedDate);
+            startOfDay.setHours(0, 0, 0, 0);
+            
+            const endOfDay = new Date(selectedDate);
+            endOfDay.setHours(23, 59, 59, 999);
+            
+            // Filter jobs by the selected date
+            const jobItems = document.querySelectorAll('.job-item');
+            let hasVisibleJobs = false;
+            
+            jobItems.forEach(item => {
+                const jobDateText = item.querySelector('.text-sm.text-gray-600 p:first-child').textContent;
+                const jobDateStr = jobDateText.replace('วันที่: ', '');
+                
+                // Parse Thai date format back to compare
+                const parts = jobDateStr.split('/');
+                if (parts.length === 3) {
+                    const day = parseInt(parts[0]);
+                    const monthMap = {
+                        'ม.ค.': 0, 'ก.พ.': 1, 'มี.ค.': 2, 'เม.ย.': 3, 'พ.ค.': 4, 'มิ.ย.': 5,
+                        'ก.ค.': 6, 'ส.ค.': 7, 'ก.ย.': 8, 'ต.ค.': 9, 'พ.ย.': 10, 'ธ.ค.': 11
+                    };
+                    const month = monthMap[parts[1]];
+                    const year = parseInt(parts[2]) - 543; // Convert from Buddhist to Gregorian
+                    
+                    const jobDate = new Date(year, month, day);
+                    
+                    if (jobDate >= startOfDay && jobDate <= endOfDay) {
+                        // Check if it also matches the current status filter
+                        const currentStatusFilter = document.querySelector('.status-filter.active').getAttribute('data-status');
+                        if (currentStatusFilter === 'all' || item.getAttribute('data-status') === currentStatusFilter) {
+                            item.style.display = 'block';
+                            hasVisibleJobs = true;
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    } else {
+                        item.style.display = 'none';
+                    }
+                }
+            });
+            
+            // Show/hide no jobs message
+            const noJobsMessage = document.getElementById('no-jobs-message');
+            if (hasVisibleJobs) {
+                noJobsMessage.style.display = 'none';
+            } else {
+                noJobsMessage.style.display = 'block';
+                noJobsMessage.querySelector('p:first-of-type').textContent = 'ไม่พบงานในวันที่เลือก';
+            }
+            
+            // Update the header text
+            const formattedDate = formatThaiDate(selectedDate.toISOString());
+            document.querySelector('#history-screen p.text-xs.text-gray-500').textContent = `แสดงข้อมูลวันที่ ${formattedDate}`;
+        });
+        
+        // Edit job
+        function editJob(jobId) {
+            const savedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
+            const job = savedJobs.find(j => j.jobId === jobId);
+            
+            if (!job) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'ไม่พบงาน',
+                    text: 'ไม่สามารถหางานที่ต้องการแก้ไขได้',
+                    confirmButtonText: 'ตกลง'
+                });
+                return;
+            }
+            
+            // Populate form with job data
+            populateFormWithJobData(job);
+            showScreen('new-job-screen');
+        }
+        
+        function populateFormWithJobData(job) {
+            const form = document.getElementById('new-job-form');
+            
+            // Basic information
+            if (job.company) {
+                const companySelect = form.querySelector('select');
+                companySelect.value = job.company;
+            }
+            
+            if (job.assignedBy) {
+                form.querySelector('input[placeholder="ชื่อผู้มอบงาน"]').value = job.assignedBy;
+            }
+            
+            if (job.contact) {
+                form.querySelector('input[placeholder="ข้อมูลติดต่อ"]').value = job.contact;
+            }
+            
+            if (job.pickupProvince) {
+                form.querySelector('input[placeholder="จังหวัด"]').value = job.pickupProvince;
+            }
+            
+            if (job.pickupDistrict) {
+                form.querySelector('input[placeholder="เขต/อำเภอ"]').value = job.pickupDistrict;
+            }
+            
+            // Set job date - convert from Thai format to date picker format
+            if (job.jobDate) {
+                const parsedDate = parseThaiDate(job.jobDate);
+                document.getElementById('job-date-picker').value = formatDate(parsedDate);
+            }
+            
+            // Job details
+            if (job.jobDetails) {
+                const jobDetails = JSON.parse(job.jobDetails);
+                const container = document.getElementById('job-details-container');
+                
+                // Clear existing job details
+                container.innerHTML = '';
+                
+                jobDetails.forEach((detail, index) => {
+                    if (index === 0) {
+                        // Use the first job detail card
+                        const firstCard = document.createElement('div');
+                        firstCard.className = 'job-detail-card border border-gray-200 rounded-md p-3 mb-3';
+                        firstCard.innerHTML = `
+                            <div class="mb-2">
+                                <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" value="${detail.destinationCompany || ''}" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" value="${detail.deliveryProvince || detail.deliveryLocation || ''}" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" value="${detail.deliveryDistrict || ''}" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" value="${detail.recipient || ''}" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="block text-gray-600 mb-1">รายละเอียด</label>
+                                <textarea class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required>${detail.description || ''}</textarea>
+                            </div>
+                            <div>
+                                <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
+                                <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" value="${detail.amount || 0}" required>
+                            </div>
+                        `;
+                        container.appendChild(firstCard);
+                        
+                        // Add event listener to amount input
+                        firstCard.querySelector('.amount-input').addEventListener('input', updateTotalAmount);
+                    } else {
+                        // Add additional job detail cards
+                        document.getElementById('add-job-detail').click();
+                        const newCard = container.lastElementChild;
+                        const inputs = newCard.querySelectorAll('input, textarea');
+                        inputs[0].value = detail.destinationCompany || '';
+                        inputs[1].value = detail.deliveryProvince || detail.deliveryLocation || '';
+                        inputs[2].value = detail.deliveryDistrict || '';
+                        inputs[3].value = detail.recipient || '';
+                        inputs[4].value = detail.description || '';
+                        inputs[5].value = detail.amount || 0;
+                    }
+                });
+            }
+            
+            // Additional fees
+            if (job.additionalFees) {
+                const additionalFees = JSON.parse(job.additionalFees);
+                additionalFees.forEach(fee => {
+                    document.getElementById('add-fee').click();
+                    const container = document.getElementById('additional-fees-container');
+                    const newFee = container.lastElementChild;
+                    const select = newFee.querySelector('select');
+                    const input = newFee.querySelector('input');
+                    if (select && input) {
+                        select.value = fee.description || '';
+                        input.value = fee.amount || 0;
+                    }
+                });
+            }
+            
+            // Update totals
+            updateTotalAmount();
+            
+            // Store the job ID for updating
+            form.setAttribute('data-editing-job-id', job.jobId);
+        }
+        
+        // View job
+        async function viewJob(jobId) {
+            const savedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
+            const job = savedJobs.find(j => j.jobId === jobId);
+            
+            if (!job) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'ไม่พบงาน',
+                    text: 'ไม่สามารถหางานที่ต้องการดูได้',
+                    confirmButtonText: 'ตกลง'
+                });
+                return;
+            }
+            
+            const jobDetails = job.jobDetails ? JSON.parse(job.jobDetails) : [];
+            const additionalFees = job.additionalFees ? JSON.parse(job.additionalFees) : [];
+            
+            let jobDetailsHtml = '';
+            jobDetails.forEach((detail, index) => {
+                jobDetailsHtml += `
+                    <div class="mb-3 p-3 bg-gray-50 rounded border">
+                        <h4 class="font-medium text-blue-600 mb-2">งาน #${index + 1}</h4>
+                        <div class="grid grid-cols-1 gap-1 text-sm">
+                            <p><strong>บริษัทปลายทาง:</strong> ${detail.destinationCompany || 'ไม่ระบุ'}</p>
+                            <p><strong>จังหวัดส่งของ:</strong> ${detail.deliveryProvince || detail.deliveryLocation || 'ไม่ระบุ'}</p>
+                            <p><strong>เขต/อำเภอส่งของ:</strong> ${detail.deliveryDistrict || 'ไม่ระบุ'}</p>
+                            <p><strong>ผู้รับงาน:</strong> ${detail.recipient || 'ไม่ระบุ'}</p>
+                            <p><strong>รายละเอียด:</strong> ${detail.description || 'ไม่ระบุ'}</p>
+                            <p><strong>จำนวนเงิน:</strong> ${detail.amount ? detail.amount.toFixed(2) : '0.00'} บาท</p>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            let additionalFeesHtml = '';
+            if (additionalFees.length > 0) {
+                additionalFeesHtml = '<h4 class="font-medium mt-4 mb-2 text-green-600">ค่าบริการเพิ่มเติม:</h4>';
+                additionalFees.forEach((fee, index) => {
+                    additionalFeesHtml += `
+                        <div class="mb-2 p-2 bg-green-50 rounded border border-green-200">
+                            <div class="text-sm">
+                                <p><strong>รายการ #${index + 1}:</strong> ${fee.description}</p>
+                                <p><strong>จำนวนเงิน:</strong> ${fee.amount ? fee.amount.toFixed(2) : '0.00'} บาท</p>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            await Swal.fire({
+                title: `รายละเอียดงาน ${job.jobId}`,
+                html: `
+                    <div class="text-left">
+                        <div class="mb-4">
+                            <p><strong>วันที่:</strong> ${formatThaiDate(job.timestamp)}</p>
+                            <p><strong>บริษัท:</strong> ${job.company || 'ไม่ระบุ'}</p>
+                            <p><strong>ผู้มอบงาน:</strong> ${job.assignedBy || 'ไม่ระบุ'}</p>
+                            <p><strong>ติดต่อ:</strong> ${job.contact || 'ไม่ระบุ'}</p>
+                            <p><strong>จังหวัดรับของ:</strong> ${job.pickupProvince || 'ไม่ระบุ'}</p>
+                            <p><strong>เขต/อำเภอรับของ:</strong> ${job.pickupDistrict || 'ไม่ระบุ'}</p>
+                        </div>
+                        
+                        <h4 class="font-medium mb-2">รายละเอียดงาน:</h4>
+                        ${jobDetailsHtml}
+                        
+                        ${additionalFeesHtml}
+                        
+                        <div class="mt-4 pt-3 border-t">
+                            <div class="flex justify-between font-bold">
+                                <span>รวมทั้งหมด:</span>
+                                <span>${job.totalAmount ? job.totalAmount.toFixed(2) : '0.00'} บาท</span>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                confirmButtonText: 'ปิด',
+                confirmButtonColor: '#3b82f6',
+                width: '90%'
+            });
+        }
+        
+        // Update statistics
+        function updateStats() {
+            const savedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
+            const today = new Date();
+            const todayStr = today.toDateString();
+            
+            // Jobs today
+            const jobsToday = savedJobs.filter(job => {
+                const jobDate = new Date(job.timestamp);
+                return jobDate.toDateString() === todayStr;
+            }).length;
+            
+            // Completed jobs today
+            const completedToday = savedJobs.filter(job => {
+                const jobDate = new Date(job.timestamp);
+                return jobDate.toDateString() === todayStr && job.status === 'complete';
+            }).length;
+            
+            // Monthly jobs
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+            const monthlyJobs = savedJobs.filter(job => {
+                const jobDate = new Date(job.timestamp);
+                return jobDate.getMonth() === currentMonth && jobDate.getFullYear() === currentYear;
+            }).length;
+            
+            // Update display
+            document.getElementById('jobs-today').textContent = jobsToday;
+            document.getElementById('completed-today').textContent = completedToday;
+            document.getElementById('monthly-jobs').textContent = monthlyJobs;
+        }
+        
+        // Save job to localStorage and Google Sheets
+        function saveJob(jobData, isDraft = false) {
+            // Save to localStorage first
+            let savedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
+            
+            // Check if editing existing job
+            const form = document.getElementById('new-job-form');
+            const editingJobId = form.getAttribute('data-editing-job-id');
+            
+            if (editingJobId) {
+                // Update existing job
+                const jobIndex = savedJobs.findIndex(job => job.jobId === editingJobId);
+                if (jobIndex !== -1) {
+                    savedJobs[jobIndex] = { ...savedJobs[jobIndex], ...jobData };
+                }
+                form.removeAttribute('data-editing-job-id');
+            } else {
+                // Add new job
+                savedJobs.push(jobData);
+            }
+            
+            localStorage.setItem('mangpongJobs', JSON.stringify(savedJobs));
+            
+            // Also submit to Google Sheets
+            return submitToGoogleSheets({
+                action: 'saveJob',
+                ...jobData,
+                isDraft: isDraft
+            });
         }
 
-        // ตรวจสอบสถานะการเข้าสู่ระบบเมื่อโหลดหน้า
-        window.addEventListener('load', function() {
-            const currentUser = localStorage.getItem('currentUser');
-            if (currentUser) {
-                showMainApp();
-            } else {
-                loginContainer.classList.remove('hidden');
-                mainAppContainer.classList.add('hidden');
+        // Initialize app
+        function initializeApp() {
+            updateDateTime();
+            checkJobStatus();
+            updateStats();
+            displayJobHistory();
+            
+            // Add event listeners to amount inputs
+            document.querySelectorAll('.amount-input').forEach(input => {
+                input.addEventListener('input', updateTotalAmount);
+            });
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is already logged in
+            const savedUser = localStorage.getItem('mangpongUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app').classList.remove('hidden');
+                document.getElementById('user-display-name').textContent = currentUser.fullName;
+                initializeApp();
             }
             
-            // ป้องกันการซูมบน iOS เมื่อโฟกัส input
+
+            
+            // Prevent zoom on iOS when focusing inputs
             const metaViewport = document.querySelector('meta[name=viewport]');
-            if (metaViewport) {
-              metaViewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
-            }
+            metaViewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
             
+            // Add fastclick to eliminate 300ms delay on mobile
             document.addEventListener('touchstart', function() {}, {passive: true});
         });
     </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96c571e2562337e1',t:'MTc1NDcyMzU0My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
