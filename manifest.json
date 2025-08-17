@@ -1,3 +1,7 @@
+/*
+  ไฟล์นี้ควรบันทึกเป็น manifest.json และวางไว้ใน root directory ของ GitHub Pages
+  This file should be saved as manifest.json and placed in the root directory of your GitHub Pages.
+*/
 {
   "name": "แมงป่อง เทรดดิ้ง",
   "short_name": "Mangpong",
