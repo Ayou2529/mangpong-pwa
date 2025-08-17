@@ -1,3 +1,7 @@
+/*
+  ไฟล์นี้ควรบันทึกเป็น service-worker.js และวางไว้ใน root directory ของ GitHub Pages
+  This file should be saved as service-worker.js and placed in the root directory of your GitHub Pages.
+*/
 const CACHE_NAME = 'mangpong-v1';
 const urlsToCache = [
   '/',
