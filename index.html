@@ -348,6 +348,7 @@
             </div>
 
             <form id="new-job-form">
+                <input type="hidden" id="edit-job-id" name="jobId">
                 <div class="card bg-white p-4 mb-4">
                     <h2 class="font-medium text-gray-700 mb-3">ข้อมูลการรับงาน</h2>
                     
@@ -552,9 +553,41 @@
     </div>
 
     <script>
+        // This function receives the data from the Google Apps Script.
+        function jsonpCallback(data) {
+            // Check if the data is an array and contains records.
+            if (Array.isArray(data) && data.length > 0) {
+                // Call the function to display the job history on the page.
+                displayJobHistory(data);
+            } else {
+                // If no data is returned, display a message.
+                console.log("No job history found for this user.");
+                document.getElementById('job-history-container').innerHTML = '<p>No job history found.</p>';
+            }
+        }
+
         // Global variables
         let currentUser = null;
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzsJgafQvnSVeIYcWOa-wVrW51z1ulTRiRIGoNi96BwrARTRzsIvRIgMZvKp-GCTcCs/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxsiDptiG1utVjIq1qO4DV9HLHB9U0vqNmRX-uLcGixUuEaoJc340fFLUXEoBIqat3s/exec';
+
+        // Function to load jobs from Google Sheets
+        async function loadJobsFromSheets() {
+            try {
+                const response = await submitToGoogleSheets({
+                    action: 'getJobs',
+                    username: currentUser.username
+                });
+                
+                if (response.success && response.jobs) {
+                    localStorage.setItem('mangpongJobs', JSON.stringify(response.jobs));
+                    return response.jobs;
+                }
+                return [];
+            } catch (error) {
+                console.error('Error loading jobs:', error);
+                return JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
+            }
+        }
 
         // Authentication functions
         function showLoginScreen() {
@@ -791,8 +824,8 @@
         }
         
         // Check incomplete and draft jobs from localStorage
-        function checkJobStatus() {
-            const savedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
+        async function checkJobStatus() {
+            const savedJobs = await loadJobsFromSheets();
             
             const incompleteJobs = savedJobs.filter(job => job.status === 'incomplete');
             const draftJobs = savedJobs.filter(job => job.status === 'draft');
@@ -859,56 +892,9 @@
             } else if (screenId === 'new-job-screen') {
                 document.querySelectorAll('.nav-item')[1].classList.add('active');
                 // Clear form if not editing
-                const form = document.getElementById('new-job-form');
-                if (!form.getAttribute('data-editing-job-id')) {
-                    form.reset();
-                    
-                    // Reset job date picker to today
-                    const jobDatePicker = document.getElementById('job-date-picker');
-                    if (jobDatePicker) {
-                        jobDatePicker.value = formatDate(new Date());
-                    }
-                    
-                    // Clear additional job details and fees
-                    const jobDetailsContainer = document.getElementById('job-details-container');
-                    const additionalFeesContainer = document.getElementById('additional-fees-container');
-                    
-                    // Reset to single job detail
-                    jobDetailsContainer.innerHTML = `
-                        <div class="job-detail-card border border-gray-200 rounded-md p-3 mb-3">
-                            <div class="mb-2">
-                                <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
-                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" required>
-                            </div>
-                            <div class="mb-2">
-                                <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
-                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" required>
-                            </div>
-                            <div class="mb-2">
-                                <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
-                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" required>
-                            </div>
-                            <div class="mb-2">
-                                <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
-                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" required>
-                            </div>
-                            <div class="mb-2">
-                                <label class="block text-gray-600 mb-1">รายละเอียด</label>
-                                <textarea class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required></textarea>
-                            </div>
-                            <div>
-                                <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
-                                <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" required>
-                            </div>
-                        </div>
-                    `;
-                    
-                    // Clear additional fees
-                    additionalFeesContainer.innerHTML = '';
-                    
-                    // Re-add event listeners
-                    jobDetailsContainer.querySelector('.amount-input').addEventListener('input', updateTotalAmount);
-                    updateTotalAmount();
+                const editJobId = document.getElementById('edit-job-id').value;
+                if (!editJobId) {
+                    resetForm();
                 }
             } else if (screenId === 'history-screen') {
                 document.querySelectorAll('.nav-item')[2].classList.add('active');
@@ -1084,9 +1070,7 @@
                 });
                 
                 // Reset form
-                const form = document.getElementById('new-job-form');
-                form.reset();
-                updateTotalAmount();
+                resetForm();
                 
                 // Go back to home screen
                 showScreen('home-screen');
@@ -1144,10 +1128,11 @@
             const thaiDateValue = formatThaiDateInput(selectedDate);
             
             // ข้อมูลหลักของงาน
+            const editJobId = document.getElementById('edit-job-id').value;
             const base = {
                 timestamp: selectedDate.toISOString(),
                 jobDate: thaiDateValue,
-                jobId: 'JOB-' + Math.floor(10000 + Math.random() * 90000),
+                jobId: editJobId || 'JOB-' + Math.floor(10000 + Math.random() * 90000),
                 username: currentUser ? currentUser.username : 'unknown',
                 company: form.querySelector('select').value,
                 assignedBy: form.querySelector('input[placeholder="ชื่อผู้มอบงาน"]').value,
@@ -1244,6 +1229,59 @@
             return new Date(gregorianYear, month, day);
         }
         
+        function resetForm() {
+            const form = document.getElementById('new-job-form');
+            form.reset();
+            document.getElementById('edit-job-id').value = '';
+            
+            // Reset job date picker to today
+            const jobDatePicker = document.getElementById('job-date-picker');
+            if (jobDatePicker) {
+                jobDatePicker.value = formatDate(new Date());
+            }
+            
+            // Clear additional job details and fees
+            const jobDetailsContainer = document.getElementById('job-details-container');
+            const additionalFeesContainer = document.getElementById('additional-fees-container');
+            
+            // Reset to single job detail
+            jobDetailsContainer.innerHTML = `
+                <div class="job-detail-card border border-gray-200 rounded-md p-3 mb-3">
+                    <div class="mb-2">
+                        <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
+                        <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
+                        <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
+                        <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
+                        <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-gray-600 mb-1">รายละเอียด</label>
+                        <textarea class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
+                        <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" required>
+                    </div>
+                </div>
+            `;
+            
+            // Clear additional fees
+            additionalFeesContainer.innerHTML = '';
+            
+            // Re-add event listeners
+            jobDetailsContainer.querySelector('.amount-input').addEventListener('input', updateTotalAmount);
+            updateTotalAmount();
+        }
+        
         // Form submission
         document.getElementById('new-job-form').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -1281,50 +1319,8 @@
                     // Update stats
                     updateStats();
                     
-                    // Reset form and clear editing state
-                    form.reset();
-                    form.removeAttribute('data-editing-job-id');
-                    
-                    // Clear additional job details and fees
-                    const jobDetailsContainer = document.getElementById('job-details-container');
-                    const additionalFeesContainer = document.getElementById('additional-fees-container');
-                    
-                    // Reset to single job detail
-                    jobDetailsContainer.innerHTML = `
-                        <div class="job-detail-card border border-gray-200 rounded-md p-3 mb-3">
-                            <div class="mb-2">
-                                <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
-                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" required>
-                            </div>
-                            <div class="mb-2">
-                                <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
-                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" required>
-                            </div>
-                            <div class="mb-2">
-                                <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
-                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" required>
-                            </div>
-                            <div class="mb-2">
-                                <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
-                                <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" required>
-                            </div>
-                            <div class="mb-2">
-                                <label class="block text-gray-600 mb-1">รายละเอียด</label>
-                                <textarea class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required></textarea>
-                            </div>
-                            <div>
-                                <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
-                                <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" required>
-                            </div>
-                        </div>
-                    `;
-                    
-                    // Clear additional fees
-                    additionalFeesContainer.innerHTML = '';
-                    
-                    // Re-add event listeners
-                    jobDetailsContainer.querySelector('.amount-input').addEventListener('input', updateTotalAmount);
-                    updateTotalAmount();
+                    // Reset form
+                    resetForm();
                     
                     // Go back to home screen
                     showScreen('home-screen');
@@ -1405,8 +1401,7 @@
                         });
                         
                         // Reset form
-                        form.reset();
-                        updateTotalAmount();
+                        resetForm();
                         
                         // Go back to home screen
                         showScreen('home-screen');
@@ -1458,29 +1453,66 @@
         });
         
         // Display job history
-        function displayJobHistory() {
-            const savedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
-            const container = document.getElementById('job-history-container');
-            const noJobsMessage = document.getElementById('no-jobs-message');
-            
-            if (savedJobs.length === 0) {
-                noJobsMessage.style.display = 'block';
-                return;
-            }
-            
-            noJobsMessage.style.display = 'none';
-            
-            // Sort jobs by timestamp (newest first)
-            savedJobs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            
-            // Clear existing job items (except no-jobs-message)
-            const existingJobs = container.querySelectorAll('.job-item');
-            existingJobs.forEach(job => job.remove());
-            
-            savedJobs.forEach(job => {
-                const jobElement = createJobHistoryItem(job);
-                container.insertBefore(jobElement, noJobsMessage);
+        async function displayJobHistory() {
+            // Show loading
+            Swal.fire({
+                title: 'กำลังโหลดประวัติงาน...',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
             });
+
+            try {
+                const savedJobs = await loadJobsFromSheets();
+
+                const container = document.getElementById('job-history-container');
+                const noJobsMessage = document.getElementById('no-jobs-message');
+
+                if (savedJobs.length === 0) {
+                    noJobsMessage.style.display = 'block';
+                    Swal.close();
+                    return;
+                }
+
+                noJobsMessage.style.display = 'none';
+
+                // Sort jobs by timestamp (newest first)
+                savedJobs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                // Filter jobs to the last 30 days
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                const recentJobs = savedJobs.filter(job => new Date(job.timestamp) >= thirtyDaysAgo);
+
+                // Clear existing job items (except no-jobs-message)
+                const existingJobs = container.querySelectorAll('.job-item');
+                existingJobs.forEach(job => job.remove());
+                
+                if (recentJobs.length === 0) {
+                    noJobsMessage.style.display = 'block';
+                    noJobsMessage.querySelector('p:first-of-type').textContent = 'ไม่พบประวัติงานใน 30 วันล่าสุด';
+                    Swal.close();
+                    return;
+                }
+
+                recentJobs.forEach(job => {
+                    const jobElement = createJobHistoryItem(job);
+                    container.insertBefore(jobElement, noJobsMessage);
+                });
+
+                Swal.close();
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'เกิดข้อผิดพลาด',
+                    text: error.message,
+                    confirmButtonText: 'ตกลง',
+                    confirmButtonColor: '#ef4444'
+                });
+            }
         }
         
         function createJobHistoryItem(job) {
@@ -1628,6 +1660,7 @@
         
         function populateFormWithJobData(job) {
             const form = document.getElementById('new-job-form');
+            document.getElementById('edit-job-id').value = job.jobId;
             
             // Basic information
             if (job.company) {
@@ -1733,9 +1766,6 @@
             
             // Update totals
             updateTotalAmount();
-            
-            // Store the job ID for updating
-            form.setAttribute('data-editing-job-id', job.jobId);
         }
         
         // View job
@@ -1821,8 +1851,8 @@
         }
         
         // Update statistics
-        function updateStats() {
-            const savedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
+        async function updateStats() {
+            const savedJobs = await loadJobsFromSheets();
             const today = new Date();
             const todayStr = today.toDateString();
             
@@ -1858,16 +1888,17 @@
             let savedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
             
             // Check if editing existing job
-            const form = document.getElementById('new-job-form');
-            const editingJobId = form.getAttribute('data-editing-job-id');
+            const editingJobId = document.getElementById('edit-job-id').value;
             
             if (editingJobId) {
                 // Update existing job
                 const jobIndex = savedJobs.findIndex(job => job.jobId === editingJobId);
                 if (jobIndex !== -1) {
                     savedJobs[jobIndex] = { ...savedJobs[jobIndex], ...jobData };
+                } else {
+                    // If not found, add as new (should not happen in normal flow)
+                    savedJobs.push(jobData);
                 }
-                form.removeAttribute('data-editing-job-id');
             } else {
                 // Add new job
                 savedJobs.push(jobData);
