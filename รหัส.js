@@ -12,9 +12,32 @@ const SHEET_HISTORY = 'JobHistory';
 
 function doGet(e) {
   const params = e && e.parameter ? e.parameter : {};
-  const callback = params.callback || 'callback';
   const action = (params.action || '').toLowerCase();
 
+  if (!action) {
+    return serveWebApp();
+  }
+
+  const callback = params.callback || 'callback';
+  let result = handleAction(action, params);
+
+  return ContentService
+    .createTextOutput(`${callback}(${JSON.stringify(result)})`)
+    .setMimeType(ContentService.MimeType.JAVASCRIPT);
+}
+
+function doPost(e) {
+  const params = JSON.parse(e.postData.contents);
+  const action = (params.action || '').toLowerCase();
+  let result = handleAction(action, params);
+  return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function serveWebApp() {
+  return HtmlService.createHtmlOutputFromFile('index.html').setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+function handleAction(action, params) {
   let result = { success: false, error: 'Invalid action' };
 
   try {
@@ -36,10 +59,7 @@ function doGet(e) {
   } catch (err) {
     result = { success: false, error: String(err && err.message ? err.message : err) };
   }
-
-  return ContentService
-    .createTextOutput(`${callback}(${JSON.stringify(result)})`)
-    .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  return result;
 }
 
 function handleGetUserJobs(p) {
@@ -164,17 +184,17 @@ function handleSaveJob(p) {
 
   const timestamp = new Date().toISOString();
   
-  // ใช้ jobId จากพารามิเตอร์ ถ้าไม่มีค่อยสร้างใหม่
+  // Use jobId from parameters, if not available, create a new one
   let jobId = (p.jobId && p.jobId.trim()) ? p.jobId.trim() : ('JOB-' + Math.floor(10000 + Math.random()*90000));
 
-  // ค้นหา job เดิม
+  // Find existing job
   const jobData = jobs.getDataRange().getValues();
   const headers = jobData[0];
   let existingIndex = -1;
   
-  // หาแถวที่มี jobId นี้อยู่แล้ว
+  // Find the row with this jobId
   for (let i = 1; i < jobData.length; i++) {
-    if (jobData[i][2] === jobId) { // คอลัมน์ที่ 2 คือ jobId
+    if (jobData[i][2] === jobId) { // Column 2 is jobId
       existingIndex = i;
       break;
     }
@@ -196,7 +216,7 @@ function handleSaveJob(p) {
   }
 
   if (existingIndex > 0) {
-    // แก้ไข → log ค่าเก่า/ใหม่
+    // Edit -> log old/new values
     const oldRow = jobData[existingIndex];
     for (let c=0;c<headers.length;c++){
       const oldVal = oldRow[c];
@@ -207,7 +227,7 @@ function handleSaveJob(p) {
     }
     jobs.getRange(existingIndex+1,1,1,newRow.length).setValues([newRow]);
   } else {
-    // สร้างใหม่
+    // Create new
     jobs.appendRow(newRow);
     history.appendRow([new Date(),"create",jobId,p.username||'',"ALL","","Created new job"]);
   }
