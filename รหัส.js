@@ -9,8 +9,12 @@ const SHEET_DETAILS = 'JobDetails';
 const SHEET_FEES = 'AdditionalFees';
 const SHEET_USERS = 'Users';
 const SHEET_HISTORY = 'JobHistory';
-
 function doGet(e) {
+  if (e && e.parameter && e.parameter.page === 'service-worker') {
+    return ContentService.createTextOutput(
+      HtmlService.createHtmlOutputFromFile('service-worker.js').getContent())
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
   const params = e && e.parameter ? e.parameter : {};
   const action = (params.action || '').toLowerCase();
 
