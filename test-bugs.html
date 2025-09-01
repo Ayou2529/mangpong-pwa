@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bug Test - Mangpong PWA</title>
+    <script src="config.js"></script>
+    <script src="main.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .error { color: red; }
+        .success { color: green; }
+        .warning { color: orange; }
+        button { padding: 10px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🐛 Bug Testing - Mangpong PWA</h1>
+    
+    <div class="test-section">
+        <h2>1. JavaScript Syntax Check</h2>
+        <div id="syntax-results"></div>
+        <button onclick="testJavaScriptSyntax()">Test JavaScript Syntax</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Function Availability Check</h2>
+        <div id="function-results"></div>
+        <button onclick="testFunctionAvailability()">Test Functions</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. DOM Element Check</h2>
+        <div id="dom-results"></div>
+        <button onclick="testDOMElements()">Test DOM Elements</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Google Apps Script Integration</h2>
+        <div id="integration-results"></div>
+        <button onclick="testGoogleIntegration()">Test Google Integration</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>5. Service Worker Test</h2>
+        <div id="sw-results"></div>
+        <button onclick="testServiceWorker()">Test Service Worker</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>6. Console Error Check</h2>
+        <div id="console-results"></div>
+        <button onclick="checkConsoleErrors()">Check Console Errors</button>
+    </div>
+
+    <script>
+        // Test results container
+        function addResult(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = message;
+            container.appendChild(div);
+        }
+
+        // 1. JavaScript Syntax Check
+        function testJavaScriptSyntax() {
+            const container = document.getElementById('syntax-results');
+            container.innerHTML = '';
+            
+            try {
+                // Test basic JavaScript functionality
+                eval('let test = 1; const test2 = 2;');
+                addResult('syntax-results', '✅ Basic JavaScript syntax is working', 'success');
+                
+                // Test ES6 features
+                const testObj = { ...{ a: 1 }, b: 2 };
+                addResult('syntax-results', '✅ ES6 spread operator working', 'success');
+                
+                // Test async/await
+                const testAsync = async () => 'test';
+                addResult('syntax-results', '✅ Async/await syntax supported', 'success');
+                
+            } catch (error) {
+                addResult('syntax-results', `❌ JavaScript syntax error: ${error.message}`, 'error');
+            }
+        }
+
+        // 2. Function Availability Check
+        function testFunctionAvailability() {
+            const container = document.getElementById('function-results');
+            container.innerHTML = '';
+            
+            const requiredFunctions = [
+                'showPage', 'showScreen', 'loadJobsFromSheets', 'submitToGoogleSheets',
+                'collectFormData', 'saveJob', 'updateTotalAmount', 'displayJobHistory'
+            ];
+            
+            requiredFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    addResult('function-results', `✅ ${funcName} function is available`, 'success');
+                } else {
+                    addResult('function-results', `❌ ${funcName} function is missing`, 'error');
+                }
+            });
+        }
+
+        // 3. DOM Element Check
+        function testDOMElements() {
+            const container = document.getElementById('dom-results');
+            container.innerHTML = '';
+            
+            const requiredElements = [
+                'home-screen', 'new-job-screen', 'history-screen', 'new-job-form',
+                'job-date-picker', 'edit-job-id', 'user-display-name'
+            ];
+            
+            requiredElements.forEach(elementId => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    addResult('dom-results', `✅ Element #${elementId} exists`, 'success');
+                } else {
+                    addResult('dom-results', `❌ Element #${elementId} is missing`, 'error');
+                }
+            });
+        }
+
+        // 4. Google Apps Script Integration
+        function testGoogleIntegration() {
+            const container = document.getElementById('integration-results');
+            container.innerHTML = '';
+            
+            try {
+                // Check if GOOGLE_SCRIPT_URL is defined
+                if (typeof GOOGLE_SCRIPT_URL !== 'undefined') {
+                    addResult('integration-results', `✅ GOOGLE_SCRIPT_URL is defined: ${GOOGLE_SCRIPT_URL}`, 'success');
+                    
+                    // Test URL format
+                    if (GOOGLE_SCRIPT_URL.includes('script.google.com')) {
+                        addResult('integration-results', '✅ Google Apps Script URL format is correct', 'success');
+                    } else {
+                        addResult('integration-results', '⚠️ GOOGLE_SCRIPT_URL may not be a valid Google Apps Script URL', 'warning');
+                    }
+                } else {
+                    addResult('integration-results', '❌ GOOGLE_SCRIPT_URL is not defined', 'error');
+                }
+                
+                // Check if submitToGoogleSheets function exists
+                if (typeof submitToGoogleSheets === 'function') {
+                    addResult('integration-results', '✅ submitToGoogleSheets function exists', 'success');
+                } else {
+                    addResult('integration-results', '❌ submitToGoogleSheets function is missing', 'error');
+                }
+                
+            } catch (error) {
+                addResult('integration-results', `❌ Error testing Google integration: ${error.message}`, 'error');
+            }
+        }
+
+        // 5. Service Worker Test
+        function testServiceWorker() {
+            const container = document.getElementById('sw-results');
+            container.innerHTML = '';
+            
+            if ('serviceWorker' in navigator) {
+                addResult('sw-results', '✅ Service Worker API is supported', 'success');
+                
+                // Check if service-worker.js file exists
+                fetch('service-worker.js')
+                    .then(response => {
+                        if (response.ok) {
+                            addResult('sw-results', '✅ service-worker.js file is accessible', 'success');
+                        } else {
+                            addResult('sw-results', '❌ service-worker.js file is not accessible', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        addResult('sw-results', `❌ Error accessing service-worker.js: ${error.message}`, 'error');
+                    });
+                    
+            } else {
+                addResult('sw-results', '❌ Service Worker API is not supported', 'error');
+            }
+        }
+
+        // 6. Console Error Check
+        function checkConsoleErrors() {
+            const container = document.getElementById('console-results');
+            container.innerHTML = '';
+            
+            // Override console.error to catch errors
+            const originalError = console.error;
+            const errors = [];
+            
+            console.error = function(...args) {
+                errors.push(args.join(' '));
+                originalError.apply(console, args);
+            };
+            
+            // Trigger some common operations that might cause errors
+            try {
+                // Test form data collection
+                if (typeof collectFormData === 'function') {
+                    collectFormData();
+                }
+                
+                // Test total amount update
+                if (typeof updateTotalAmount === 'function') {
+                    updateTotalAmount();
+                }
+                
+                setTimeout(() => {
+                    if (errors.length > 0) {
+                        addResult('console-results', `⚠️ Found ${errors.length} console errors:`, 'warning');
+                        errors.forEach(error => {
+                            addResult('console-results', `   - ${error}`, 'warning');
+                        });
+                    } else {
+                        addResult('console-results', '✅ No console errors detected', 'success');
+                    }
+                    
+                    // Restore original console.error
+                    console.error = originalError;
+                }, 1000);
+                
+            } catch (error) {
+                addResult('console-results', `❌ Error during testing: ${error.message}`, 'error');
+                console.error = originalError;
+            }
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                testJavaScriptSyntax();
+                testFunctionAvailability();
+                testDOMElements();
+                testGoogleIntegration();
+                testServiceWorker();
+                checkConsoleErrors();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

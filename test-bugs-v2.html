@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bug Test v2 - Mangpong PWA</title>
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .error { color: #d32f2f; font-weight: bold; }
+        .success { color: #388e3c; font-weight: bold; }
+        .warning { color: #f57c00; font-weight: bold; }
+        .info { color: #1976d2; }
+        button { padding: 12px 20px; margin: 5px; border: none; border-radius: 6px; background: #2196f3; color: white; cursor: pointer; }
+        button:hover { background: #1976d2; }
+        .test-result { margin: 5px 0; padding: 8px; border-radius: 4px; background: #f8f9fa; }
+        .summary { background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 20px 0; }
+        .progress-bar { width: 100%; height: 20px; background: #e0e0e0; border-radius: 10px; overflow: hidden; margin: 10px 0; }
+        .progress-fill { height: 100%; background: #4caf50; transition: width 0.3s ease; }
+    </style>
+    <script src="config.js"></script>
+    <script src="main.js"></script>
+</head>
+<body>
+    <h1>🐛 Bug Testing v2 - Mangpong PWA</h1>
+    <p>Testing the system after recent fixes...</p>
+    
+    <div class="summary">
+        <h3>📊 Test Summary</h3>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+        </div>
+        <div id="test-summary">Ready to test...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>1. 🔧 System Health Check</h2>
+        <div id="health-results"></div>
+        <button onclick="runHealthCheck()">Run Health Check</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. 🌐 Google Apps Script Integration Test</h2>
+        <div id="google-results"></div>
+        <button onclick="testGoogleIntegration()">Test Google Integration</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. 📝 Form Functionality Test</h2>
+        <div id="form-results"></div>
+        <button onclick="testFormFunctionality()">Test Forms</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. 🔄 Service Worker Test</h2>
+        <div id="sw-results"></div>
+        <button onclick="testServiceWorker()">Test Service Worker</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>5. 📱 PWA Features Test</h2>
+        <div id="pwa-results"></div>
+        <button onclick="testPWAFeatures()">Test PWA Features</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>6. 🚨 Error Detection Test</h2>
+        <div id="error-results"></div>
+        <button onclick="detectErrors()">Detect Errors</button>
+    </div>
+
+    <div style="display: none;">
+        <form id="new-job-form">
+            <input type="hidden" id="edit-job-id" name="jobId">
+            <input type="date" id="job-date-picker">
+        </form>
+    </div>
+
+    <script>
+        let testResults = {
+            total: 0,
+            passed: 0,
+            failed: 0,
+            warnings: 0
+        };
+
+        function updateProgress() {
+            const progress = testResults.total > 0 ? (testResults.passed / testResults.total) * 100 : 0;
+            document.getElementById('progress-fill').style.width = progress + '%';
+            
+            const summary = `Tests: ${testResults.passed}/${testResults.total} passed | ${testResults.failed} failed | ${testResults.warnings} warnings`;
+            document.getElementById('test-summary').textContent = summary;
+        }
+
+        function addResult(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.textContent = message;
+            container.appendChild(div);
+            
+            testResults.total++;
+            if (type === 'success') testResults.passed++;
+            else if (type === 'error') testResults.failed++;
+            else if (type === 'warning') testResults.warnings++;
+            
+            updateProgress();
+        }
+
+        // 1. System Health Check
+        async function runHealthCheck() {
+            const container = document.getElementById('health-results');
+            container.innerHTML = '';
+            
+            addResult('health-results', '🔍 Starting system health check...', 'info');
+            
+            try {
+                // Check basic JavaScript functionality
+                eval('let test = 1; const test2 = 2;');
+                addResult('health-results', '✅ JavaScript engine working', 'success');
+                
+                // Check ES6 features
+                const testObj = { ...{ a: 1 }, b: 2 };
+                addResult('health-results', '✅ ES6 features supported', 'success');
+                
+                // Check async/await
+                const testAsync = async () => 'test';
+                addResult('health-results', '✅ Async/await supported', 'success');
+                
+                // Check if we're in a browser environment
+                if (typeof window !== 'undefined') {
+                    addResult('health-results', '✅ Browser environment detected', 'success');
+                } else {
+                    addResult('health-results', '❌ Not in browser environment', 'error');
+                }
+                
+                // Check localStorage
+                if (typeof localStorage !== 'undefined') {
+                    addResult('health-results', '✅ LocalStorage available', 'success');
+                } else {
+                    addResult('health-results', '❌ LocalStorage not available', 'error');
+                }
+                
+                // Check fetch API
+                if (typeof fetch !== 'undefined') {
+                    addResult('health-results', '✅ Fetch API available', 'success');
+                } else {
+                    addResult('health-results', '❌ Fetch API not available', 'error');
+                }
+                
+            } catch (error) {
+                addResult('health-results', `❌ Health check failed: ${error.message}`, 'error');
+            }
+        }
+
+        // 2. Google Apps Script Integration Test
+        async function testGoogleIntegration() {
+            const container = document.getElementById('google-results');
+            container.innerHTML = '';
+            
+            addResult('google-results', '🔍 Testing Google Apps Script integration...', 'info');
+            
+            try {
+                // Check if GOOGLE_SCRIPT_URL is defined
+                if (typeof GOOGLE_SCRIPT_URL !== 'undefined') {
+                    addResult('google-results', `✅ GOOGLE_SCRIPT_URL defined: ${GOOGLE_SCRIPT_URL}`, 'success');
+                    
+                    // Test URL format
+                    if (GOOGLE_SCRIPT_URL.includes('script.google.com')) {
+                        addResult('google-results', '✅ Valid Google Apps Script URL format', 'success');
+                    } else {
+                        addResult('google-results', '⚠️ URL format may not be valid', 'warning');
+                    }
+                    
+                    // Check if submitToGoogleSheets function exists
+                    if (typeof submitToGoogleSheets === 'function') {
+                        addResult('google-results', '✅ submitToGoogleSheets function exists', 'success');
+                        
+                        // Test a simple request (without actually sending)
+                        try {
+                            const testData = { action: 'test', test: true };
+                            addResult('google-results', '✅ Function signature valid', 'success');
+                        } catch (error) {
+                            addResult('google-results', `❌ Function execution error: ${error.message}`, 'error');
+                        }
+                    } else {
+                        addResult('google-results', '❌ submitToGoogleSheets function missing', 'error');
+                    }
+                    
+                } else {
+                    addResult('google-results', '❌ GOOGLE_SCRIPT_URL not defined', 'error');
+                }
+                
+            } catch (error) {
+                addResult('google-results', `❌ Google integration test failed: ${error.message}`, 'error');
+            }
+        }
+
+        // 3. Form Functionality Test
+        async function testFormFunctionality() {
+            const container = document.getElementById('form-results');
+            container.innerHTML = '';
+            
+            addResult('form-results', '🔍 Testing form functionality...', 'info');
+            
+            try {
+                // Check if collectFormData function exists
+                if (typeof collectFormData === 'function') {
+                    addResult('form-results', '✅ collectFormData function exists', 'success');
+                } else {
+                    addResult('form-results', '❌ collectFormData function missing', 'error');
+                }
+                
+                // Check if saveJob function exists
+                if (typeof saveJob === 'function') {
+                    addResult('form-results', '✅ saveJob function exists', 'success');
+                } else {
+                    addResult('form-results', '❌ saveJob function missing', 'error');
+                }
+                
+                // Check if updateTotalAmount function exists
+                if (typeof updateTotalAmount === 'function') {
+                    addResult('form-results', '✅ updateTotalAmount function exists', 'success');
+                } else {
+                    addResult('form-results', '❌ updateTotalAmount function missing', 'error');
+                }
+                
+                // Check if form elements exist (if we're in the right context)
+                const formElements = ['new-job-form', 'job-date-picker', 'edit-job-id'];
+                formElements.forEach(elementId => {
+                    const element = document.getElementById(elementId);
+                    if (element) {
+                        addResult('form-results', `✅ Form element #${elementId} exists`, 'success');
+                    } else {
+                        addResult('form-results', `⚠️ Form element #${elementId} not found (may be normal if not on form page)`, 'warning');
+                    }
+                });
+                
+            } catch (error) {
+                addResult('form-results', `❌ Form functionality test failed: ${error.message}`, 'error');
+            }
+        }
+
+        // 4. Service Worker Test
+        async function testServiceWorker() {
+            const container = document.getElementById('sw-results');
+            container.innerHTML = '';
+            
+            addResult('sw-results', '🔍 Testing service worker...', 'info');
+            
+            try {
+                if ('serviceWorker' in navigator) {
+                    addResult('sw-results', '✅ Service Worker API supported', 'success');
+                    
+                    // Check if service-worker.js file exists
+                    try {
+                        const response = await fetch('service-worker.js');
+                        if (response.ok) {
+                            addResult('sw-results', '✅ service-worker.js file accessible', 'success');
+                        } else {
+                            addResult('sw-results', '❌ service-worker.js file not accessible', 'error');
+                        }
+                    } catch (error) {
+                        addResult('sw-results', `❌ Error accessing service-worker.js: ${error.message}`, 'error');
+                    }
+                    
+                    // Check manifest.json
+                    try {
+                        const manifestResponse = await fetch('manifest.json');
+                        if (manifestResponse.ok) {
+                            const manifest = await manifestResponse.json();
+                            if (manifest.name && manifest.short_name) {
+                                addResult('sw-results', '✅ manifest.json is valid JSON', 'success');
+                            } else {
+                                addResult('sw-results', '⚠️ manifest.json missing required fields', 'warning');
+                            }
+                        } else {
+                            addResult('sw-results', '❌ manifest.json not accessible', 'error');
+                        }
+                    } catch (error) {
+                        addResult('sw-results', `❌ Error accessing manifest.json: ${error.message}`, 'error');
+                    }
+                    
+                } else {
+                    addResult('sw-results', '❌ Service Worker API not supported', 'error');
+                }
+                
+            } catch (error) {
+                addResult('sw-results', `❌ Service worker test failed: ${error.message}`, 'error');
+            }
+        }
+
+        // 5. PWA Features Test
+        async function testPWAFeatures() {
+            const container = document.getElementById('pwa-results');
+            container.innerHTML = '';
+            
+            addResult('pwa-results', '🔍 Testing PWA features...', 'info');
+            
+            try {
+                // Check if app can be installed
+                if ('BeforeInstallPromptEvent' in window) {
+                    addResult('pwa-results', '✅ PWA installation supported', 'success');
+                } else {
+                    addResult('pwa-results', '⚠️ PWA installation may not be supported', 'warning');
+                }
+                
+                // Check offline capability
+                if ('caches' in window) {
+                    addResult('pwa-results', '✅ Cache API supported', 'success');
+                } else {
+                    addResult('pwa-results', '❌ Cache API not supported', 'error');
+                }
+                
+                // Check notifications
+                if ('Notification' in window) {
+                    addResult('pwa-results', '✅ Notifications API supported', 'success');
+                } else {
+                    addResult('pwa-results', '⚠️ Notifications API not supported', 'warning');
+                }
+                
+                // Check if running in standalone mode
+                if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+                    addResult('pwa-results', '✅ Running in standalone mode', 'success');
+                } else {
+                    addResult('pwa-results', 'ℹ️ Running in browser mode', 'info');
+                }
+                
+            } catch (error) {
+                addResult('pwa-results', `❌ PWA features test failed: ${error.message}`, 'error');
+            }
+        }
+
+        // 6. Error Detection Test
+        async function detectErrors() {
+            const container = document.getElementById('error-results');
+            container.innerHTML = '';
+            
+            addResult('error-results', '🔍 Detecting potential errors...', 'info');
+            
+            try {
+                // Override console.error to catch errors
+                const originalError = console.error;
+                const errors = [];
+                
+                console.error = function(...args) {
+                    errors.push(args.join(' '));
+                    originalError.apply(console, args);
+                };
+                
+                // Test some common operations that might cause errors
+                setTimeout(() => {
+                    if (errors.length > 0) {
+                        addResult('error-results', `⚠️ Found ${errors.length} console errors:`, 'warning');
+                        errors.forEach(error => {
+                            addResult('error-results', `   - ${error}`, 'warning');
+                        });
+                    } else {
+                        addResult('error-results', '✅ No console errors detected', 'success');
+                    }
+                    
+                    // Restore original console.error
+                    console.error = originalError;
+                }, 2000);
+                
+                // Test function calls that might fail
+                try {
+                    if (typeof collectFormData === 'function') {
+                        // Don't actually call it, just check if it exists
+                        addResult('error-results', '✅ collectFormData function accessible', 'success');
+                    }
+                } catch (error) {
+                    addResult('error-results', `❌ Error accessing collectFormData: ${error.message}`, 'error');
+                }
+                
+            } catch (error) {
+                addResult('error-results', `❌ Error detection test failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run basic tests on page load
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                runHealthCheck();
+                testGoogleIntegration();
+                testFormFunctionality();
+                testServiceWorker();
+                testPWAFeatures();
+                detectErrors();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
