@@ -1,2 +1,3 @@
-service-worker.js
-node_modules/**
+**/**
+!appsscript.json
+!รหัส.js
