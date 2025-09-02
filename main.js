@@ -840,8 +840,21 @@ function collectFormData() {
         if (!jobDatePicker) {
             throw new Error('Job date picker not found');
         }
-        const selectedDate = new Date(jobDatePicker.value);
-        const thaiDateValue = formatThaiDateInput(selectedDate);
+        
+        // When editing, preserve the original job date
+        let selectedDate, thaiDateValue;
+        const editJobId = document.getElementById('edit-job-id').value;
+        const originalDateField = document.getElementById('original-job-date');
+        if (editJobId && originalDateField && originalDateField.value) {
+            // Editing existing job - preserve original date
+            const originalThaiDate = originalDateField.value;
+            selectedDate = parseThaiDate(originalThaiDate);
+            thaiDateValue = originalThaiDate; // Use original Thai date format
+        } else {
+            // Creating new job - use current date
+            selectedDate = new Date(jobDatePicker.value);
+            thaiDateValue = formatThaiDateInput(selectedDate);
+        }
     
         // ข้อมูลหลักของงาน
         const editJobId = document.getElementById('edit-job-id').value;
@@ -1449,6 +1462,9 @@ function editJob(jobId) {
         
         console.log('editJob called with jobId:', jobId);
         
+        // Show loading animation immediately
+        showLoadingAnimation('กรุณารอสักครู่...');
+        
         loadJobsFromSheets().then(savedJobs => {
             console.log('Saved jobs:', savedJobs);
             
@@ -1457,6 +1473,7 @@ function editJob(jobId) {
             
             if (!job) {
                 console.error('Job not found for ID:', jobId);
+                hideLoadingAnimation();
                 Swal.fire({
                     icon: 'error',
                     title: 'ไม่พบงาน',
@@ -1472,9 +1489,24 @@ function editJob(jobId) {
             // Populate form with job data
             populateFormWithJobData(job);
             showScreen('new-job-screen');
+            
+            // Hide loading animation after a short delay to ensure UI updates
+            setTimeout(() => {
+                hideLoadingAnimation();
+            }, 500);
+        }).catch(error => {
+            console.error('Error loading jobs:', error);
+            hideLoadingAnimation();
+            Swal.fire({
+                icon: 'error',
+                title: 'เกิดข้อผิดพลาด',
+                text: 'ไม่สามารถโหลดข้อมูลงานได้',
+                confirmButtonText: 'ตกลง'
+            });
         });
     } catch (error) {
         console.error('Error editing job:', error);
+        hideLoadingAnimation();
         Swal.fire({
             icon: 'error',
             title: 'เกิดข้อผิดพลาด',
@@ -1559,11 +1591,27 @@ function populateFormWithJobData(job) {
         if (job.jobDate) {
             const parsedDate = parseThaiDate(job.jobDate);
             const jobDatePicker = document.getElementById('job-date-picker');
+            const originalDateField = document.getElementById('original-job-date');
             if(jobDatePicker) {
                 // For editing, preserve the original job date
                 jobDatePicker.value = formatDate(parsedDate);
-                // Store the original date to prevent it from being overwritten
-                jobDatePicker.setAttribute('data-original-date', jobDatePicker.value);
+                // Store the original date in a hidden field
+                if (originalDateField) {
+                    originalDateField.value = job.jobDate;
+                }
+                // Visually indicate that date cannot be changed
+                jobDatePicker.title = 'ไม่สามารถเปลี่ยนวันที่ได้ขณะแก้ไขงาน';
+                // Add a visual indicator
+                const dateContainer = jobDatePicker.closest('.mb-3');
+                if (dateContainer) {
+                    let indicator = dateContainer.querySelector('.date-edit-indicator');
+                    if (!indicator) {
+                        indicator = document.createElement('div');
+                        indicator.className = 'date-edit-indicator text-xs text-gray-500 mt-1';
+                        indicator.textContent = 'หมายเหตุ: ไม่สามารถเปลี่ยนวันที่ได้ขณะแก้ไขงาน';
+                        dateContainer.appendChild(indicator);
+                    }
+                }
             }
         }
         
@@ -1860,6 +1908,17 @@ async function updateStats() {
         if(monthlyJobsEl) monthlyJobsEl.textContent = monthlyJobs + " งาน";
         const totalJobsEl = document.getElementById('total-jobs');
         if(totalJobsEl) totalJobsEl.textContent = totalJobs + " งาน";
+        
+        // Update current month display
+        const currentMonthEl = document.getElementById('current-month');
+        if(currentMonthEl) {
+            const thaiMonths = [
+                'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+                'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+            ];
+            const thaiYear = today.getFullYear() + 543;
+            currentMonthEl.textContent = `${thaiMonths[currentMonth]} ${thaiYear}`;
+        }
     } catch (error) {
         console.error('Error updating stats:', error);
         // Don't throw error to prevent breaking the UI
@@ -2036,6 +2095,22 @@ function applyIOSFixes() {
             this.style.zIndex = '';
         });
     });
+// Show loading animation
+function showLoadingAnimation(message = 'กรุณารอสักครู่...') {
+    Swal.fire({
+        title: message,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+}
+
+// Hide loading animation
+function hideLoadingAnimation() {
+    Swal.close();
 }
 
 if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
