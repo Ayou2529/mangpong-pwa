@@ -29,10 +29,35 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+  // Skip non-GET requests
   if (event.request.method !== 'GET') return;
+  
+  // For iOS compatibility, handle requests carefully
   event.respondWith(
     caches.match(event.request)
-      .then(response => response || fetch(event.request))
-      .catch(() => caches.match('/index.html'))
+      .then(response => {
+        // Return cached response if available
+        if (response) {
+          return response;
+        }
+        
+        // Try to fetch from network
+        return fetch(event.request).catch(() => {
+          // If fetch fails, try to serve index.html as fallback
+          if (event.request.mode === 'navigate') {
+            return caches.match('/index.html');
+          }
+        });
+      })
   );
+});
+
+// Handle push notifications (if used)
+self.addEventListener('push', event => {
+  console.log('Push event received:', event);
+});
+
+// Handle notification clicks
+self.addEventListener('notificationclick', event => {
+  console.log('Notification click received:', event);
 });

@@ -14,6 +14,60 @@ function jsonpCallback(data) {
 // Global variables
 let currentUser = null;
 
+// --- START: SAFE LOCALSTORAGE WRAPPERS ---
+
+// Safe localStorage wrapper for iOS compatibility
+function safeLocalStorageSetItem(key, value) {
+    try {
+        localStorage.setItem(key, value);
+        return true;
+    } catch (e) {
+        console.error('localStorage setItem failed:', e);
+        // iOS Safari sometimes throws QUOTA_EXCEEDED_ERR
+        if (isIOS()) {
+            // Try to clean up old data
+            try {
+                // Remove oldest jobs to free up space
+                const jobs = JSON.parse(safeLocalStorageGetItem('mangpongJobs') || '[]');
+                if (jobs.length > 10) {
+                    // Keep only the most recent 10 jobs
+                    const recentJobs = jobs.slice(-10);
+                    safeLocalStorageSetItem('mangpongJobs', JSON.stringify(recentJobs));
+                    // Retry setting the item
+                    safeLocalStorageSetItem(key, value);
+                    return true;
+                }
+            } catch (cleanupError) {
+                console.error('localStorage cleanup failed:', cleanupError);
+            }
+        }
+        return false;
+    }
+}
+
+// Safe localStorage getter
+function safeLocalStorageGetItem(key, defaultValue = null) {
+    try {
+        return localStorage.getItem(key) || defaultValue;
+    } catch (e) {
+        console.error('localStorage getItem failed:', e);
+        return defaultValue;
+    }
+}
+
+// Safe localStorage removal
+function safeLocalStorageRemoveItem(key) {
+    try {
+        localStorage.removeItem(key);
+        return true;
+    } catch (e) {
+        console.error('localStorage removeItem failed:', e);
+        return false;
+    }
+}
+
+// --- END: SAFE LOCALSTORAGE WRAPPERS ---
+
 // --- START: FIX FOR PAGE VISIBILITY ---
 
 // Global variable to track the current top-level page
@@ -58,7 +112,7 @@ async function loadJobsFromSheets() {
         // Check if Google Script URL is defined
         if (!window.GOOGLE_SCRIPT_URL) {
             console.warn('Google Script URL not defined, using localStorage only');
-            return JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
+            return JSON.parse(safeLocalStorageGetItem('mangpongJobs') || '[]');
         }
         
         const response = await submitToGoogleSheets({
@@ -67,16 +121,16 @@ async function loadJobsFromSheets() {
         });
         
         if (response.success && response.jobs) {
-            localStorage.setItem('mangpongJobs', JSON.stringify(response.jobs));
+            safeLocalStorageSetItem('mangpongJobs', JSON.stringify(response.jobs));
             return response.jobs;
         }
         // If response is not successful, fall back to localStorage
         console.warn('Failed to load jobs from sheets, falling back to localStorage');
-        return JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
+        return JSON.parse(safeLocalStorageGetItem('mangpongJobs') || '[]');
     } catch (error) {
         console.error('Error loading jobs:', error);
         // Always fall back to localStorage on error
-        return JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
+        return JSON.parse(safeLocalStorageGetItem('mangpongJobs') || '[]');
     }
 }
 
@@ -90,7 +144,7 @@ function showRegisterScreen() {
 }
 
 function logout() {
-    localStorage.removeItem('mangpongUser');
+    safeLocalStorageRemoveItem('mangpongUser');
     currentUser = null;
     showPage('login-screen');
 }
@@ -166,7 +220,7 @@ if (loginForm) {
             
             if (response && response.success) {
                 currentUser = response.user;
-                localStorage.setItem('mangpongUser', JSON.stringify(currentUser));
+                safeLocalStorageSetItem('mangpongUser', JSON.stringify(currentUser));
                 
                 // Show success and redirect
                 await Swal.fire({
@@ -1820,7 +1874,7 @@ function saveJob(jobData, isDraft = false) {
         }
         
         // Save to localStorage first
-        let savedJobs = JSON.parse(localStorage.getItem('mangpongJobs') || '[]');
+        let savedJobs = JSON.parse(safeLocalStorageGetItem('mangpongJobs') || '[]');
         
         // Check if editing existing job
         const editJobIdElement = document.getElementById('edit-job-id');
@@ -1830,31 +1884,31 @@ function saveJob(jobData, isDraft = false) {
         const editingJobId = editJobIdElement.value;
         
         if (editingJobId) {
-            // Update existing job
-            const jobIndex = savedJobs.findIndex(job => job.jobId === editingJobId);
-            if (jobIndex !== -1) {
-                // Preserve existing data and merge with new data
-                const existingJob = savedJobs[jobIndex];
-                savedJobs[jobIndex] = { 
-                    ...existingJob,           // Keep all existing fields
-                    ...jobData,               // Override with new form data
-                    jobId: editingJobId,      // Ensure jobId remains the same
-                    timestamp: existingJob.timestamp, // Preserve original timestamp
-                    username: existingJob.username    // Preserve original username
-                };
-                console.log('Updated existing job:', editingJobId, 'with data:', savedJobs[jobIndex]);
-            } else {
-                // If not found, add as new (should not happen in normal flow)
-                console.warn('Job not found for editing, adding as new:', editingJobId);
-                savedJobs.push(jobData);
-            }
+        // Update existing job
+        const jobIndex = savedJobs.findIndex(job => job.jobId === editingJobId);
+        if (jobIndex !== -1) {
+            // Preserve existing data and merge with new data
+            const existingJob = savedJobs[jobIndex];
+            savedJobs[jobIndex] = { 
+                ...existingJob,           // Keep all existing fields
+                ...jobData,               // Override with new form data
+                jobId: editingJobId,      // Ensure jobId remains the same
+                timestamp: existingJob.timestamp, // Preserve original timestamp
+                username: existingJob.username    // Preserve original username
+            };
+            console.log('Updated existing job:', editingJobId, 'with data:', savedJobs[jobIndex]);
         } else {
-            // Add new job
+            // If not found, add as new (should not happen in normal flow)
+            console.warn('Job not found for editing, adding as new:', editingJobId);
             savedJobs.push(jobData);
-            console.log('Added new job:', jobData.jobId);
         }
-        
-        localStorage.setItem('mangpongJobs', JSON.stringify(savedJobs));
+    } else {
+        // Add new job
+        savedJobs.push(jobData);
+        console.log('Added new job:', jobData.jobId);
+    }
+    
+    safeLocalStorageSetItem('mangpongJobs', JSON.stringify(savedJobs));
         
         // Also submit to Google Sheets
         return submitToGoogleSheets({
@@ -1868,7 +1922,20 @@ function saveJob(jobData, isDraft = false) {
     }
 }
 
-// Initialize on page load
+// Prevent iOS Safari from aggressively caching AJAX requests
+function preventIOSSafariCaching() {
+    if (isIOS()) {
+        // Add timestamp to all requests to prevent caching
+        const originalSubmitToGoogleSheets = submitToGoogleSheets;
+        submitToGoogleSheets = function(data) {
+            // Add cache busting parameter
+            data._ = Date.now();
+            return originalSubmitToGoogleSheets(data);
+        };
+    }
+}
+
+// Call this function after DOM loads
 document.addEventListener('DOMContentLoaded', function() {
     try {
         const loginScreen = document.getElementById('login-screen');
@@ -1877,7 +1944,7 @@ document.addEventListener('DOMContentLoaded', function() {
             showPage('login-screen');
             
             // Check if user is already logged in
-            const savedUser = localStorage.getItem('mangpongUser');
+            const savedUser = safeLocalStorageGetItem('mangpongUser');
             if (savedUser) {
                 try {
                     currentUser = JSON.parse(savedUser);
@@ -1888,13 +1955,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 } catch (parseError) {
                     console.error('Error parsing saved user data:', parseError);
                     // Clear invalid user data
-                    localStorage.removeItem('mangpongUser');
+                    safeLocalStorageRemoveItem('mangpongUser');
                 }
+            }
+            
+            // iOS specific fixes
+            if (isIOS()) {
+                applyIOSFixes();
+                preventIOSSafariCaching();
             }
             
             // Prevent zoom on iOS when focusing inputs
             const metaViewport = document.querySelector('meta[name=viewport]');
-            if(metaViewport) metaViewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+            if(metaViewport) {
+                metaViewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+            }
             
             // Add fastclick to eliminate 300ms delay on mobile
             document.addEventListener('touchstart', function() {}, {passive: true});
@@ -1911,8 +1986,65 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Function to detect iOS devices
+function isIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
+// Apply iOS specific fixes
+function applyIOSFixes() {
+    console.log('Applying iOS specific fixes');
+    
+    // Fix for 100vh issue on mobile Safari
+    function fixViewportHeight() {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    
+    // Initial fix
+    fixViewportHeight();
+    
+    // Fix on resize/orientation change
+    window.addEventListener('resize', fixViewportHeight);
+    window.addEventListener('orientationchange', fixViewportHeight);
+    
+    // Fix for input field styling
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        // Ensure all inputs have proper font size to prevent zoom
+        if (!input.style.fontSize || parseInt(input.style.fontSize) < 16) {
+            input.style.fontSize = '16px';
+        }
+        
+        // Fix for rounded corners on iOS
+        input.style.webkitAppearance = 'none';
+        input.style.borderRadius = '8px';
+    });
+    
+    // Fix for date inputs on iOS
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    dateInputs.forEach(input => {
+        // Make date inputs more consistent across browsers
+        input.style.webkitAppearance = 'none';
+        input.addEventListener('focus', function() {
+            this.style.position = 'relative';
+            this.style.zIndex = '9999';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.style.position = '';
+            this.style.zIndex = '';
+        });
+    });
+}
+
 if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
     navigator.serviceWorker.register('service-worker.js')
-        .then(reg => console.log('✅ Service Worker registered', reg))
-        .catch(err => console.error('❌ Service Worker registration failed', err));
+        .then(reg => {
+            console.log('✅ Service Worker registered', reg);
+        })
+        .catch(err => {
+            console.error('❌ Service Worker registration failed', err);
+            // Don't show error to user as this is expected on iOS Safari
+        });
 }

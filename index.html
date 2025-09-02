@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>แมงป่อง เทรดดิ้ง - Mangpong Delivery</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -78,7 +78,7 @@
             cursor: pointer;
         }
         /* Improve touch targets for mobile */
-        button, input, select, textarea {
+        input, select, textarea, button {
             font-size: 16px; /* Prevents iOS zoom on focus */
         }
         .touch-target {
@@ -144,6 +144,14 @@
             width: 100%;
             max-width: 400px;
             margin: 1rem;
+        }
+        /* iOS specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            /* iOS devices */
+            .app {
+                /* Use CSS custom property for height */
+                height: calc(var(--vh, 1vh) * 100);
+            }
         }
     </style>
 </head>
