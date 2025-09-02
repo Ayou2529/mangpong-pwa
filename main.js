@@ -857,7 +857,6 @@ function collectFormData() {
         }
     
         // ข้อมูลหลักของงาน
-        const editJobId = document.getElementById('edit-job-id').value;
         const base = {
             timestamp: selectedDate.toISOString(),
             jobDate: thaiDateValue,
