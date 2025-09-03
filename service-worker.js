@@ -2,14 +2,15 @@
   ไฟล์นี้ควรบันทึกเป็น service-worker.js และวางไว้ใน root directory ของ GitHub Pages
   This file should be saved as service-worker.js and placed in the root directory of your GitHub Pages.
 */
-const CACHE_NAME = 'mangpong-v1';
+const CACHE_NAME = 'mangpong-v2';
 const urlsToCache = [
   '/',
   '/index.html',
+  '/main.js',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png',
-  // เพิ่มไฟล์ asset อื่นๆตามต้องการ เช่น css js รูปภาพ ฯลฯ
+  // Add other assets as needed
 ];
 
 self.addEventListener('install', event => {
@@ -29,27 +30,36 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Skip non-GET requests
   if (event.request.method !== 'GET') return;
-  
-  // For iOS compatibility, handle requests carefully
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Return cached response if available
-        if (response) {
-          return response;
-        }
-        
-        // Try to fetch from network
-        return fetch(event.request).catch(() => {
-          // If fetch fails, try to serve index.html as fallback
-          if (event.request.mode === 'navigate') {
-            return caches.match('/index.html');
-          }
+
+  if (event.request.destination === 'image' || event.request.destination === 'font') {
+    event.respondWith(
+      caches.match(event.request).then(cachedResponse => {
+        const fetchPromise = fetch(event.request).then(networkResponse => {
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, networkResponse.clone());
+          });
+          return networkResponse;
+        });
+        return cachedResponse || fetchPromise;
+      })
+    );
+  } else if (event.request.destination === 'document' || event.request.destination === 'script' || event.request.destination === 'style') {
+    event.respondWith(
+      caches.match(event.request).then(cachedResponse => {
+        return cachedResponse || fetch(event.request).then(networkResponse => {
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, networkResponse.clone());
+          });
+          return networkResponse;
         });
       })
-  );
+    );
+  } else {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match(event.request))
+    );
+  }
 });
 
 // Handle push notifications (if used)
