@@ -1753,18 +1753,14 @@ function populateFormWithJobData(job) {
           originalDateField.value = job.jobDate;
         }
         // Visually indicate that date cannot be changed
-        jobDatePicker.title = "ไม่สามารถเปลี่ยนวันที่ได้ขณะแก้ไขงาน";
-        // Add a visual indicator
+        // Allow editing the date even when editing a job
+        jobDatePicker.removeAttribute("title");
+        // Remove visual indicator if exists
         const dateContainer = jobDatePicker.closest(".mb-3");
         if (dateContainer) {
           let indicator = dateContainer.querySelector(".date-edit-indicator");
-          if (!indicator) {
-            indicator = document.createElement("div");
-            indicator.className =
-              "date-edit-indicator text-xs text-gray-500 mt-1";
-            indicator.textContent =
-              "หมายเหตุ: ไม่สามารถเปลี่ยนวันที่ได้ขณะแก้ไขงาน";
-            dateContainer.appendChild(indicator);
+          if (indicator) {
+            dateContainer.removeChild(indicator);
           }
         }
       }
