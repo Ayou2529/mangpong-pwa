@@ -1345,7 +1345,6 @@ async function displayJobHistory() {
         container.insertBefore(jobElement, noJobsMessage);
       });
     }
-    }
 
     Swal.close();
   } catch (error) {
