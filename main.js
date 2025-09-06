@@ -1361,19 +1361,7 @@ async function displayJobHistory() {
         const jobElement = createJobHistoryItem(job);
         container.insertBefore(jobElement, noJobsMessage);
       });
-
-      // Add event delegation for edit and view buttons
-      container.addEventListener("click", function (e) {
-        console.log("Container click event:", e.target);
-
-        if (e.target.closest('[data-action="edit"]')) {
-          const editButton = e.target.closest('[data-action="edit"]');
-          const jobId = editButton.getAttribute("data-job-id");
-          console.log("Edit button clicked for job:", jobId);
-          console.log("Edit button element:", editButton);
-          editJob(jobId);
-        }
-      });
+    }
     }
 
     Swal.close();
@@ -1428,25 +1416,18 @@ function createJobHistoryItem(job) {
             : ""
         }
         <div class="flex space-x-2">
+          <button class="text-sm text-indigo-600 font-medium flex items-center touch-target" onclick="editJob('${job.jobId}')">
             ${
-              job.status === "complete"
-                ? `
-                <button class="text-sm text-indigo-600 font-medium flex items-center touch-target" data-action="edit" data-job-id="${job.jobId}">
-                    แก้ไขงาน
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                </button>
-            `
-                : `
-                <button class="text-sm text-indigo-600 font-medium flex items-center touch-target" data-action="edit" data-job-id="${job.jobId}">
-                    ${job.status === "draft" ? "แก้ไขร่าง" : "แก้ไขงาน"}
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                </button>
-            `
+              job.status === "draft" 
+                ? "แก้ไขร่าง" 
+                : job.status === "incomplete" 
+                ? "แก้ไขงานไม่สมบูรณ์" 
+                : "แก้ไขงาน"
             }
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </button>
         </div>
     `;
 
@@ -1607,55 +1588,10 @@ function editJob(jobId) {
       throw new Error("Job ID is required");
     }
 
-    console.log("editJob called with jobId:", jobId);
-
-    // Show loading animation immediately
-    showLoadingAnimation("กรุณารอสักครู่...");
-
-    loadJobsFromSheets()
-      .then((savedJobs) => {
-        console.log("Saved jobs:", savedJobs);
-
-        const job = savedJobs.find((j) => j.jobId === jobId);
-        console.log("Found job:", job);
-
-        if (!job) {
-          console.error("Job not found for ID:", jobId);
-          hideLoadingAnimation();
-          Swal.fire({
-            icon: "error",
-            title: "ไม่พบงาน",
-            text: "ไม่สามารถหางานที่ต้องการแก้ไขได้",
-            confirmButtonText: "ตกลง",
-          });
-          return;
-        }
-
-        // Clear form first to ensure clean state
-        resetForm();
-
-        // Populate form with job data
-        populateFormWithJobData(job);
-        showScreen("new-job-screen");
-
-        // Hide loading animation after a short delay to ensure UI updates
-        setTimeout(() => {
-          hideLoadingAnimation();
-        }, 500);
-      })
-      .catch((error) => {
-        console.error("Error loading jobs:", error);
-        hideLoadingAnimation();
-        Swal.fire({
-          icon: "error",
-          title: "เกิดข้อผิดพลาด",
-          text: "ไม่สามารถโหลดข้อมูลงานได้",
-          confirmButtonText: "ตกลง",
-        });
-      });
+    // Redirect to edit page with job ID in query string
+    window.location.href = `edit.html?jobId=${encodeURIComponent(jobId)}`;
   } catch (error) {
     console.error("Error editing job:", error);
-    hideLoadingAnimation();
     Swal.fire({
       icon: "error",
       title: "เกิดข้อผิดพลาด",

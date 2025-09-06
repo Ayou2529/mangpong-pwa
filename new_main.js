@@ -1265,19 +1265,7 @@ async function displayJobHistory() {
         const jobElement = createJobHistoryItem(job);
         container.insertBefore(jobElement, noJobsMessage);
       });
-
-      // Add event delegation for edit and view buttons
-      container.addEventListener("click", function (e) {
-        console.log("Container click event:", e.target);
-
-        if (e.target.closest('[data-action="edit"]')) {
-          const editButton = e.target.closest('[data-action="edit"]');
-          const jobId = editButton.getAttribute("data-job-id");
-          console.log("Edit button clicked for job:", jobId);
-          console.log("Edit button element:", editButton);
-          editJob(jobId);
-        }
-      });
+    }
     }
 
     Swal.close();
@@ -1323,12 +1311,18 @@ function createJobHistoryItem(job) {
             : ""
         }
         <div class="flex space-x-2">
-                <button class="text-sm text-indigo-600 font-medium flex items-center touch-target" data-action="edit" data-job-id="${job.jobId}">
-                    แก้ไขงาน
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                </button>
+          <button class="text-sm text-indigo-600 font-medium flex items-center touch-target" onclick="editJob('${job.jobId}')">
+            ${
+              job.status === "draft" 
+                ? "แก้ไขร่าง" 
+                : job.status === "incomplete" 
+                ? "แก้ไขงานไม่สมบูรณ์" 
+                : "แก้ไขงาน"
+            }
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </button>
         </div>
     `;
 

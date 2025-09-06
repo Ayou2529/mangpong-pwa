@@ -1,5 +1,3 @@
-// updated_main.js
-
 // This function receives the data from the Google Apps Script.
 function jsonpCallback(data) {
   // Check if the data is an array and contains records.
@@ -473,6 +471,7 @@ function initializeApp() {
   updateDateTime();
   checkJobStatus();
   updateStats();
+  displayJobHistory();
 
   // Add event listeners to amount inputs
   document.querySelectorAll(".amount-input").forEach((input) => {
@@ -642,11 +641,13 @@ async function checkJobStatus() {
 function showScreen(screenId) {
   // Hide all screens
   const homeScreen = document.getElementById("home-screen");
-  const jobScreen = document.getElementById("job-screen");
+  const newJobScreen = document.getElementById("new-job-screen");
+  const editJobScreen = document.getElementById("edit-job-screen");
   const historyScreen = document.getElementById("history-screen");
 
   if (homeScreen) homeScreen.classList.add("hidden");
-  if (jobScreen) jobScreen.classList.add("hidden");
+  if (newJobScreen) newJobScreen.classList.add("hidden");
+  if (editJobScreen) editJobScreen.classList.add("hidden");
   if (historyScreen) historyScreen.classList.add("hidden");
 
   // Show the selected screen
@@ -664,7 +665,18 @@ function showScreen(screenId) {
     if (navItem) navItem.classList.add("active");
     checkJobStatus();
     updateStats();
-  } else if (screenId === "job-screen") {
+  } else if (screenId === "new-job-screen") {
+    const navItem = document.querySelectorAll(".nav-item")[1];
+    if (navItem) navItem.classList.add("active");
+    // Clear form if not editing
+    const editJobId = document.getElementById("edit-job-id").value;
+    if (!editJobId) {
+      resetForm();
+    } else {
+      // If editing, ensure form is properly populated
+      console.log("Entering edit mode for job:", editJobId);
+    }
+  } else if (screenId === "edit-job-screen") {
     const navItem = document.querySelectorAll(".nav-item")[1];
     if (navItem) navItem.classList.add("active");
   } else if (screenId === "history-screen") {
@@ -697,27 +709,27 @@ if (addJobDetail) {
                 </div>
                 <div class="mb-2">
                     <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
-                    <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target job-company-to" placeholder="ชื่อบริษัทปลายทาง" required>
+                    <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" required>
                 </div>
                 <div class="mb-2">
                     <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
-                    <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target job-province" placeholder="จังหวัดส่งของ" required>
+                    <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" required>
                 </div>
                 <div class="mb-2">
                     <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
-                    <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target job-district" placeholder="เขต/อำเภอส่งของ" required>
+                    <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" required>
                 </div>
                 <div class="mb-2">
                     <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
-                    <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target job-recipient" placeholder="ชื่อผู้รับงาน" required>
+                    <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" required>
                 </div>
                 <div class="mb-2">
                     <label class="block text-gray-600 mb-1">รายละเอียด</label>
-                    <textarea class="w-full p-3 border border-gray-300 rounded-md touch-target job-detail" placeholder="รายละเอียดงาน" rows="2" required></textarea>
+                    <textarea class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required></textarea>
                 </div>
                 <div>
                     <label class="block text-gray-600 mb-1">จำนวนเงิน - บาท</label>
-                    <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target job-amount" placeholder="0.00" min="0" step="0.01" required>
+                    <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" required>
                 </div>
             `;
       container.appendChild(newDetail);
@@ -755,7 +767,7 @@ if (addFee) {
     feeItem.className = "flex justify-between items-center mb-2";
     feeItem.innerHTML = `
             <div class="flex-1 mr-2">
-                <select class="w-full p-3 border border-gray-300 rounded-md touch-target fee-name" required>
+                <select class="w-full p-3 border border-gray-300 rounded-md touch-target" required>
                     <option value="" disabled selected>เลือกรายการ</option>
                     <option value="บรรทุก">บรรทุก</option>
                     <option value="ล่วงเวลา_OT">ล่วงเวลา_OT</option>
@@ -793,7 +805,7 @@ function updateTotalAmount() {
     let total = 0;
 
     // Sum job detail amounts
-    document.querySelectorAll(".job-amount, .amount-input").forEach((input) => {
+    document.querySelectorAll(".amount-input").forEach((input) => {
       const value = parseFloat(input.value) || 0;
       total += value;
     });
@@ -899,9 +911,9 @@ if (floatingSaveBtn) {
 // Collect form data
 function collectFormData() {
   try {
-    const form = document.getElementById("job-form");
+    const form = document.getElementById("new-job-form");
     if (!form) {
-      throw new Error("Form not found - job-form element missing");
+      throw new Error("Form not found - new-job-form element missing");
     }
 
     // วันที่บันทึกงาน
@@ -931,17 +943,27 @@ function collectFormData() {
       jobDate: thaiDateValue,
       jobId: editJobId || "JOB-" + Math.floor(10000 + Math.random() * 90000),
       username: currentUser ? currentUser.username : "unknown",
-      company: document.getElementById("job-company").value || "",
-      assignedBy: document.getElementById("job-assigned-by").value || "",
-      contact: document.getElementById("job-contact").value || "",
-      pickupProvince: document.getElementById("job-pickup-province").value || "",
-      pickupDistrict: document.getElementById("job-pickup-district").value || "",
+      company: form.querySelector("select")
+        ? form.querySelector("select").value
+        : "",
+      assignedBy: form.querySelector('input[placeholder="ชื่อผู้มอบงาน"]')
+        ? form.querySelector('input[placeholder="ชื่อผู้มอบงาน"]').value
+        : "",
+      contact: form.querySelector('input[placeholder="ข้อมูลติดต่อ"]')
+        ? form.querySelector('input[placeholder="ข้อมูลติดต่อ"]').value
+        : "",
+      pickupProvince: form.querySelector('input[placeholder="จังหวัด"]')
+        ? form.querySelector('input[placeholder="จังหวัด"]').value
+        : "",
+      pickupDistrict: form.querySelector('input[placeholder="เขต/อำเภอ"]')
+        ? form.querySelector('input[placeholder="เขต/อำเภอ"]').value
+        : "",
     };
 
     // รายละเอียดงาน (แบบโครงสร้างสำหรับใช้ในแอป)
     const jobDetails = [];
     const jobDetailCards = document.querySelectorAll(".job-detail-card");
-    jobDetailCards.forEach((card, index) => {
+    jobDetailCards.forEach((card) => {
       const inputs = card.querySelectorAll("input, textarea");
       jobDetails.push({
         destinationCompany: inputs[0] ? inputs[0].value : "",
@@ -1040,7 +1062,7 @@ function parseThaiDate(thaiDateStr) {
 
 // Reset form
 function resetForm() {
-  const form = document.getElementById("job-form");
+  const form = document.getElementById("new-job-form");
   if (form) form.reset();
   const editJobId = document.getElementById("edit-job-id");
   if (editJobId) editJobId.value = "";
@@ -1064,27 +1086,27 @@ function resetForm() {
             <div class="job-detail-card border border-gray-200 rounded-md p-3 mb-3">
                 <div class="mb-2">
                     <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
-                    <input type="text" id="job-company-to-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" required>
+                    <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" required>
                 </div>
                 <div class="mb-2">
                     <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
-                    <input type="text" id="job-province-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" required>
+                    <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" required>
                 </div>
                 <div class="mb-2">
                     <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
-                    <input type="text" id="job-district-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" required>
+                    <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" required>
                 </div>
                 <div class="mb-2">
                     <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
-                    <input type="text" id="job-recipient-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" required>
+                    <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" required>
                 </div>
                 <div class="mb-2">
                     <label class="block text-gray-600 mb-1">รายละเอียด</label>
-                    <textarea id="job-detail-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required></textarea>
+                    <textarea class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required></textarea>
                 </div>
                 <div>
                     <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
-                    <input type="number" id="job-amount-1" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" value="0" required>
+                    <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" value="0" required>
                 </div>
             </div>
         `;
@@ -1108,13 +1130,13 @@ function resetForm() {
 }
 
 // Form submission
-const jobForm = document.getElementById("job-form");
-if (jobForm) {
-  jobForm.addEventListener("submit", async function (e) {
+const newJobForm = document.getElementById("new-job-form");
+if (newJobForm) {
+  newJobForm.addEventListener("submit", async function (e) {
     e.preventDefault();
 
     // Check if form is valid
-    const form = document.getElementById("job-form");
+    const form = document.getElementById("new-job-form");
     const isValid = form.checkValidity();
 
     if (isValid) {
@@ -1540,26 +1562,15 @@ if (filterDateBtn) {
 
 // Start new job with clean form
 function startNewJob() {
-  // Set mode to create
-  const modeElement = document.getElementById("job-mode");
-  if (modeElement) modeElement.value = "create";
-
   // Clear any existing edit state
   const editJobId = document.getElementById("edit-job-id");
   if (editJobId) editJobId.value = "";
 
-  // Update UI for create mode
-  const titleElement = document.getElementById("job-screen-title");
-  if (titleElement) titleElement.textContent = "บันทึกงานใหม่";
-
-  const submitBtn = document.getElementById("job-submit-btn");
-  if (submitBtn) submitBtn.textContent = "บันทึกงาน";
-
   // Reset form to clean state
   resetForm();
 
-  // Navigate to job screen
-  showScreen("job-screen");
+  // Navigate to new job screen
+  showScreen("new-job-screen");
 }
 
 // Cancel edit and clear form
@@ -1576,7 +1587,7 @@ function cancelEdit() {
 }
 
 // Edit job
-async function editJob(jobId) {
+function editJob(jobId) {
   try {
     if (!jobId) {
       throw new Error("Job ID is required");
@@ -1585,66 +1596,49 @@ async function editJob(jobId) {
     console.log("editJob called with jobId:", jobId);
 
     // Show loading animation immediately
-    showLoadingAnimation("กำลังโหลดข้อมูลงาน...");
+    showLoadingAnimation("กรุณารอสักครู่...");
 
-    // Try to get job data from backend first
-    let job = null;
-    try {
-      const response = await submitToGoogleSheets({
-        action: "getJobById",
-        jobId: jobId,
-        username: currentUser.username,
+    loadJobsFromSheets()
+      .then((savedJobs) => {
+        console.log("Saved jobs:", savedJobs);
+
+        const job = savedJobs.find((j) => j.jobId === jobId);
+        console.log("Found job:", job);
+
+        if (!job) {
+          console.error("Job not found for ID:", jobId);
+          hideLoadingAnimation();
+          Swal.fire({
+            icon: "error",
+            title: "ไม่พบงาน",
+            text: "ไม่สามารถหางานที่ต้องการแก้ไขได้",
+            confirmButtonText: "ตกลง",
+          });
+          return;
+        }
+
+        // Clear form first to ensure clean state
+        resetForm();
+
+        // Populate form with job data
+        populateFormWithJobData(job);
+        showScreen("new-job-screen");
+
+        // Hide loading animation after a short delay to ensure UI updates
+        setTimeout(() => {
+          hideLoadingAnimation();
+        }, 500);
+      })
+      .catch((error) => {
+        console.error("Error loading jobs:", error);
+        hideLoadingAnimation();
+        Swal.fire({
+          icon: "error",
+          title: "เกิดข้อผิดพลาด",
+          text: "ไม่สามารถโหลดข้อมูลงานได้",
+          confirmButtonText: "ตกลง",
+        });
       });
-
-      if (response && response.success && response.job) {
-        job = response.job;
-      }
-    } catch (error) {
-      console.warn("Failed to get job from backend, trying localStorage:", error);
-    }
-
-    // If not found in backend, try localStorage
-    if (!job) {
-      const savedJobs = await loadJobsFromSheets();
-      job = savedJobs.find((j) => j.jobId === jobId);
-    }
-
-    console.log("Found job:", job);
-
-    if (!job) {
-      console.error("Job not found for ID:", jobId);
-      hideLoadingAnimation();
-      Swal.fire({
-        icon: "error",
-        title: "ไม่พบงาน",
-        text: "ไม่สามารถหางานที่ต้องการแก้ไขได้",
-        confirmButtonText: "ตกลง",
-      });
-      return;
-    }
-
-    // Clear form first to ensure clean state
-    resetForm();
-
-    // Set mode to edit
-    const modeElement = document.getElementById("job-mode");
-    if (modeElement) modeElement.value = "edit";
-
-    // Update UI for edit mode
-    const titleElement = document.getElementById("job-screen-title");
-    if (titleElement) titleElement.textContent = "แก้ไขงาน";
-
-    const submitBtn = document.getElementById("job-submit-btn");
-    if (submitBtn) submitBtn.textContent = "บันทึกการแก้ไข";
-
-    // Populate form with job data
-    populateFormWithJobData(job);
-    showScreen("job-screen");
-
-    // Hide loading animation after a short delay to ensure UI updates
-    setTimeout(() => {
-      hideLoadingAnimation();
-    }, 500);
   } catch (error) {
     console.error("Error editing job:", error);
     hideLoadingAnimation();
@@ -1693,7 +1687,7 @@ function populateFormWithJobData(job) {
     }
     // --- FIX ENDS HERE ---
 
-    const form = document.getElementById("job-form");
+    const form = document.getElementById("new-job-form");
     if (!form) return;
 
     // Set the edit job ID to preserve the existing job
@@ -1704,27 +1698,31 @@ function populateFormWithJobData(job) {
 
     // Basic information
     if (job.company) {
-      const companySelect = document.getElementById("job-company");
+      const companySelect = form.querySelector("select");
       if (companySelect) companySelect.value = job.company;
     }
 
     if (job.assignedBy) {
-      const assignedBy = document.getElementById("job-assigned-by");
+      const assignedBy = form.querySelector(
+        'input[placeholder="ชื่อผู้มอบงาน"]'
+      );
       if (assignedBy) assignedBy.value = job.assignedBy;
     }
 
     if (job.contact) {
-      const contact = document.getElementById("job-contact");
+      const contact = form.querySelector('input[placeholder="ข้อมูลติดต่อ"]');
       if (contact) contact.value = job.contact;
     }
 
     if (job.pickupProvince) {
-      const pickupProvince = document.getElementById("job-pickup-province");
+      const pickupProvince = form.querySelector('input[placeholder="จังหวัด"]');
       if (pickupProvince) pickupProvince.value = job.pickupProvince;
     }
 
     if (job.pickupDistrict) {
-      const pickupDistrict = document.getElementById("job-pickup-district");
+      const pickupDistrict = form.querySelector(
+        'input[placeholder="เขต/อำเภอ"]'
+      );
       if (pickupDistrict) pickupDistrict.value = job.pickupDistrict;
     }
 
@@ -1782,27 +1780,27 @@ function populateFormWithJobData(job) {
           firstCard.innerHTML = `
                         <div class="mb-2">
                             <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
-                            <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target job-company-to" placeholder="ชื่อบริษัทปลายทาง" value="${detail.destinationCompany || ""}" required>
+                            <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" value="${detail.destinationCompany || ""}" required>
                         </div>
                         <div class="mb-2">
                             <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
-                            <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target job-province" placeholder="จังหวัดส่งของ" value="${detail.deliveryProvince || detail.deliveryLocation || ""}" required>
+                            <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" value="${detail.deliveryProvince || detail.deliveryLocation || ""}" required>
                         </div>
                         <div class="mb-2">
                             <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
-                            <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target job-district" placeholder="เขต/อำเภอส่งของ" value="${detail.deliveryDistrict || ""}" required>
+                            <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" value="${detail.deliveryDistrict || ""}" required>
                         </div>
                         <div class="mb-2">
                             <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
-                            <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target job-recipient" placeholder="ชื่อผู้รับงาน" value="${detail.recipient || ""}" required>
+                            <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" value="${detail.recipient || ""}" required>
                         </div>
                         <div class="mb-2">
                             <label class="block text-gray-600 mb-1">รายละเอียด</label>
-                            <textarea class="w-full p-3 border border-gray-300 rounded-md touch-target job-detail" placeholder="รายละเอียดงาน" rows="2" required>${detail.description || ""}</textarea>
+                            <textarea class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required>${detail.description || ""}</textarea>
                         </div>
                         <div>
                             <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
-                            <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target job-amount" placeholder="0.00" min="0" step="0.01" value="${detail.amount || 0}" required>
+                            <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" value="${detail.amount || 0}" required>
                         </div>
                     `;
           container.appendChild(firstCard);
@@ -1816,9 +1814,7 @@ function populateFormWithJobData(job) {
           const addJobDetailBtn = document.getElementById("add-job-detail");
           if (addJobDetailBtn) addJobDetailBtn.click();
           const newCard = container.lastElementChild;
-          const inputs = newCard.querySelectorAll(
-            ".job-company-to, .job-province, .job-district, .job-recipient, .job-detail, .job-amount"
-          );
+          const inputs = newCard.querySelectorAll("input, textarea");
           if (inputs[0]) inputs[0].value = detail.destinationCompany || "";
           if (inputs[1])
             inputs[1].value =
@@ -1837,27 +1833,27 @@ function populateFormWithJobData(job) {
       defaultCard.innerHTML = `
                 <div class="mb-2">
                     <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
-                    <input type="text" id="job-company-to-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" required>
+                    <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" required>
                 </div>
                 <div class="mb-2">
                     <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
-                    <input type="text" id="job-province-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" required>
+                    <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" required>
                 </div>
                 <div class="mb-2">
                     <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
-                    <input type="text" id="job-district-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" required>
+                    <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" required>
                 </div>
                 <div class="mb-2">
                     <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
-                    <input type="text" id="job-recipient-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" required>
+                    <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" required>
                 </div>
                 <div class="mb-2">
                     <label class="block text-gray-600 mb-1">รายละเอียด</label>
-                    <textarea id="job-detail-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required></textarea>
+                    <textarea class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required></textarea>
                 </div>
                 <div>
                     <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
-                    <input type="number" id="job-amount-1" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" value="0" required>
+                    <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" value="0" required>
                 </div>
             `;
       container.appendChild(defaultCard);
@@ -2148,9 +2144,8 @@ function saveJob(jobData, isDraft = false) {
     safeLocalStorageSetItem("mangpongJobs", JSON.stringify(savedJobs));
 
     // Also submit to Google Sheets
-    const action = editingJobId ? "updateJob" : "createJob";
     return submitToGoogleSheets({
-      action: action,
+      action: "saveJob",
       ...jobData,
       isDraft: isDraft,
     });
@@ -2158,6 +2153,478 @@ function saveJob(jobData, isDraft = false) {
     console.error("Error saving job:", error);
     throw new Error(`Failed to save job: ${error.message}`);
   }
+}
+
+// Load job for edit
+async function loadJobForEdit(jobId) {
+  try {
+    if (!jobId) {
+      throw new Error("Job ID is required");
+    }
+
+    // Show loading animation
+    showLoadingAnimation("กำลังโหลดข้อมูลงาน...");
+
+    // Get job data from backend
+    const response = await submitToGoogleSheets({
+      action: "getJobById",
+      jobId: jobId,
+      username: currentUser.username,
+    });
+
+    if (response && response.success && response.job) {
+      // Pre-fill the form with job data
+      populateEditFormWithJobData(response.job);
+      hideLoadingAnimation();
+      return response.job;
+    } else {
+      hideLoadingAnimation();
+      throw new Error(response.error || "ไม่สามารถโหลดข้อมูลงานได้");
+    }
+  } catch (error) {
+    console.error("Error loading job for edit:", error);
+    hideLoadingAnimation();
+    Swal.fire({
+      icon: "error",
+      title: "เกิดข้อผิดพลาด",
+      text: `ไม่สามารถโหลดข้อมูลงานได้: ${error.message}`,
+      confirmButtonText: "ตกลง",
+      confirmButtonColor: "#ef4444",
+    });
+    throw error;
+  }
+}
+
+// Populate edit form with job data
+function populateEditFormWithJobData(job) {
+  try {
+    if (!job || typeof job !== "object") {
+      throw new Error("Invalid job data provided");
+    }
+
+    // Set the edit job ID
+    document.getElementById("edit-job-id").value = job.jobId;
+
+    // Basic information
+    if (job.company) {
+      const companySelect = document.getElementById("job-company");
+      if (companySelect) companySelect.value = job.company;
+    }
+
+    if (job.assignedBy) {
+      const assignedBy = document.getElementById("job-assigned-by");
+      if (assignedBy) assignedBy.value = job.assignedBy;
+    }
+
+    if (job.contact) {
+      const contact = document.getElementById("job-contact");
+      if (contact) contact.value = job.contact;
+    }
+
+    if (job.pickupProvince) {
+      const pickupProvince = document.getElementById("job-pickup-province");
+      if (pickupProvince) pickupProvince.value = job.pickupProvince;
+    }
+
+    if (job.pickupDistrict) {
+      const pickupDistrict = document.getElementById("job-pickup-district");
+      if (pickupDistrict) pickupDistrict.value = job.pickupDistrict;
+    }
+
+    // Set job date
+    if (job.jobDate) {
+      const parsedDate = parseThaiDate(job.jobDate);
+      const jobDatePicker = document.getElementById("job-date-picker");
+      if (jobDatePicker) {
+        jobDatePicker.value = formatDate(parsedDate);
+      }
+    }
+
+    // Job details
+    const container = document.getElementById("job-details-container");
+    if (!container) return;
+
+    // Clear existing job details
+    container.innerHTML = "";
+
+    // Initialize jobDetails variable at function level
+    let jobDetails = [];
+
+    // Reconstruct structured data if it's not present
+    if (!job.jobDetails && job.jobCount > 0) {
+      const reconstructedDetails = [];
+      for (let i = 1; i <= job.jobCount; i++) {
+        reconstructedDetails.push({
+          destinationCompany: job["companyTo" + i] || "",
+          deliveryProvince: job["province" + i] || "",
+          deliveryDistrict: job["district" + i] || "",
+          recipient: job["recipient" + i] || "",
+          description: job["detail" + i] || "",
+          amount: parseFloat(job["amount" + i]) || 0,
+        });
+      }
+      jobDetails = reconstructedDetails;
+    } else if (job.jobDetails) {
+      try {
+        jobDetails = JSON.parse(job.jobDetails);
+      } catch (error) {
+        console.error("Error parsing job details:", error);
+        jobDetails = [];
+      }
+    }
+
+    jobDetails.forEach((detail, index) => {
+      if (index === 0) {
+        // Use the first job detail card
+        const firstCard = document.createElement("div");
+        firstCard.className =
+          "job-detail-card border border-gray-200 rounded-md p-3 mb-3";
+        firstCard.innerHTML = `
+                    <div class="mb-2">
+                        <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
+                        <input type="text" id="job-company-to-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" value="${detail.destinationCompany || ""}" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
+                        <input type="text" id="job-province-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" value="${detail.deliveryProvince || ""}" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
+                        <input type="text" id="job-district-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" value="${detail.deliveryDistrict || ""}" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
+                        <input type="text" id="job-recipient-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" value="${detail.recipient || ""}" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-gray-600 mb-1">รายละเอียด</label>
+                        <textarea id="job-detail-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required>${detail.description || ""}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
+                        <input type="number" id="job-amount-1" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" value="${detail.amount || 0}" required>
+                    </div>
+                `;
+        container.appendChild(firstCard);
+
+        // Add event listener to amount input
+        firstCard
+          .querySelector(".amount-input")
+          .addEventListener("input", updateTotalAmount);
+      } else {
+        // Add additional job detail cards
+        const addJobDetailBtn = document.getElementById("add-job-detail");
+        if (addJobDetailBtn) addJobDetailBtn.click();
+        const newCard = container.lastElementChild;
+        const inputs = newCard.querySelectorAll(
+          "input[type='text'], input[type='number'], textarea"
+        );
+        if (inputs[0]) inputs[0].value = detail.destinationCompany || "";
+        if (inputs[1]) inputs[1].value = detail.deliveryProvince || "";
+        if (inputs[2]) inputs[2].value = detail.deliveryDistrict || "";
+        if (inputs[3]) inputs[3].value = detail.recipient || "";
+        if (inputs[4]) inputs[4].value = detail.description || "";
+        if (inputs[5]) inputs[5].value = detail.amount || 0;
+      }
+    });
+
+    // Additional fees
+    const additionalFeesContainer = document.getElementById(
+      "additional-fees-container"
+    );
+    if (additionalFeesContainer) additionalFeesContainer.innerHTML = ""; // Clear existing fees
+
+    // Initialize additionalFees variable at function level
+    let additionalFees = [];
+
+    // Reconstruct structured data if it's not present
+    if (!job.additionalFees && job.feeCount > 0) {
+      const reconstructedFees = [];
+      for (let i = 1; i <= job.feeCount; i++) {
+        reconstructedFees.push({
+          description: job["feeName" + i] || "",
+          amount: parseFloat(job["feeAmount" + i]) || 0,
+        });
+      }
+      additionalFees = reconstructedFees;
+    } else if (job.additionalFees) {
+      try {
+        additionalFees = JSON.parse(job.additionalFees);
+      } catch (error) {
+        console.error("Error parsing additional fees:", error);
+        additionalFees = [];
+      }
+    }
+
+    additionalFees.forEach((fee) => {
+      const addFeeBtn = document.getElementById("add-fee");
+      if (addFeeBtn) addFeeBtn.click();
+      const newFee = additionalFeesContainer.lastElementChild;
+      const select = newFee.querySelector("select");
+      const input = newFee.querySelector("input");
+      if (select && input) {
+        select.value = fee.description || "";
+        input.value = fee.amount || 0;
+      }
+    });
+
+    // Update totals
+    updateTotalAmount();
+
+    // Also update the Main Service Fee display field if it exists
+    const mainServiceFeeElement = document.getElementById("main-service-fee");
+    if (mainServiceFeeElement) {
+      const totalAmount = jobDetails.reduce(
+        (sum, detail) => sum + (parseFloat(detail.amount) || 0),
+        0
+      );
+      mainServiceFeeElement.textContent = totalAmount.toFixed(2) + " บาท";
+    }
+
+    // Ensure totals are updated after a brief delay to allow DOM to settle
+    setTimeout(() => {
+      updateTotalAmount();
+    }, 100);
+  } catch (error) {
+    console.error("Error populating edit form with job data:", error);
+    throw new Error(`Failed to populate edit form: ${error.message}`);
+  }
+}
+
+// Update job
+async function updateJob() {
+  try {
+    // Show loading alert
+    Swal.fire({
+      title: "กำลังบันทึกการแก้ไข...",
+      text: "กรุณารอสักครู่",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    // Collect form data
+    const formData = collectEditFormData();
+
+    // Submit to backend
+    const response = await submitToGoogleSheets({
+      action: "updateJob",
+      ...formData,
+    });
+
+    if (response && response.success) {
+      // Show success message
+      await Swal.fire({
+        icon: "success",
+        title: "บันทึกการแก้ไขสำเร็จ!",
+        text: `งาน ${formData.jobId} ถูกบันทึกการแก้ไขเรียบร้อยแล้ว`,
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#10b981",
+      });
+
+      // Update stats
+      updateStats();
+
+      // Reset form
+      resetEditForm();
+
+      // Go back to home screen
+      showScreen("home-screen");
+    } else {
+      throw new Error(response.error || "ไม่สามารถบันทึกการแก้ไขได้");
+    }
+
+    return response;
+  } catch (error) {
+    console.error("Error updating job:", error);
+
+    // Show error message
+    await Swal.fire({
+      icon: "error",
+      title: "เกิดข้อผิดพลาด!",
+      text: error.message,
+      confirmButtonText: "ตกลง",
+      confirmButtonColor: "#ef4444",
+    });
+
+    throw error;
+  }
+}
+
+// Collect edit form data
+function collectEditFormData() {
+  try {
+    const form = document.getElementById("edit-job-form");
+    if (!form) {
+      throw new Error("Edit form not found");
+    }
+
+    // วันที่บันทึกงาน
+    const jobDatePicker = document.getElementById("job-date-picker");
+    if (!jobDatePicker) {
+      throw new Error("Job date picker not found");
+    }
+
+    const selectedDate = new Date(jobDatePicker.value);
+    const thaiDateValue = formatThaiDateInput(selectedDate);
+
+    // ข้อมูลหลักของงาน
+    const base = {
+      timestamp: new Date().toISOString(), // Always set to current time for updates
+      jobDate: thaiDateValue,
+      jobId: document.getElementById("edit-job-id").value,
+      username: currentUser ? currentUser.username : "unknown",
+      company: document.getElementById("job-company").value || "",
+      assignedBy: document.getElementById("job-assigned-by").value || "",
+      contact: document.getElementById("job-contact").value || "",
+      pickupProvince: document.getElementById("job-pickup-province").value || "",
+      pickupDistrict: document.getElementById("job-pickup-district").value || "",
+    };
+
+    // รายละเอียดงาน (แบบโครงสร้างสำหรับใช้ในแอป)
+    const jobDetails = [];
+    const jobDetailCards = document.querySelectorAll(".job-detail-card");
+    jobDetailCards.forEach((card) => {
+      const inputs = card.querySelectorAll("input, textarea");
+      jobDetails.push({
+        destinationCompany: inputs[0] ? inputs[0].value : "",
+        deliveryProvince: inputs[1] ? inputs[1].value : "",
+        deliveryDistrict: inputs[2] ? inputs[2].value : "",
+        recipient: inputs[3] ? inputs[3].value : "",
+        description: inputs[4] ? inputs[4].value : "",
+        amount: inputs[5] ? parseFloat(inputs[5].value) || 0 : 0,
+      });
+    });
+
+    // ค่าบริการเพิ่มเติม (แบบโครงสร้างสำหรับใช้ในแอป)
+    const additionalFees = [];
+    const feeItems = document.querySelectorAll(
+      "#additional-fees-container > div"
+    );
+    feeItems.forEach((item) => {
+      const select = item.querySelector("select");
+      const input = item.querySelector("input");
+      if (select && input) {
+        additionalFees.push({
+          description: select.value,
+          amount: parseFloat(input.value) || 0,
+        });
+      }
+    });
+
+    // รวมยอดเงิน
+    const mainServiceFee = jobDetails.reduce(
+      (sum, j) => sum + (parseFloat(j.amount) || 0),
+      0
+    );
+    const additionalFeesTotal = additionalFees.reduce(
+      (sum, f) => sum + (parseFloat(f.amount) || 0),
+      0
+    );
+    const totalAmount = mainServiceFee + additionalFeesTotal;
+
+    // แปลงเป็นรูปแบบแนวนอน flat สูงสุด 5 งาน และ 10 ค่าบริการเพิ่มเติม (ปรับได้ตามต้องการ)
+    const flat = {};
+    jobDetails.forEach((d, i) => {
+      const idx = i + 1;
+      flat["companyTo" + idx] = d.destinationCompany || "";
+      flat["province" + idx] = d.deliveryProvince || "";
+      flat["district" + idx] = d.deliveryDistrict || "";
+      flat["recipient" + idx] = d.recipient || "";
+      flat["detail" + idx] = d.description || "";
+      flat["amount" + idx] = parseFloat(d.amount) || 0;
+    });
+    flat.jobCount = jobDetails.length;
+
+    additionalFees.forEach((f, i) => {
+      const idx = i + 1;
+      flat["feeName" + idx] = f.description || "";
+      flat["feeAmount" + idx] = parseFloat(f.amount) || 0;
+    });
+    flat.feeCount = additionalFees.length;
+
+    // ส่งออกทั้งแบบโครงสร้าง (เพื่อให้แอปยังแสดงผลได้) และแบบแนวนอน (เพื่อบันทึกลงชีตหนึ่งแถว/งาน)
+    return {
+      ...base,
+      // โครงสร้างเดิมสำหรับหน้าประวัติและดูรายละเอียด
+      jobDetails: JSON.stringify(jobDetails),
+      additionalFees: JSON.stringify(additionalFees),
+      // ตัวเลขสรุป
+      mainServiceFee,
+      additionalFeesTotal,
+      totalAmount,
+      // ฟิลด์แบบแบนแนวนอน
+      ...flat,
+    };
+  } catch (error) {
+    console.error("Error collecting edit form data:", error);
+    throw new Error(`Failed to collect edit form data: ${error.message}`);
+  }
+}
+
+// Reset edit form
+function resetEditForm() {
+  const form = document.getElementById("edit-job-form");
+  if (form) form.reset();
+  const editJobId = document.getElementById("edit-job-id");
+  if (editJobId) editJobId.value = "";
+
+  // Reset job date picker to today
+  const jobDatePicker = document.getElementById("job-date-picker");
+  if (jobDatePicker) {
+    jobDatePicker.value = formatDate(new Date());
+  }
+
+  // Clear additional job details and fees
+  const jobDetailsContainer = document.getElementById("job-details-container");
+  const additionalFeesContainer = document.getElementById(
+    "additional-fees-container"
+  );
+
+  if (jobDetailsContainer) {
+    // Reset to single job detail
+    jobDetailsContainer.innerHTML = `
+            <div class="job-detail-card border border-gray-200 rounded-md p-3 mb-3">
+                <div class="mb-2">
+                    <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
+                    <input type="text" id="job-company-to-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" required>
+                </div>
+                <div class="mb-2">
+                    <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
+                    <input type="text" id="job-province-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" required>
+                </div>
+                <div class="mb-2">
+                    <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
+                    <input type="text" id="job-district-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" required>
+                </div>
+                <div class="mb-2">
+                    <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
+                    <input type="text" id="job-recipient-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" required>
+                </div>
+                <div class="mb-2">
+                    <label class="block text-gray-600 mb-1">รายละเอียด</label>
+                    <textarea id="job-detail-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required></textarea>
+                </div>
+                <div>
+                    <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
+                    <input type="number" id="job-amount-1" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" value="0" required>
+                </div>
+            </div>
+        `;
+  }
+
+  // Clear additional fees
+  if (additionalFeesContainer) additionalFeesContainer.innerHTML = "";
+
+  // Re-add event listeners
+  const amountInputs = document.querySelectorAll(".amount-input");
+  amountInputs.forEach((input) => {
+    input.addEventListener("input", updateTotalAmount);
+  });
+  updateTotalAmount();
 }
 
 // Prevent iOS Safari from aggressively caching AJAX requests
@@ -2299,6 +2766,478 @@ function showLoadingAnimation(message = "กรุณารอสักครู
 // Hide loading animation
 function hideLoadingAnimation() {
   Swal.close();
+}
+
+// Load job for edit
+async function loadJobForEdit(jobId) {
+  try {
+    if (!jobId) {
+      throw new Error("Job ID is required");
+    }
+
+    // Show loading animation
+    showLoadingAnimation("กำลังโหลดข้อมูลงาน...");
+
+    // Get job data from backend
+    const response = await submitToGoogleSheets({
+      action: "getJobById",
+      jobId: jobId,
+      username: currentUser.username,
+    });
+
+    if (response && response.success && response.job) {
+      // Pre-fill the form with job data
+      populateEditFormWithJobData(response.job);
+      hideLoadingAnimation();
+      return response.job;
+    } else {
+      hideLoadingAnimation();
+      throw new Error(response.error || "ไม่สามารถโหลดข้อมูลงานได้");
+    }
+  } catch (error) {
+    console.error("Error loading job for edit:", error);
+    hideLoadingAnimation();
+    Swal.fire({
+      icon: "error",
+      title: "เกิดข้อผิดพลาด",
+      text: `ไม่สามารถโหลดข้อมูลงานได้: ${error.message}`,
+      confirmButtonText: "ตกลง",
+      confirmButtonColor: "#ef4444",
+    });
+    throw error;
+  }
+}
+
+// Populate edit form with job data
+function populateEditFormWithJobData(job) {
+  try {
+    if (!job || typeof job !== "object") {
+      throw new Error("Invalid job data provided");
+    }
+
+    // Set the edit job ID
+    document.getElementById("edit-job-id").value = job.jobId;
+
+    // Basic information
+    if (job.company) {
+      const companySelect = document.getElementById("job-company");
+      if (companySelect) companySelect.value = job.company;
+    }
+
+    if (job.assignedBy) {
+      const assignedBy = document.getElementById("job-assigned-by");
+      if (assignedBy) assignedBy.value = job.assignedBy;
+    }
+
+    if (job.contact) {
+      const contact = document.getElementById("job-contact");
+      if (contact) contact.value = job.contact;
+    }
+
+    if (job.pickupProvince) {
+      const pickupProvince = document.getElementById("job-pickup-province");
+      if (pickupProvince) pickupProvince.value = job.pickupProvince;
+    }
+
+    if (job.pickupDistrict) {
+      const pickupDistrict = document.getElementById("job-pickup-district");
+      if (pickupDistrict) pickupDistrict.value = job.pickupDistrict;
+    }
+
+    // Set job date
+    if (job.jobDate) {
+      const parsedDate = parseThaiDate(job.jobDate);
+      const jobDatePicker = document.getElementById("job-date-picker");
+      if (jobDatePicker) {
+        jobDatePicker.value = formatDate(parsedDate);
+      }
+    }
+
+    // Job details
+    const container = document.getElementById("job-details-container");
+    if (!container) return;
+
+    // Clear existing job details
+    container.innerHTML = "";
+
+    // Initialize jobDetails variable at function level
+    let jobDetails = [];
+
+    // Reconstruct structured data if it's not present
+    if (!job.jobDetails && job.jobCount > 0) {
+      const reconstructedDetails = [];
+      for (let i = 1; i <= job.jobCount; i++) {
+        reconstructedDetails.push({
+          destinationCompany: job["companyTo" + i] || "",
+          deliveryProvince: job["province" + i] || "",
+          deliveryDistrict: job["district" + i] || "",
+          recipient: job["recipient" + i] || "",
+          description: job["detail" + i] || "",
+          amount: parseFloat(job["amount" + i]) || 0,
+        });
+      }
+      jobDetails = reconstructedDetails;
+    } else if (job.jobDetails) {
+      try {
+        jobDetails = JSON.parse(job.jobDetails);
+      } catch (error) {
+        console.error("Error parsing job details:", error);
+        jobDetails = [];
+      }
+    }
+
+    jobDetails.forEach((detail, index) => {
+      if (index === 0) {
+        // Use the first job detail card
+        const firstCard = document.createElement("div");
+        firstCard.className =
+          "job-detail-card border border-gray-200 rounded-md p-3 mb-3";
+        firstCard.innerHTML = `
+                    <div class="mb-2">
+                        <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
+                        <input type="text" id="job-company-to-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" value="${detail.destinationCompany || ""}" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
+                        <input type="text" id="job-province-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" value="${detail.deliveryProvince || ""}" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
+                        <input type="text" id="job-district-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" value="${detail.deliveryDistrict || ""}" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
+                        <input type="text" id="job-recipient-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" value="${detail.recipient || ""}" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-gray-600 mb-1">รายละเอียด</label>
+                        <textarea id="job-detail-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required>${detail.description || ""}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
+                        <input type="number" id="job-amount-1" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" value="${detail.amount || 0}" required>
+                    </div>
+                `;
+        container.appendChild(firstCard);
+
+        // Add event listener to amount input
+        firstCard
+          .querySelector(".amount-input")
+          .addEventListener("input", updateTotalAmount);
+      } else {
+        // Add additional job detail cards
+        const addJobDetailBtn = document.getElementById("add-job-detail");
+        if (addJobDetailBtn) addJobDetailBtn.click();
+        const newCard = container.lastElementChild;
+        const inputs = newCard.querySelectorAll(
+          "input[type='text'], input[type='number'], textarea"
+        );
+        if (inputs[0]) inputs[0].value = detail.destinationCompany || "";
+        if (inputs[1]) inputs[1].value = detail.deliveryProvince || "";
+        if (inputs[2]) inputs[2].value = detail.deliveryDistrict || "";
+        if (inputs[3]) inputs[3].value = detail.recipient || "";
+        if (inputs[4]) inputs[4].value = detail.description || "";
+        if (inputs[5]) inputs[5].value = detail.amount || 0;
+      }
+    });
+
+    // Additional fees
+    const additionalFeesContainer = document.getElementById(
+      "additional-fees-container"
+    );
+    if (additionalFeesContainer) additionalFeesContainer.innerHTML = ""; // Clear existing fees
+
+    // Initialize additionalFees variable at function level
+    let additionalFees = [];
+
+    // Reconstruct structured data if it's not present
+    if (!job.additionalFees && job.feeCount > 0) {
+      const reconstructedFees = [];
+      for (let i = 1; i <= job.feeCount; i++) {
+        reconstructedFees.push({
+          description: job["feeName" + i] || "",
+          amount: parseFloat(job["feeAmount" + i]) || 0,
+        });
+      }
+      additionalFees = reconstructedFees;
+    } else if (job.additionalFees) {
+      try {
+        additionalFees = JSON.parse(job.additionalFees);
+      } catch (error) {
+        console.error("Error parsing additional fees:", error);
+        additionalFees = [];
+      }
+    }
+
+    additionalFees.forEach((fee) => {
+      const addFeeBtn = document.getElementById("add-fee");
+      if (addFeeBtn) addFeeBtn.click();
+      const newFee = additionalFeesContainer.lastElementChild;
+      const select = newFee.querySelector("select");
+      const input = newFee.querySelector("input");
+      if (select && input) {
+        select.value = fee.description || "";
+        input.value = fee.amount || 0;
+      }
+    });
+
+    // Update totals
+    updateTotalAmount();
+
+    // Also update the Main Service Fee display field if it exists
+    const mainServiceFeeElement = document.getElementById("main-service-fee");
+    if (mainServiceFeeElement) {
+      const totalAmount = jobDetails.reduce(
+        (sum, detail) => sum + (parseFloat(detail.amount) || 0),
+        0
+      );
+      mainServiceFeeElement.textContent = totalAmount.toFixed(2) + " บาท";
+    }
+
+    // Ensure totals are updated after a brief delay to allow DOM to settle
+    setTimeout(() => {
+      updateTotalAmount();
+    }, 100);
+  } catch (error) {
+    console.error("Error populating edit form with job data:", error);
+    throw new Error(`Failed to populate edit form: ${error.message}`);
+  }
+}
+
+// Update job
+async function updateJob() {
+  try {
+    // Show loading alert
+    Swal.fire({
+      title: "กำลังบันทึกการแก้ไข...",
+      text: "กรุณารอสักครู่",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    // Collect form data
+    const formData = collectEditFormData();
+
+    // Submit to backend
+    const response = await submitToGoogleSheets({
+      action: "updateJob",
+      ...formData,
+    });
+
+    if (response && response.success) {
+      // Show success message
+      await Swal.fire({
+        icon: "success",
+        title: "บันทึกการแก้ไขสำเร็จ!",
+        text: `งาน ${formData.jobId} ถูกบันทึกการแก้ไขเรียบร้อยแล้ว`,
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#10b981",
+      });
+
+      // Update stats
+      updateStats();
+
+      // Reset form
+      resetEditForm();
+
+      // Go back to home screen
+      showScreen("home-screen");
+    } else {
+      throw new Error(response.error || "ไม่สามารถบันทึกการแก้ไขได้");
+    }
+
+    return response;
+  } catch (error) {
+    console.error("Error updating job:", error);
+
+    // Show error message
+    await Swal.fire({
+      icon: "error",
+      title: "เกิดข้อผิดพลาด!",
+      text: error.message,
+      confirmButtonText: "ตกลง",
+      confirmButtonColor: "#ef4444",
+    });
+
+    throw error;
+  }
+}
+
+// Collect edit form data
+function collectEditFormData() {
+  try {
+    const form = document.getElementById("edit-job-form");
+    if (!form) {
+      throw new Error("Edit form not found");
+    }
+
+    // วันที่บันทึกงาน
+    const jobDatePicker = document.getElementById("job-date-picker");
+    if (!jobDatePicker) {
+      throw new Error("Job date picker not found");
+    }
+
+    const selectedDate = new Date(jobDatePicker.value);
+    const thaiDateValue = formatThaiDateInput(selectedDate);
+
+    // ข้อมูลหลักของงาน
+    const base = {
+      timestamp: new Date().toISOString(), // Always set to current time for updates
+      jobDate: thaiDateValue,
+      jobId: document.getElementById("edit-job-id").value,
+      username: currentUser ? currentUser.username : "unknown",
+      company: document.getElementById("job-company").value || "",
+      assignedBy: document.getElementById("job-assigned-by").value || "",
+      contact: document.getElementById("job-contact").value || "",
+      pickupProvince: document.getElementById("job-pickup-province").value || "",
+      pickupDistrict: document.getElementById("job-pickup-district").value || "",
+    };
+
+    // รายละเอียดงาน (แบบโครงสร้างสำหรับใช้ในแอป)
+    const jobDetails = [];
+    const jobDetailCards = document.querySelectorAll(".job-detail-card");
+    jobDetailCards.forEach((card) => {
+      const inputs = card.querySelectorAll("input, textarea");
+      jobDetails.push({
+        destinationCompany: inputs[0] ? inputs[0].value : "",
+        deliveryProvince: inputs[1] ? inputs[1].value : "",
+        deliveryDistrict: inputs[2] ? inputs[2].value : "",
+        recipient: inputs[3] ? inputs[3].value : "",
+        description: inputs[4] ? inputs[4].value : "",
+        amount: inputs[5] ? parseFloat(inputs[5].value) || 0 : 0,
+      });
+    });
+
+    // ค่าบริการเพิ่มเติม (แบบโครงสร้างสำหรับใช้ในแอป)
+    const additionalFees = [];
+    const feeItems = document.querySelectorAll(
+      "#additional-fees-container > div"
+    );
+    feeItems.forEach((item) => {
+      const select = item.querySelector("select");
+      const input = item.querySelector("input");
+      if (select && input) {
+        additionalFees.push({
+          description: select.value,
+          amount: parseFloat(input.value) || 0,
+        });
+      }
+    });
+
+    // รวมยอดเงิน
+    const mainServiceFee = jobDetails.reduce(
+      (sum, j) => sum + (parseFloat(j.amount) || 0),
+      0
+    );
+    const additionalFeesTotal = additionalFees.reduce(
+      (sum, f) => sum + (parseFloat(f.amount) || 0),
+      0
+    );
+    const totalAmount = mainServiceFee + additionalFeesTotal;
+
+    // แปลงเป็นรูปแบบแนวนอน flat สูงสุด 5 งาน และ 10 ค่าบริการเพิ่มเติม (ปรับได้ตามต้องการ)
+    const flat = {};
+    jobDetails.forEach((d, i) => {
+      const idx = i + 1;
+      flat["companyTo" + idx] = d.destinationCompany || "";
+      flat["province" + idx] = d.deliveryProvince || "";
+      flat["district" + idx] = d.deliveryDistrict || "";
+      flat["recipient" + idx] = d.recipient || "";
+      flat["detail" + idx] = d.description || "";
+      flat["amount" + idx] = parseFloat(d.amount) || 0;
+    });
+    flat.jobCount = jobDetails.length;
+
+    additionalFees.forEach((f, i) => {
+      const idx = i + 1;
+      flat["feeName" + idx] = f.description || "";
+      flat["feeAmount" + idx] = parseFloat(f.amount) || 0;
+    });
+    flat.feeCount = additionalFees.length;
+
+    // ส่งออกทั้งแบบโครงสร้าง (เพื่อให้แอปยังแสดงผลได้) และแบบแนวนอน (เพื่อบันทึกลงชีตหนึ่งแถว/งาน)
+    return {
+      ...base,
+      // โครงสร้างเดิมสำหรับหน้าประวัติและดูรายละเอียด
+      jobDetails: JSON.stringify(jobDetails),
+      additionalFees: JSON.stringify(additionalFees),
+      // ตัวเลขสรุป
+      mainServiceFee,
+      additionalFeesTotal,
+      totalAmount,
+      // ฟิลด์แบบแบนแนวนอน
+      ...flat,
+    };
+  } catch (error) {
+    console.error("Error collecting edit form data:", error);
+    throw new Error(`Failed to collect edit form data: ${error.message}`);
+  }
+}
+
+// Reset edit form
+function resetEditForm() {
+  const form = document.getElementById("edit-job-form");
+  if (form) form.reset();
+  const editJobId = document.getElementById("edit-job-id");
+  if (editJobId) editJobId.value = "";
+
+  // Reset job date picker to today
+  const jobDatePicker = document.getElementById("job-date-picker");
+  if (jobDatePicker) {
+    jobDatePicker.value = formatDate(new Date());
+  }
+
+  // Clear additional job details and fees
+  const jobDetailsContainer = document.getElementById("job-details-container");
+  const additionalFeesContainer = document.getElementById(
+    "additional-fees-container"
+  );
+
+  if (jobDetailsContainer) {
+    // Reset to single job detail
+    jobDetailsContainer.innerHTML = `
+            <div class="job-detail-card border border-gray-200 rounded-md p-3 mb-3">
+                <div class="mb-2">
+                    <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
+                    <input type="text" id="job-company-to-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" required>
+                </div>
+                <div class="mb-2">
+                    <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
+                    <input type="text" id="job-province-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" required>
+                </div>
+                <div class="mb-2">
+                    <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
+                    <input type="text" id="job-district-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" required>
+                </div>
+                <div class="mb-2">
+                    <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
+                    <input type="text" id="job-recipient-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" required>
+                </div>
+                <div class="mb-2">
+                    <label class="block text-gray-600 mb-1">รายละเอียด</label>
+                    <textarea id="job-detail-1" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required></textarea>
+                </div>
+                <div>
+                    <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
+                    <input type="number" id="job-amount-1" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" value="0" required>
+                </div>
+            </div>
+        `;
+  }
+
+  // Clear additional fees
+  if (additionalFeesContainer) additionalFeesContainer.innerHTML = "";
+
+  // Re-add event listeners
+  const amountInputs = document.querySelectorAll(".amount-input");
+  amountInputs.forEach((input) => {
+    input.addEventListener("input", updateTotalAmount);
+  });
+  updateTotalAmount();
 }
 
 if (typeof window !== "undefined" && "serviceWorker" in navigator) {
