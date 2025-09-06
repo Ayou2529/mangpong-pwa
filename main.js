@@ -1587,14 +1587,97 @@ function editJob(jobId) {
       throw new Error("Job ID is required");
     }
 
-    // Redirect to edit page with job ID in query string
-    window.location.href = `edit.html?jobId=${encodeURIComponent(jobId)}`;
+    // Instead of redirecting to edit.html, we'll load the job data and populate the form
+    loadJobForEdit(jobId);
   } catch (error) {
     console.error("Error editing job:", error);
     Swal.fire({
       icon: "error",
       title: "เกิดข้อผิดพลาด",
       text: `ไม่สามารถแก้ไขงานได้: ${error.message}`,
+      confirmButtonText: "ตกลง",
+      confirmButtonColor: "#ef4444",
+    });
+  }
+}
+
+// Load job data for editing and populate the form
+async function loadJobForEdit(jobId) {
+  try {
+    if (!jobId) {
+      throw new Error("Job ID is required");
+    }
+
+    console.log("Loading job for edit:", jobId);
+
+    // Show loading animation immediately
+    showLoadingAnimation("กำลังโหลดข้อมูลงาน...");
+
+    // Try to get job data from backend first
+    let job = null;
+    try {
+      const response = await submitToGoogleSheets({
+        action: "getJobById",
+        jobId: jobId,
+        username: currentUser.username,
+      });
+
+      if (response && response.success && response.job) {
+        job = response.job;
+      }
+    } catch (error) {
+      console.warn("Failed to get job from backend, trying localStorage:", error);
+    }
+
+    // If not found in backend, try localStorage
+    if (!job) {
+      const savedJobs = await loadJobsFromSheets();
+      job = savedJobs.find((j) => j.jobId === jobId);
+    }
+
+    console.log("Found job:", job);
+
+    if (!job) {
+      console.error("Job not found for ID:", jobId);
+      hideLoadingAnimation();
+      Swal.fire({
+        icon: "error",
+        title: "ไม่พบงาน",
+        text: "ไม่สามารถหางานที่ต้องการแก้ไขได้",
+        confirmButtonText: "ตกลง",
+      });
+      return;
+    }
+
+    // Clear form first to ensure clean state
+    resetForm();
+
+    // Set mode to edit
+    const modeElement = document.getElementById("job-mode");
+    if (modeElement) modeElement.value = "edit";
+
+    // Update UI for edit mode
+    const titleElement = document.getElementById("job-screen-title");
+    if (titleElement) titleElement.textContent = "แก้ไขงาน";
+
+    const submitBtn = document.getElementById("job-submit-btn");
+    if (submitBtn) submitBtn.textContent = "บันทึกการแก้ไข";
+
+    // Populate form with job data
+    populateFormWithJobData(job);
+    showScreen("job-screen");
+
+    // Hide loading animation after a short delay to ensure UI updates
+    setTimeout(() => {
+      hideLoadingAnimation();
+    }, 500);
+  } catch (error) {
+    console.error("Error loading job for edit:", error);
+    hideLoadingAnimation();
+    Swal.fire({
+      icon: "error",
+      title: "เกิดข้อผิดพลาด",
+      text: `ไม่สามารถโหลดข้อมูลงานได้: ${error.message}`,
       confirmButtonText: "ตกลง",
       confirmButtonColor: "#ef4444",
     });
