@@ -146,6 +146,19 @@
         <p>กำลังโหลดข้อมูลงาน...</p>
       </div>
 
+      <!-- Error message -->
+      <div id="error-message" class="hidden p-4 text-center">
+        <div class="card bg-white p-4 mb-4">
+          <h2 class="font-medium text-red-600 mb-2">เกิดข้อผิดพลาด</h2>
+          <p id="error-text" class="text-gray-600 mb-4"></p>
+          <button 
+            class="w-full py-3 btn-primary rounded-md font-medium touch-target"
+            onclick="goToHistory()">
+            กลับไปหน้าประวัติ
+          </button>
+        </div>
+      </div>
+
       <!-- Edit Job Form -->
       <form id="edit-job-form" class="hidden">
         <!-- Hidden fields -->
@@ -196,7 +209,7 @@
                 class="w-full p-3 border border-gray-300 rounded-md mb-2 touch-target"
                 required
               >
-                <option value="" disabled>เลือกบริษัท</option>
+                <option value="" disabled selected>เลือกบริษัท</option>
                 <option value="บจก.เวอริโฟน (ชั้น 3.2)">บจก.เวอริโฟน (ชั้น 3.2)</option>
                 <option value="บจก.เวอริโฟน (ชั้น 20)">บจก.เวอริโฟน (ชั้น 20)</option>
                 <option value="บจก.ไอมาร์ค">บจก.ไอมาร์ค</option>
@@ -267,6 +280,32 @@
             </h2>
             <div id="job-details-container">
               <!-- Job details will be populated here -->
+              <div class="job-detail-card border border-gray-200 rounded-md p-3 mb-3">
+                <div class="mb-2">
+                  <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
+                  <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" required>
+                </div>
+                <div class="mb-2">
+                  <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
+                  <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" required>
+                </div>
+                <div class="mb-2">
+                  <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
+                  <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" required>
+                </div>
+                <div class="mb-2">
+                  <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
+                  <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" required>
+                </div>
+                <div class="mb-2">
+                  <label class="block text-gray-600 mb-1">รายละเอียด</label>
+                  <textarea class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required></textarea>
+                </div>
+                <div>
+                  <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
+                  <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" value="0" required>
+                </div>
+              </div>
             </div>
             <button
               type="button"
@@ -524,6 +563,7 @@
           // Show loading
           document.getElementById("loading").classList.remove("hidden");
           document.getElementById("edit-job-form").classList.add("hidden");
+          document.getElementById("error-message").classList.add("hidden");
 
           // Try to get job data from backend first
           let job = null;
@@ -550,13 +590,7 @@
 
           if (!job) {
             console.error("Job not found for ID:", jobId);
-            await Swal.fire({
-              icon: "error",
-              title: "ไม่พบงาน",
-              text: "ไม่สามารถหางานที่ต้องการแก้ไขได้",
-              confirmButtonText: "ตกลง",
-            });
-            goToHistory();
+            showError("ไม่สามารถหางานที่ต้องการแก้ไขได้ (ID: " + jobId + ")");
             return;
           }
 
@@ -572,14 +606,7 @@
         } catch (error) {
           console.error("Error loading job for edit:", error);
           document.getElementById("loading").classList.add("hidden");
-          await Swal.fire({
-            icon: "error",
-            title: "เกิดข้อผิดพลาด",
-            text: `ไม่สามารถโหลดข้อมูลงานได้: ${error.message}`,
-            confirmButtonText: "ตกลง",
-            confirmButtonColor: "#ef4444",
-          });
-          goToHistory();
+          showError(`ไม่สามารถโหลดข้อมูลงานได้: ${error.message}`);
         }
       }
 
@@ -745,7 +772,7 @@
           updateTotalAmount();
         } catch (error) {
           console.error("Error populating form with job data:", error);
-          throw new Error(`Failed to populate form: ${error.message}`);
+          showError(`Failed to populate form: ${error.message}`);
         }
       }
 
@@ -1092,6 +1119,14 @@
           throw new Error(`Failed to update job: ${error.message}`);
         }
       }
+
+      // Show error message
+      function showError(message) {
+        document.getElementById("error-text").textContent = message;
+        document.getElementById("error-message").classList.remove("hidden");
+        document.getElementById("edit-job-form").classList.add("hidden");
+        document.getElementById("loading").classList.add("hidden");
+      }
       // --- END: JOB MANAGEMENT FUNCTIONS ---
 
       // --- START: UI FUNCTIONS ---
@@ -1099,7 +1134,6 @@
       function goToHistory() {
         window.location.href = "index.html#history-screen";
       }
-
       // --- END: UI FUNCTIONS ---
 
       // --- START: EVENT LISTENERS ---
@@ -1166,14 +1200,7 @@
           const jobId = urlParams.get("id");
 
           if (!jobId) {
-            Swal.fire({
-              icon: "error",
-              title: "ไม่พบข้อมูลงาน",
-              text: "ไม่พบ Job ID ใน URL",
-              confirmButtonText: "ตกลง",
-            }).then(() => {
-              goToHistory();
-            });
+            showError("ไม่พบ Job ID ใน URL โปรดเข้าถึงหน้านี้ผ่านลิงก์ที่ถูกต้อง");
             return;
           }
 
@@ -1189,15 +1216,7 @@
           updateTotalAmount();
         } catch (error) {
           console.error("Error during DOMContentLoaded:", error);
-          Swal.fire({
-            icon: "error",
-            title: "เกิดข้อผิดพลาด",
-            text: `ไม่สามารถโหลดหน้าแก้ไขงานได้: ${error.message}`,
-            confirmButtonText: "ตกลง",
-            confirmButtonColor: "#ef4444",
-          }).then(() => {
-            goToHistory();
-          });
+          showError(`ไม่สามารถโหลดหน้าแก้ไขงานได้: ${error.message}`);
         }
       });
       // --- END: EVENT LISTENERS ---
