@@ -116,6 +116,19 @@
         background-color: #dbeafe;
         border-color: #60a5fa;
       }
+      /* Loading spinner */
+      .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-left-color: #3b82f6;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
     </style>
   </head>
   <body>
@@ -142,13 +155,19 @@
       </div>
 
       <!-- Loading indicator -->
-      <div id="loading" class="hidden p-4 text-center">
+      <div id="loading" class="p-4 text-center hidden">
+        <div class="spinner"></div>
         <p>กำลังโหลดข้อมูลงาน...</p>
       </div>
 
       <!-- Error message -->
-      <div id="error-message" class="hidden p-4 text-center">
+      <div id="error-message" class="p-4 text-center hidden">
         <div class="card bg-white p-4 mb-4">
+          <div class="text-red-500 mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
           <h2 class="font-medium text-red-600 mb-2">เกิดข้อผิดพลาด</h2>
           <p id="error-text" class="text-gray-600 mb-4"></p>
           <button 
@@ -394,70 +413,18 @@
 
     <script src="config.js"></script>
     <script>
+      console.log("Edit page script loading...");
+
       // Global variables
       let currentUser = null;
       let originalJobData = null;
 
-      // --- START: SAFE LOCALSTORAGE WRAPPERS ---
-      // Safe localStorage wrapper for iOS compatibility
-      function safeLocalStorageSetItem(key, value) {
-        try {
-          localStorage.setItem(key, value);
-          return true;
-        } catch (e) {
-          console.error("localStorage setItem failed:", e);
-          // iOS Safari sometimes throws QUOTA_EXCEEDED_ERR
-          if (isIOS()) {
-            // Try to clean up old data
-            try {
-              // Remove oldest jobs to free up space
-              const jobs = JSON.parse(
-                safeLocalStorageGetItem("mangpongJobs") || "[]"
-              );
-              if (jobs.length > 10) {
-                // Keep only the most recent 10 jobs
-                const recentJobs = jobs.slice(-10);
-                safeLocalStorageSetItem("mangpongJobs", JSON.stringify(recentJobs));
-                // Retry setting the item
-                safeLocalStorageSetItem(key, value);
-                return true;
-              }
-            } catch (cleanupError) {
-              console.error("localStorage cleanup failed:", cleanupError);
-            }
-          }
-          return false;
-        }
-      }
-
-      // Safe localStorage getter
-      function safeLocalStorageGetItem(key, defaultValue = null) {
-        try {
-          return localStorage.getItem(key) || defaultValue;
-        } catch (e) {
-          console.error("localStorage getItem failed:", e);
-          return defaultValue;
-        }
-      }
-
-      // Safe localStorage removal
-      function safeLocalStorageRemoveItem(key) {
-        try {
-          localStorage.removeItem(key);
-          return true;
-        } catch (e) {
-          console.error("localStorage removeItem failed:", e);
-          return false;
-        }
-      }
-      // --- END: SAFE LOCALSTORAGE WRAPPERS ---
-
+      // --- START: HELPER FUNCTIONS ---
       // Function to detect iOS devices
       function isIOS() {
         return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
       }
 
-      // --- START: DATE FUNCTIONS ---
       // Format date as YYYY-MM-DD for input[type="date"]
       function formatDate(date) {
         const year = date.getFullYear();
@@ -500,7 +467,76 @@
 
         return new Date(gregorianYear, month, day);
       }
-      // --- END: DATE FUNCTIONS ---
+      // --- END: HELPER FUNCTIONS ---
+
+      // --- START: UI FUNCTIONS ---
+      // Show loading indicator
+      function showLoading() {
+        document.getElementById("loading").classList.remove("hidden");
+        document.getElementById("error-message").classList.add("hidden");
+        document.getElementById("edit-job-form").classList.add("hidden");
+      }
+
+      // Hide loading indicator
+      function hideLoading() {
+        document.getElementById("loading").classList.add("hidden");
+      }
+
+      // Show error message
+      function showError(message) {
+        console.error("Showing error:", message);
+        document.getElementById("error-text").textContent = message;
+        document.getElementById("error-message").classList.remove("hidden");
+        document.getElementById("loading").classList.add("hidden");
+        document.getElementById("edit-job-form").classList.add("hidden");
+      }
+
+      // Show form
+      function showForm() {
+        document.getElementById("edit-job-form").classList.remove("hidden");
+        document.getElementById("loading").classList.add("hidden");
+        document.getElementById("error-message").classList.add("hidden");
+      }
+
+      // Go to history page
+      function goToHistory() {
+        window.location.href = "index.html#history-screen";
+      }
+      // --- END: UI FUNCTIONS ---
+
+      // --- START: SAFE LOCALSTORAGE WRAPPERS ---
+      // Safe localStorage wrapper for iOS compatibility
+      function safeLocalStorageSetItem(key, value) {
+        try {
+          localStorage.setItem(key, value);
+          return true;
+        } catch (e) {
+          console.error("localStorage setItem failed:", e);
+          return false;
+        }
+      }
+
+      // Safe localStorage getter
+      function safeLocalStorageGetItem(key, defaultValue = null) {
+        try {
+          return localStorage.getItem(key) || defaultValue;
+        } catch (e) {
+          console.error("localStorage getItem failed:", e);
+          return defaultValue;
+        }
+      }
+
+      // Safe localStorage removal
+      function safeLocalStorageRemoveItem(key) {
+        try {
+          localStorage.removeItem(key);
+          return true;
+        } catch (e) {
+          console.error("localStorage removeItem failed:", e);
+          return false;
+        }
+      }
+      // --- END: SAFE LOCALSTORAGE WRAPPERS ---
 
       // --- START: JOB MANAGEMENT FUNCTIONS ---
       // Submit data to Google Apps Script
@@ -556,25 +592,25 @@
       // Load job data for editing
       async function loadJobForEdit(jobId) {
         try {
+          console.log("Loading job for edit:", jobId);
+          
           if (!jobId) {
             throw new Error("Job ID is required");
           }
 
-          // Show loading
-          document.getElementById("loading").classList.remove("hidden");
-          document.getElementById("edit-job-form").classList.add("hidden");
-          document.getElementById("error-message").classList.add("hidden");
+          showLoading();
 
           // Try to get job data from backend first
           let job = null;
           try {
+            console.log("Fetching job from Google Sheets...");
             const response = await submitToGoogleSheets({
               action: "getJobById",
-              jobId: jobId,
-              // We would normally pass username here, but we don't have it in this standalone page
-              // For a real implementation, you would need to pass the username or have some authentication
+              jobId: jobId
             });
 
+            console.log("Response from Google Sheets:", response);
+            
             if (response && response.success && response.job) {
               job = response.job;
             }
@@ -584,6 +620,7 @@
 
           // If not found in backend, try localStorage
           if (!job) {
+            console.log("Trying localStorage...");
             const savedJobs = JSON.parse(safeLocalStorageGetItem("mangpongJobs") || "[]");
             job = savedJobs.find((j) => j.jobId === jobId);
           }
@@ -594,18 +631,18 @@
             return;
           }
 
+          console.log("Found job:", job);
+
           // Store original job data for reference
           originalJobData = job;
 
           // Populate form with job data
           populateFormWithJobData(job);
 
-          // Hide loading and show form
-          document.getElementById("loading").classList.add("hidden");
-          document.getElementById("edit-job-form").classList.remove("hidden");
+          // Show form
+          showForm();
         } catch (error) {
           console.error("Error loading job for edit:", error);
-          document.getElementById("loading").classList.add("hidden");
           showError(`ไม่สามารถโหลดข้อมูลงานได้: ${error.message}`);
         }
       }
@@ -613,6 +650,8 @@
       // Populate form with job data
       function populateFormWithJobData(job) {
         try {
+          console.log("Populating form with job data:", job);
+          
           if (!job || typeof job !== "object") {
             throw new Error("Invalid job data provided");
           }
@@ -620,6 +659,7 @@
           // --- FIX STARTS HERE ---
           // Reconstruct structured data if it's not present (i.e., loaded from Sheets)
           if (!job.jobDetails && job.jobCount > 0) {
+            console.log("Reconstructing job details...");
             const reconstructedDetails = [];
             for (let i = 1; i <= job.jobCount; i++) {
               reconstructedDetails.push({
@@ -635,6 +675,7 @@
           }
 
           if (!job.additionalFees && job.feeCount > 0) {
+            console.log("Reconstructing additional fees...");
             const reconstructedFees = [];
             for (let i = 1; i <= job.feeCount; i++) {
               reconstructedFees.push({
@@ -701,50 +742,24 @@
 
               jobDetails.forEach((detail, index) => {
                 if (index === 0) {
-                  // Use the first job detail card
-                  const firstCard = document.createElement("div");
-                  firstCard.className =
-                    "job-detail-card border border-gray-200 rounded-md p-3 mb-3";
-                  firstCard.innerHTML = `
-                    <div class="mb-2">
-                      <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
-                      <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" value="${detail.destinationCompany || ""}" required>
-                    </div>
-                    <div class="mb-2">
-                      <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
-                      <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" value="${detail.deliveryProvince || ""}" required>
-                    </div>
-                    <div class="mb-2">
-                      <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
-                      <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" value="${detail.deliveryDistrict || ""}" required>
-                    </div>
-                    <div class="mb-2">
-                      <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
-                      <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" value="${detail.recipient || ""}" required>
-                    </div>
-                    <div class="mb-2">
-                      <label class="block text-gray-600 mb-1">รายละเอียด</label>
-                      <textarea class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required>${detail.description || ""}</textarea>
-                    </div>
-                    <div>
-                      <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
-                      <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" value="${detail.amount || 0}" required>
-                    </div>
-                  `;
-                  container.appendChild(firstCard);
-
-                  // Add event listener to amount input
-                  firstCard
-                    .querySelector(".amount-input")
-                    .addEventListener("input", updateTotalAmount);
+                  // Update the first job detail card
+                  const firstCardInputs = container.querySelector(".job-detail-card").querySelectorAll("input, textarea");
+                  if (firstCardInputs.length >= 6) {
+                    firstCardInputs[0].value = detail.destinationCompany || "";
+                    firstCardInputs[1].value = detail.deliveryProvince || "";
+                    firstCardInputs[2].value = detail.deliveryDistrict || "";
+                    firstCardInputs[3].value = detail.recipient || "";
+                    firstCardInputs[4].value = detail.description || "";
+                    firstCardInputs[5].value = detail.amount || 0;
+                    
+                    // Add event listener to amount input
+                    firstCardInputs[5].addEventListener("input", updateTotalAmount);
+                  }
                 } else {
                   // Add additional job detail cards
                   addJobDetailCard(detail);
                 }
               });
-            } else {
-              // If no job details exist, create a default empty card
-              addDefaultJobDetailCard();
             }
           }
 
@@ -844,46 +859,6 @@
         }
       }
 
-      // Add default job detail card
-      function addDefaultJobDetailCard() {
-        const container = document.getElementById("job-details-container");
-        const defaultCard = document.createElement("div");
-        defaultCard.className =
-          "job-detail-card border border-gray-200 rounded-md p-3 mb-3";
-        defaultCard.innerHTML = `
-          <div class="mb-2">
-            <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
-            <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" required>
-          </div>
-          <div class="mb-2">
-            <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
-            <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" required>
-          </div>
-          <div class="mb-2">
-            <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
-            <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" required>
-          </div>
-          <div class="mb-2">
-            <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
-            <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" required>
-          </div>
-          <div class="mb-2">
-            <label class="block text-gray-600 mb-1">รายละเอียด</label>
-            <textarea class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required></textarea>
-          </div>
-          <div>
-            <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
-            <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" value="0" required>
-          </div>
-        `;
-        container.appendChild(defaultCard);
-
-        // Add event listener to amount input
-        defaultCard
-          .querySelector(".amount-input")
-          .addEventListener("input", updateTotalAmount);
-      }
-
       // Add fee card
       function addFeeCard(fee = null) {
         const container = document.getElementById("additional-fees-container");
@@ -952,7 +927,6 @@
           }
         } catch (error) {
           console.error("Error updating total amount:", error);
-          // Don't throw error to prevent breaking the UI
         }
       }
 
@@ -1119,101 +1093,98 @@
           throw new Error(`Failed to update job: ${error.message}`);
         }
       }
-
-      // Show error message
-      function showError(message) {
-        document.getElementById("error-text").textContent = message;
-        document.getElementById("error-message").classList.remove("hidden");
-        document.getElementById("edit-job-form").classList.add("hidden");
-        document.getElementById("loading").classList.add("hidden");
-      }
       // --- END: JOB MANAGEMENT FUNCTIONS ---
 
-      // --- START: UI FUNCTIONS ---
-      // Go to history page
-      function goToHistory() {
-        window.location.href = "index.html#history-screen";
-      }
-      // --- END: UI FUNCTIONS ---
-
       // --- START: EVENT LISTENERS ---
-      // Add job detail
-      document.getElementById("add-job-detail").addEventListener("click", function () {
-        addJobDetailCard();
-      });
-
-      // Add additional fee
-      document.getElementById("add-fee").addEventListener("click", function () {
-        addFeeCard();
-      });
-
-      // Form submission
-      document.getElementById("edit-job-form").addEventListener("submit", async function (e) {
-        e.preventDefault();
-
-        // Show loading alert
-        Swal.fire({
-          title: "กำลังอัปเดตข้อมูล...",
-          text: "กรุณารอสักครู่",
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          showConfirmButton: false,
-          didOpen: () => {
-            Swal.showLoading();
-          },
-        });
-
-        try {
-          const formData = collectFormData();
-          const response = await updateJob(formData);
-
-          // Show success message
-          await Swal.fire({
-            icon: "success",
-            title: "อัปเดตสำเร็จ!",
-            text: `งาน ${formData.jobId} ถูกอัปเดตเรียบร้อยแล้ว`,
-            confirmButtonText: "ตกลง",
-            confirmButtonColor: "#10b981",
-          });
-
-          // Go back to history screen
-          goToHistory();
-        } catch (error) {
-          console.error("Error submitting form:", error);
-
-          // Show error message
-          await Swal.fire({
-            icon: "error",
-            title: "เกิดข้อผิดพลาด!",
-            text: error.message,
-            confirmButtonText: "ตกลง",
-            confirmButtonColor: "#ef4444",
-          });
-        }
-      });
-
       // Initialize when DOM is loaded
       document.addEventListener("DOMContentLoaded", function () {
+        console.log("DOM loaded, initializing edit page...");
+        
         try {
           // Get job ID from URL
           const urlParams = new URLSearchParams(window.location.search);
           const jobId = urlParams.get("id");
+
+          console.log("Job ID from URL:", jobId);
 
           if (!jobId) {
             showError("ไม่พบ Job ID ใน URL โปรดเข้าถึงหน้านี้ผ่านลิงก์ที่ถูกต้อง");
             return;
           }
 
+          // Check if config.js is loaded
+          if (typeof window.GOOGLE_SCRIPT_URL === 'undefined') {
+            showError("ไม่สามารถโหลดการกำหนดค่าได้ โปรดตรวจสอบว่าไฟล์ config.js ถูกโหลด correctly");
+            return;
+          }
+
           // Load job data
           loadJobForEdit(jobId);
 
-          // Add event listeners to amount inputs
+          // Add event listeners to amount inputs that are already in the DOM
           document.querySelectorAll(".amount-input").forEach((input) => {
             input.addEventListener("input", updateTotalAmount);
           });
 
           // Update totals initially
           updateTotalAmount();
+          
+          // Add job detail button
+          document.getElementById("add-job-detail").addEventListener("click", function () {
+            addJobDetailCard();
+          });
+
+          // Add additional fee button
+          document.getElementById("add-fee").addEventListener("click", function () {
+            addFeeCard();
+          });
+
+          // Form submission
+          document.getElementById("edit-job-form").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            // Show loading alert
+            Swal.fire({
+              title: "กำลังอัปเดตข้อมูล...",
+              text: "กรุณารอสักครู่",
+              allowOutsideClick: false,
+              allowEscapeKey: false,
+              showConfirmButton: false,
+              didOpen: () => {
+                Swal.showLoading();
+              },
+            });
+
+            try {
+              const formData = collectFormData();
+              const response = await updateJob(formData);
+
+              // Show success message
+              await Swal.fire({
+                icon: "success",
+                title: "อัปเดตสำเร็จ!",
+                text: `งาน ${formData.jobId} ถูกอัปเดตเรียบร้อยแล้ว`,
+                confirmButtonText: "ตกลง",
+                confirmButtonColor: "#10b981",
+              });
+
+              // Go back to history screen
+              goToHistory();
+            } catch (error) {
+              console.error("Error submitting form:", error);
+
+              // Show error message
+              await Swal.fire({
+                icon: "error",
+                title: "เกิดข้อผิดพลาด!",
+                text: error.message,
+                confirmButtonText: "ตกลง",
+                confirmButtonColor: "#ef4444",
+              });
+            }
+          });
+          
+          console.log("Event listeners attached successfully");
         } catch (error) {
           console.error("Error during DOMContentLoaded:", error);
           showError(`ไม่สามารถโหลดหน้าแก้ไขงานได้: ${error.message}`);
