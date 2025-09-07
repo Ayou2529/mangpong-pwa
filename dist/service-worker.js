@@ -258,6 +258,11 @@ self.addEventListener('fetch', event => {
   const request = event.request;
   const url = new URL(request.url);
   
+  // Skip requests from Chrome extensions (to avoid errors)
+  if (url.protocol === 'chrome-extension:') {
+    return;
+  }
+  
   console.log('Service Worker: Handling fetch event for:', url.href);
   
   // Handle navigation requests (HTML pages)

@@ -1,5 +1,0 @@
-models:
-  - name: GPT‑4o                # ชื่อที่คุณอยากตั้ง
-    provider: openai
-    model: gpt-4o               # หรือ gpt‑4‑turbo, gpt‑3.5‑turbo ฯลฯ
-    apiKey: YOUR_OPENAI_API_KEY   # ← ใส่คีย์ของคุณที่ได้จาก https://platform.openai.com/account/api-keys

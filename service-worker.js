@@ -258,6 +258,11 @@ self.addEventListener('fetch', event => {
   const request = event.request;
   const url = new URL(request.url);
   
+  // Skip requests from Chrome extensions (to avoid errors)
+  if (url.protocol === 'chrome-extension:') {
+    return;
+  }
+  
   console.log('Service Worker: Handling fetch event for:', url.href);
   
   // Handle navigation requests (HTML pages)
@@ -306,54 +311,4 @@ self.addEventListener('fetch', event => {
   
   // Handle other requests with cache-first strategy
   event.respondWith(cacheFirst(request));
-});
-
-// Handle push notifications (if used)
-self.addEventListener('push', event => {
-  console.log('Service Worker: Push event received:', event);
-  
-  // Extract push data
-  let data = {};
-  if (event.data) {
-    data = event.data.json();
-  }
-  
-  // Show notification
-  const title = data.title || 'Mangpong Notification';
-  const options = {
-    body: data.body || 'You have a new notification',
-    icon: data.icon || '/mangpong-pwa/icon-192.png',
-    badge: data.badge || '/mangpong-pwa/icon-192.png',
-    data: {
-      url: data.url || '/'
-    }
-  };
-  
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
-});
-
-// Handle notification clicks
-self.addEventListener('notificationclick', event => {
-  console.log('Service Worker: Notification click received:', event);
-  
-  event.notification.close();
-  
-  // Open the URL associated with the notification
-  event.waitUntil(
-    clients.openWindow(event.notification.data.url)
-  );
-});
-
-// Handle sync events
-self.addEventListener('sync', event => {
-  console.log('Service Worker: Sync event received:', event);
-  
-  if (event.tag === 'background-sync') {
-    event.waitUntil(
-      // Perform background sync operations here
-      Promise.resolve()
-    );
-  }
 });
