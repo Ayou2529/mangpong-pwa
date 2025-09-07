@@ -1,0 +1,1206 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>แก้ไขงาน - แมงป่อง เทรดดิ้ง</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="logo_mangpong_120x120.png"
+      sizes="120x120"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="logo_mangpong_152x152.png"
+      sizes="152x152"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="logo_mangpong_180x180.png"
+      sizes="180x180"
+    />
+    <link rel="apple-touch-icon" href="icon-192.png" sizes="192x192" />
+    <link rel="manifest" href="manifest.json" />
+    <style>
+      body {
+        font-family: "Prompt", sans-serif;
+        background-color: #f5f7fa;
+        touch-action: manipulation;
+      }
+      .card {
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+      }
+      .card:hover {
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+      }
+      .btn-primary {
+        background-color: #3b82f6;
+        color: white;
+        transition: all 0.3s ease;
+      }
+      .btn-primary:hover {
+        background-color: #2563eb;
+      }
+      .btn-secondary {
+        background-color: #e5e7eb;
+        color: #4b5563;
+        transition: all 0.3s ease;
+      }
+      .btn-secondary:hover {
+        background-color: #d1d5db;
+      }
+      .btn-success {
+        background-color: #10b981;
+        color: white;
+        transition: all 0.3s ease;
+      }
+      .btn-success:hover {
+        background-color: #059669;
+      }
+      .btn-danger {
+        background-color: #ef4444;
+        color: white;
+        transition: all 0.3s ease;
+      }
+      .btn-danger:hover {
+        background-color: #dc2626;
+      }
+      input[type="date"]::-webkit-calendar-picker-indicator {
+        cursor: pointer;
+      }
+      /* Improve touch targets for mobile */
+      input,
+      select,
+      textarea,
+      button {
+        font-size: 16px; /* Prevents iOS zoom on focus */
+      }
+      .touch-target {
+        min-height: 44px;
+        min-width: 44px;
+      }
+      /* Fix iOS input styling */
+      input,
+      select,
+      textarea {
+        -webkit-appearance: none;
+        border-radius: 8px;
+      }
+      .section-divider {
+        border-top: 1px solid #e5e7eb;
+        margin: 16px 0;
+      }
+      .add-fee-btn {
+        background-color: #f0f9ff;
+        border: 1px solid #93c5fd;
+        color: #2563eb;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.2s;
+      }
+      .add-fee-btn:hover {
+        background-color: #dbeafe;
+        border-color: #60a5fa;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="max-w-md mx-auto bg-white min-h-screen relative pb-16">
+      <!-- Header -->
+      <div class="flex items-center mb-4 p-4 border-b">
+        <button class="mr-2 touch-target" onclick="goToHistory()">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6 text-gray-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+        </button>
+        <h1 class="text-xl font-bold">แก้ไขงาน</h1>
+      </div>
+
+      <!-- Loading indicator -->
+      <div id="loading" class="hidden p-4 text-center">
+        <p>กำลังโหลดข้อมูลงาน...</p>
+      </div>
+
+      <!-- Edit Job Form -->
+      <form id="edit-job-form" class="hidden">
+        <!-- Hidden fields -->
+        <input type="hidden" id="job-id" name="jobId" />
+        <input type="hidden" id="original-job-date" name="originalJobDate" />
+
+        <div class="p-4">
+          <!-- Job Date -->
+          <div class="card bg-white p-4 mb-4">
+            <div class="mb-3">
+              <label class="block text-gray-600 mb-1">วันที่บันทึกงาน</label>
+              <input
+                type="date"
+                id="job-date-picker"
+                class="w-full p-3 border border-gray-300 rounded-md touch-target"
+                required
+              />
+            </div>
+            <div class="flex items-center text-sm text-gray-500">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4 mr-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span>สามารถแก้ไขวันที่ได้</span>
+            </div>
+          </div>
+
+          <!-- Job Information -->
+          <div class="card bg-white p-4 mb-4">
+            <h2 class="font-medium text-gray-700 mb-3">ข้อมูลการรับงาน</h2>
+
+            <!-- รับ -->
+            <div class="mb-4">
+              <h3 class="text-gray-600 font-medium mb-2">ข้อมูลการรับ</h3>
+              <label class="block text-gray-600 mb-1">บริษัท/สถานที่รับงาน</label>
+              <select
+                id="company-select"
+                class="w-full p-3 border border-gray-300 rounded-md mb-2 touch-target"
+                required
+              >
+                <option value="" disabled>เลือกบริษัท</option>
+                <option value="บจก.เวอริโฟน (ชั้น 3.2)">บจก.เวอริโฟน (ชั้น 3.2)</option>
+                <option value="บจก.เวอริโฟน (ชั้น 20)">บจก.เวอริโฟน (ชั้น 20)</option>
+                <option value="บจก.ไอมาร์ค">บจก.ไอมาร์ค</option>
+                <option value="บจก.สนง.ทองทวี">บจก.สนง.ทองทวี</option>
+                <option value="บจก.ออฟฟิศเอที">บจก.ออฟฟิศเอที</option>
+              </select>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- ผู้มอบงาน -->
+            <div class="mb-4">
+              <h3 class="text-gray-600 font-medium mb-2">ผู้มอบงาน</h3>
+              <div class="mb-2">
+                <label class="block text-gray-600 mb-1">ผู้มอบงาน</label>
+                <input
+                  type="text"
+                  id="assigned-by"
+                  class="w-full p-3 border border-gray-300 rounded-md touch-target"
+                  placeholder="ชื่อผู้มอบงาน"
+                  required
+                />
+              </div>
+              <div>
+                <label class="block text-gray-600 mb-1">ข้อมูลติดต่อ</label>
+                <input
+                  type="text"
+                  id="contact"
+                  class="w-full p-3 border border-gray-300 rounded-md touch-target"
+                  placeholder="ข้อมูลติดต่อ"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- สถานที่รับของ -->
+            <div>
+              <h3 class="text-gray-600 font-medium mb-2">สถานที่รับของ</h3>
+              <div class="mb-2">
+                <label class="block text-gray-600 mb-1">จังหวัดรับของ</label>
+                <input
+                  type="text"
+                  id="pickup-province"
+                  class="w-full p-3 border border-gray-300 rounded-md touch-target"
+                  placeholder="จังหวัด"
+                  required
+                />
+              </div>
+              <div>
+                <label class="block text-gray-600 mb-1">เขต/อำเภอรับของ</label>
+                <input
+                  type="text"
+                  id="pickup-district"
+                  class="w-full p-3 border border-gray-300 rounded-md touch-target"
+                  placeholder="เขต/อำเภอ"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Service Fee -->
+          <div class="card bg-white p-4 mb-4">
+            <h2 class="font-medium text-gray-700 mb-3">
+              ค่าบริการหลัก (Main Service Fee)
+            </h2>
+            <div id="job-details-container">
+              <!-- Job details will be populated here -->
+            </div>
+            <button
+              type="button"
+              id="add-job-detail"
+              class="w-full py-3 border border-dashed border-indigo-500 rounded-md text-indigo-500 flex items-center justify-center touch-target"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 mr-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                />
+              </svg>
+              เพิ่มรายการ (สูงสุด 5)
+            </button>
+          </div>
+
+          <!-- Summary -->
+          <div class="card bg-white p-4 mb-4">
+            <h2 class="font-medium text-gray-700 mb-2">สรุปค่าบริการ</h2>
+            <div class="flex justify-between mb-2">
+              <p class="text-gray-600">ค่าบริการหลัก:</p>
+              <p class="font-medium" id="main-service-fee">0 บาท</p>
+            </div>
+            <div class="mb-2">
+              <p class="text-gray-600 mb-1">รวมค่าบริการเพิ่มเติม:</p>
+              <div id="additional-fees-container">
+                <!-- Additional fees will be populated here -->
+              </div>
+              <button
+                type="button"
+                id="add-fee"
+                class="mt-3 add-fee-btn touch-target"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5 mr-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
+                </svg>
+                เพิ่มค่าบริการเพิ่มเติม
+              </button>
+            </div>
+            <div
+              class="border-t border-gray-200 pt-2 mt-2 flex justify-between"
+            >
+              <p class="font-medium">รวมทั้งหมด:</p>
+              <p class="font-bold text-indigo-600" id="total-amount">0 บาท</p>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex space-x-4 mb-20">
+            <button
+              type="button"
+              class="flex-1 py-3 btn-secondary rounded-md font-medium touch-target"
+              onclick="goToHistory()"
+            >
+              ยกเลิก
+            </button>
+            <button
+              type="submit"
+              class="flex-1 py-3 btn-primary rounded-md font-medium touch-target"
+            >
+              อัปเดตงาน
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+      // Global variables
+      let currentUser = null;
+      let originalJobData = null;
+
+      // --- START: SAFE LOCALSTORAGE WRAPPERS ---
+      // Safe localStorage wrapper for iOS compatibility
+      function safeLocalStorageSetItem(key, value) {
+        try {
+          localStorage.setItem(key, value);
+          return true;
+        } catch (e) {
+          console.error("localStorage setItem failed:", e);
+          // iOS Safari sometimes throws QUOTA_EXCEEDED_ERR
+          if (isIOS()) {
+            // Try to clean up old data
+            try {
+              // Remove oldest jobs to free up space
+              const jobs = JSON.parse(
+                safeLocalStorageGetItem("mangpongJobs") || "[]"
+              );
+              if (jobs.length > 10) {
+                // Keep only the most recent 10 jobs
+                const recentJobs = jobs.slice(-10);
+                safeLocalStorageSetItem("mangpongJobs", JSON.stringify(recentJobs));
+                // Retry setting the item
+                safeLocalStorageSetItem(key, value);
+                return true;
+              }
+            } catch (cleanupError) {
+              console.error("localStorage cleanup failed:", cleanupError);
+            }
+          }
+          return false;
+        }
+      }
+
+      // Safe localStorage getter
+      function safeLocalStorageGetItem(key, defaultValue = null) {
+        try {
+          return localStorage.getItem(key) || defaultValue;
+        } catch (e) {
+          console.error("localStorage getItem failed:", e);
+          return defaultValue;
+        }
+      }
+
+      // Safe localStorage removal
+      function safeLocalStorageRemoveItem(key) {
+        try {
+          localStorage.removeItem(key);
+          return true;
+        } catch (e) {
+          console.error("localStorage removeItem failed:", e);
+          return false;
+        }
+      }
+      // --- END: SAFE LOCALSTORAGE WRAPPERS ---
+
+      // Function to detect iOS devices
+      function isIOS() {
+        return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      }
+
+      // --- START: DATE FUNCTIONS ---
+      // Format date as YYYY-MM-DD for input[type="date"]
+      function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
+
+      // Convert date to Thai format for display
+      function formatThaiDate(dateString) {
+        const date = new Date(dateString);
+        const thaiYear = date.getFullYear() + 543;
+        const thaiMonths = [
+          "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.",
+          "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."
+        ];
+
+        const day = date.getDate();
+        const month = thaiMonths[date.getMonth()];
+        const year = thaiYear;
+
+        return `${day}/${month}/${year}`;
+      }
+
+      // Parse Thai date format DD/MM/YYYY to Date object
+      function parseThaiDate(thaiDateStr) {
+        if (!thaiDateStr || !thaiDateStr.includes("/")) {
+          return new Date();
+        }
+
+        const parts = thaiDateStr.split("/");
+        if (parts.length !== 3) {
+          return new Date();
+        }
+
+        const day = parseInt(parts[0]);
+        const month = parseInt(parts[1]) - 1; // Month is 0-indexed
+        const thaiYear = parseInt(parts[2]);
+        const gregorianYear = thaiYear - 543;
+
+        return new Date(gregorianYear, month, day);
+      }
+      // --- END: DATE FUNCTIONS ---
+
+      // --- START: JOB MANAGEMENT FUNCTIONS ---
+      // Submit data to Google Apps Script
+      function submitToGoogleSheets(data) {
+        return new Promise((resolve, reject) => {
+          // Check if Google Script URL is defined
+          if (!window.GOOGLE_SCRIPT_URL) {
+            reject(new Error("Google Script URL ไม่ได้ถูกกำหนดไว้"));
+            return;
+          }
+
+          const callbackName = "jsonpCallback_" + Date.now();
+
+          // expose the callback globally
+          window[callbackName] = (response) => {
+            resolve(response);
+            cleanUp();
+          };
+
+          // build query string, include the callback parameter
+          const qs = new URLSearchParams({
+            ...data,
+            callback: callbackName,
+          }).toString();
+
+          // create the script tag that will load the JSONP response
+          const script = document.createElement("script");
+          script.src = `${window.GOOGLE_SCRIPT_URL}?${qs}`;
+          script.onerror = () => {
+            reject(new Error("ไม่สามารถเชื่อมต่อกับ Google Apps Script ได้"));
+            cleanUp();
+          };
+
+          // Add timeout handling
+          const timeoutId = setTimeout(() => {
+            reject(new Error("การเชื่อมต่อกับ Google Apps Script หมดเวลา"));
+            cleanUp();
+          }, 10000); // 10 second timeout
+
+          // cleanup function – remove script element and the temporary callback
+          function cleanUp() {
+            clearTimeout(timeoutId);
+            delete window[callbackName];
+            if (script.parentNode) {
+              script.parentNode.removeChild(script);
+            }
+          }
+
+          document.body.appendChild(script);
+        });
+      }
+
+      // Load job data for editing
+      async function loadJobForEdit(jobId) {
+        try {
+          if (!jobId) {
+            throw new Error("Job ID is required");
+          }
+
+          // Show loading
+          document.getElementById("loading").classList.remove("hidden");
+          document.getElementById("edit-job-form").classList.add("hidden");
+
+          // Try to get job data from backend first
+          let job = null;
+          try {
+            const response = await submitToGoogleSheets({
+              action: "getJobById",
+              jobId: jobId,
+              // We would normally pass username here, but we don't have it in this standalone page
+              // For a real implementation, you would need to pass the username or have some authentication
+            });
+
+            if (response && response.success && response.job) {
+              job = response.job;
+            }
+          } catch (error) {
+            console.warn("Failed to get job from backend, trying localStorage:", error);
+          }
+
+          // If not found in backend, try localStorage
+          if (!job) {
+            const savedJobs = JSON.parse(safeLocalStorageGetItem("mangpongJobs") || "[]");
+            job = savedJobs.find((j) => j.jobId === jobId);
+          }
+
+          if (!job) {
+            console.error("Job not found for ID:", jobId);
+            await Swal.fire({
+              icon: "error",
+              title: "ไม่พบงาน",
+              text: "ไม่สามารถหางานที่ต้องการแก้ไขได้",
+              confirmButtonText: "ตกลง",
+            });
+            goToHistory();
+            return;
+          }
+
+          // Store original job data for reference
+          originalJobData = job;
+
+          // Populate form with job data
+          populateFormWithJobData(job);
+
+          // Hide loading and show form
+          document.getElementById("loading").classList.add("hidden");
+          document.getElementById("edit-job-form").classList.remove("hidden");
+        } catch (error) {
+          console.error("Error loading job for edit:", error);
+          document.getElementById("loading").classList.add("hidden");
+          await Swal.fire({
+            icon: "error",
+            title: "เกิดข้อผิดพลาด",
+            text: `ไม่สามารถโหลดข้อมูลงานได้: ${error.message}`,
+            confirmButtonText: "ตกลง",
+            confirmButtonColor: "#ef4444",
+          });
+          goToHistory();
+        }
+      }
+
+      // Populate form with job data
+      function populateFormWithJobData(job) {
+        try {
+          if (!job || typeof job !== "object") {
+            throw new Error("Invalid job data provided");
+          }
+
+          // --- FIX STARTS HERE ---
+          // Reconstruct structured data if it's not present (i.e., loaded from Sheets)
+          if (!job.jobDetails && job.jobCount > 0) {
+            const reconstructedDetails = [];
+            for (let i = 1; i <= job.jobCount; i++) {
+              reconstructedDetails.push({
+                destinationCompany: job["companyTo" + i] || "",
+                deliveryProvince: job["province" + i] || "",
+                deliveryDistrict: job["district" + i] || "",
+                recipient: job["recipient" + i] || "",
+                description: job["detail" + i] || "",
+                amount: parseFloat(job["amount" + i]) || 0,
+              });
+            }
+            job.jobDetails = JSON.stringify(reconstructedDetails);
+          }
+
+          if (!job.additionalFees && job.feeCount > 0) {
+            const reconstructedFees = [];
+            for (let i = 1; i <= job.feeCount; i++) {
+              reconstructedFees.push({
+                description: job["feeName" + i] || "",
+                amount: parseFloat(job["feeAmount" + i]) || 0,
+              });
+            }
+            job.additionalFees = JSON.stringify(reconstructedFees);
+          }
+          // --- FIX ENDS HERE ---
+
+          // Set the job ID
+          document.getElementById("job-id").value = job.jobId;
+
+          // Set job date - preserve the original job date
+          if (job.jobDate) {
+            const parsedDate = parseThaiDate(job.jobDate);
+            const jobDatePicker = document.getElementById("job-date-picker");
+            const originalDateField = document.getElementById("original-job-date");
+            
+            if (jobDatePicker) {
+              jobDatePicker.value = formatDate(parsedDate);
+            }
+            
+            if (originalDateField) {
+              originalDateField.value = job.jobDate;
+            }
+          }
+
+          // Basic information
+          if (job.company) {
+            document.getElementById("company-select").value = job.company;
+          }
+
+          if (job.assignedBy) {
+            document.getElementById("assigned-by").value = job.assignedBy;
+          }
+
+          if (job.contact) {
+            document.getElementById("contact").value = job.contact;
+          }
+
+          if (job.pickupProvince) {
+            document.getElementById("pickup-province").value = job.pickupProvince;
+          }
+
+          if (job.pickupDistrict) {
+            document.getElementById("pickup-district").value = job.pickupDistrict;
+          }
+
+          // Job details
+          const container = document.getElementById("job-details-container");
+          if (container) {
+            container.innerHTML = ""; // Clear existing job details
+
+            let jobDetails = [];
+            if (job.jobDetails) {
+              try {
+                jobDetails = JSON.parse(job.jobDetails);
+              } catch (error) {
+                console.error("Error parsing job details:", error);
+                jobDetails = [];
+              }
+
+              jobDetails.forEach((detail, index) => {
+                if (index === 0) {
+                  // Use the first job detail card
+                  const firstCard = document.createElement("div");
+                  firstCard.className =
+                    "job-detail-card border border-gray-200 rounded-md p-3 mb-3";
+                  firstCard.innerHTML = `
+                    <div class="mb-2">
+                      <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
+                      <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" value="${detail.destinationCompany || ""}" required>
+                    </div>
+                    <div class="mb-2">
+                      <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
+                      <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" value="${detail.deliveryProvince || ""}" required>
+                    </div>
+                    <div class="mb-2">
+                      <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
+                      <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" value="${detail.deliveryDistrict || ""}" required>
+                    </div>
+                    <div class="mb-2">
+                      <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
+                      <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" value="${detail.recipient || ""}" required>
+                    </div>
+                    <div class="mb-2">
+                      <label class="block text-gray-600 mb-1">รายละเอียด</label>
+                      <textarea class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required>${detail.description || ""}</textarea>
+                    </div>
+                    <div>
+                      <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
+                      <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" value="${detail.amount || 0}" required>
+                    </div>
+                  `;
+                  container.appendChild(firstCard);
+
+                  // Add event listener to amount input
+                  firstCard
+                    .querySelector(".amount-input")
+                    .addEventListener("input", updateTotalAmount);
+                } else {
+                  // Add additional job detail cards
+                  addJobDetailCard(detail);
+                }
+              });
+            } else {
+              // If no job details exist, create a default empty card
+              addDefaultJobDetailCard();
+            }
+          }
+
+          // Additional fees
+          const additionalFeesContainer = document.getElementById("additional-fees-container");
+          if (additionalFeesContainer) {
+            additionalFeesContainer.innerHTML = ""; // Clear existing fees
+
+            if (job.additionalFees) {
+              let additionalFees = [];
+              try {
+                additionalFees = JSON.parse(job.additionalFees);
+              } catch (error) {
+                console.error("Error parsing additional fees:", error);
+                additionalFees = [];
+              }
+
+              additionalFees.forEach((fee) => {
+                addFeeCard(fee);
+              });
+            }
+          }
+
+          // Update totals
+          updateTotalAmount();
+        } catch (error) {
+          console.error("Error populating form with job data:", error);
+          throw new Error(`Failed to populate form: ${error.message}`);
+        }
+      }
+
+      // Add a job detail card
+      function addJobDetailCard(detail = null) {
+        const container = document.getElementById("job-details-container");
+        const jobDetailCount = container.querySelectorAll(".job-detail-card").length;
+
+        if (jobDetailCount < 5) {
+          const newDetail = document.createElement("div");
+          newDetail.className =
+            "job-detail-card border border-gray-200 rounded-md p-3 mb-3";
+          newDetail.innerHTML = `
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="font-medium">รายละเอียดงาน #${jobDetailCount + 1}</h3>
+              <button type="button" class="text-red-500 remove-job-detail touch-target">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div class="mb-2">
+              <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
+              <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" value="${detail ? detail.destinationCompany || "" : ""}" required>
+            </div>
+            <div class="mb-2">
+              <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
+              <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" value="${detail ? detail.deliveryProvince || "" : ""}" required>
+            </div>
+            <div class="mb-2">
+              <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
+              <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" value="${detail ? detail.deliveryDistrict || "" : ""}" required>
+            </div>
+            <div class="mb-2">
+              <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
+              <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" value="${detail ? detail.recipient || "" : ""}" required>
+            </div>
+            <div class="mb-2">
+              <label class="block text-gray-600 mb-1">รายละเอียด</label>
+              <textarea class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required>${detail ? detail.description || "" : ""}</textarea>
+            </div>
+            <div>
+              <label class="block text-gray-600 mb-1">จำนวนเงิน - บาท</label>
+              <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" value="${detail ? detail.amount || 0 : 0}" required>
+            </div>
+          `;
+          container.appendChild(newDetail);
+
+          // Add event listener to remove button
+          newDetail
+            .querySelector(".remove-job-detail")
+            .addEventListener("click", function () {
+              container.removeChild(newDetail);
+              updateTotalAmount();
+            });
+
+          // Add event listener to amount input
+          newDetail
+            .querySelector(".amount-input")
+            .addEventListener("input", updateTotalAmount);
+        } else {
+          Swal.fire({
+            icon: "warning",
+            title: "จำกัดจำนวนรายการ",
+            text: "คุณสามารถเพิ่มรายละเอียดงานได้สูงสุด 5 รายการ",
+            confirmButtonText: "ตกลง",
+            confirmButtonColor: "#f59e0b",
+          });
+        }
+      }
+
+      // Add default job detail card
+      function addDefaultJobDetailCard() {
+        const container = document.getElementById("job-details-container");
+        const defaultCard = document.createElement("div");
+        defaultCard.className =
+          "job-detail-card border border-gray-200 rounded-md p-3 mb-3";
+        defaultCard.innerHTML = `
+          <div class="mb-2">
+            <label class="block text-gray-600 mb-1">บริษัทปลายทาง</label>
+            <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อบริษัทปลายทาง" required>
+          </div>
+          <div class="mb-2">
+            <label class="block text-gray-600 mb-1">จังหวัดส่งของ</label>
+            <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="จังหวัดส่งของ" required>
+          </div>
+          <div class="mb-2">
+            <label class="block text-gray-600 mb-1">เขต/อำเภอส่งของ</label>
+            <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="เขต/อำเภอส่งของ" required>
+          </div>
+          <div class="mb-2">
+            <label class="block text-gray-600 mb-1">ผู้รับงาน</label>
+            <input type="text" class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="ชื่อผู้รับงาน" required>
+          </div>
+          <div class="mb-2">
+            <label class="block text-gray-600 mb-1">รายละเอียด</label>
+            <textarea class="w-full p-3 border border-gray-300 rounded-md touch-target" placeholder="รายละเอียดงาน" rows="2" required></textarea>
+          </div>
+          <div>
+            <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
+            <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" value="0" required>
+          </div>
+        `;
+        container.appendChild(defaultCard);
+
+        // Add event listener to amount input
+        defaultCard
+          .querySelector(".amount-input")
+          .addEventListener("input", updateTotalAmount);
+      }
+
+      // Add fee card
+      function addFeeCard(fee = null) {
+        const container = document.getElementById("additional-fees-container");
+        const feeItem = document.createElement("div");
+        feeItem.className = "flex justify-between items-center mb-2";
+        feeItem.innerHTML = `
+          <div class="flex-1 mr-2">
+            <select class="w-full p-3 border border-gray-300 rounded-md touch-target" required>
+              <option value="" disabled selected>เลือกรายการ</option>
+              <option value="บรรทุก" ${fee && fee.description === "บรรทุก" ? "selected" : ""}>บรรทุก</option>
+              <option value="ล่วงเวลา_OT" ${fee && fee.description === "ล่วงเวลา_OT" ? "selected" : ""}>ล่วงเวลา_OT</option>
+              <option value="กลับ" ${fee && fee.description === "กลับ" ? "selected" : ""}>กลับ</option>
+              <option value="รอ" ${fee && fee.description === "รอ" ? "selected" : ""}>รอ</option>
+            </select>
+          </div>
+          <div class="w-24 mr-2">
+            <input type="number" class="w-full p-3 border border-gray-300 rounded-md fee-amount touch-target" placeholder="0.00" min="0" step="0.01" value="${fee ? fee.amount || 0 : 0}" required>
+          </div>
+          <button type="button" class="text-red-500 remove-fee touch-target">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        `;
+        container.appendChild(feeItem);
+
+        // Add event listener to remove button
+        feeItem.querySelector(".remove-fee").addEventListener("click", function () {
+          container.removeChild(feeItem);
+          updateTotalAmount();
+        });
+
+        // Add event listener to fee amount input
+        feeItem
+          .querySelector(".fee-amount")
+          .addEventListener("input", updateTotalAmount);
+      }
+
+      // Update total amount
+      function updateTotalAmount() {
+        try {
+          let total = 0;
+
+          // Sum job detail amounts
+          document.querySelectorAll(".amount-input").forEach((input) => {
+            const value = parseFloat(input.value) || 0;
+            total += value;
+          });
+
+          // Update main service fee
+          const mainServiceFeeElement = document.getElementById("main-service-fee");
+          if (mainServiceFeeElement) {
+            mainServiceFeeElement.textContent = total.toFixed(2) + " บาท";
+          }
+
+          // Sum additional fees
+          document.querySelectorAll(".fee-amount").forEach((input) => {
+            const value = parseFloat(input.value) || 0;
+            total += value;
+          });
+
+          // Update total
+          const totalAmountElement = document.getElementById("total-amount");
+          if (totalAmountElement) {
+            totalAmountElement.textContent = total.toFixed(2) + " บาท";
+          }
+        } catch (error) {
+          console.error("Error updating total amount:", error);
+          // Don't throw error to prevent breaking the UI
+        }
+      }
+
+      // Collect form data
+      function collectFormData() {
+        try {
+          const form = document.getElementById("edit-job-form");
+          if (!form) {
+            throw new Error("Form not found - edit-job-form element missing");
+          }
+
+          // วันที่บันทึกงาน
+          const jobDatePicker = document.getElementById("job-date-picker");
+          if (!jobDatePicker) {
+            throw new Error("Job date picker not found");
+          }
+
+          // Get the original job date or use current date
+          let selectedDate, thaiDateValue;
+          const originalDateField = document.getElementById("original-job-date");
+          
+          // For editing, preserve the original job date or use the selected date
+          if (originalDateField && originalDateField.value) {
+            // Use the date from the date picker (allowing user to change it)
+            selectedDate = new Date(jobDatePicker.value);
+            thaiDateValue = formatThaiDate(selectedDate); // Format as Thai date
+          } else {
+            // Creating new job - use current date
+            selectedDate = new Date(jobDatePicker.value);
+            thaiDateValue = formatThaiDate(selectedDate);
+          }
+
+          // ข้อมูลหลักของงาน
+          const base = {
+            jobId: document.getElementById("job-id").value,
+            timestamp: selectedDate.toISOString(),
+            jobDate: thaiDateValue,
+            company: document.getElementById("company-select").value,
+            assignedBy: document.getElementById("assigned-by").value,
+            contact: document.getElementById("contact").value,
+            pickupProvince: document.getElementById("pickup-province").value,
+            pickupDistrict: document.getElementById("pickup-district").value,
+          };
+
+          // รายละเอียดงาน (แบบโครงสร้างสำหรับใช้ในแอป)
+          const jobDetails = [];
+          const jobDetailCards = document.querySelectorAll(".job-detail-card");
+          jobDetailCards.forEach((card) => {
+            const inputs = card.querySelectorAll("input, textarea");
+            jobDetails.push({
+              destinationCompany: inputs[0] ? inputs[0].value : "",
+              deliveryProvince: inputs[1] ? inputs[1].value : "",
+              deliveryDistrict: inputs[2] ? inputs[2].value : "",
+              recipient: inputs[3] ? inputs[3].value : "",
+              description: inputs[4] ? inputs[4].value : "",
+              amount: inputs[5] ? parseFloat(inputs[5].value) || 0 : 0,
+            });
+          });
+
+          // ค่าบริการเพิ่มเติม (แบบโครงสร้างสำหรับใช้ในแอป)
+          const additionalFees = [];
+          const feeItems = document.querySelectorAll(
+            "#additional-fees-container > div"
+          );
+          feeItems.forEach((item) => {
+            const select = item.querySelector("select");
+            const input = item.querySelector("input");
+            if (select && input) {
+              additionalFees.push({
+                description: select.value,
+                amount: parseFloat(input.value) || 0,
+              });
+            }
+          });
+
+          // รวมยอดเงิน
+          const mainServiceFee = jobDetails.reduce(
+            (sum, j) => sum + (parseFloat(j.amount) || 0),
+            0
+          );
+          const additionalFeesTotal = additionalFees.reduce(
+            (sum, f) => sum + (parseFloat(f.amount) || 0),
+            0
+          );
+          const totalAmount = mainServiceFee + additionalFeesTotal;
+
+          // แปลงเป็นรูปแบบแนวนอน flat สูงสุด 5 งาน และ 10 ค่าบริการเพิ่มเติม (ปรับได้ตามต้องการ)
+          const flat = {};
+          jobDetails.forEach((d, i) => {
+            const idx = i + 1;
+            flat["companyTo" + idx] = d.destinationCompany || "";
+            flat["province" + idx] = d.deliveryProvince || "";
+            flat["district" + idx] = d.deliveryDistrict || "";
+            flat["recipient" + idx] = d.recipient || "";
+            flat["detail" + idx] = d.description || "";
+            flat["amount" + idx] = parseFloat(d.amount) || 0;
+          });
+          flat.jobCount = jobDetails.length;
+
+          additionalFees.forEach((f, i) => {
+            const idx = i + 1;
+            flat["feeName" + idx] = f.description || "";
+            flat["feeAmount" + idx] = parseFloat(f.amount) || 0;
+          });
+          flat.feeCount = additionalFees.length;
+
+          // ส่งออกทั้งแบบโครงสร้าง (เพื่อให้แอปยังแสดงผลได้) และแบบแนวนอน (เพื่อบันทึกลงชีตหนึ่งแถว/งาน)
+          return {
+            ...base,
+            // โครงสร้างเดิมสำหรับหน้าประวัติและดูรายละเอียด
+            jobDetails: JSON.stringify(jobDetails),
+            additionalFees: JSON.stringify(additionalFees),
+            // ตัวเลขสรุป
+            mainServiceFee,
+            additionalFeesTotal,
+            totalAmount,
+            // ฟิลด์แบบแบนแนวนอน
+            ...flat,
+          };
+        } catch (error) {
+          console.error("Error collecting form data:", error);
+          throw new Error(`Failed to collect form data: ${error.message}`);
+        }
+      }
+
+      // Update job
+      async function updateJob(jobData) {
+        try {
+          // Save to localStorage first
+          let savedJobs = JSON.parse(safeLocalStorageGetItem("mangpongJobs") || "[]");
+
+          // Update existing job
+          const jobIndex = savedJobs.findIndex((job) => job.jobId === jobData.jobId);
+          if (jobIndex !== -1) {
+            // Preserve existing data and merge with new data
+            const existingJob = savedJobs[jobIndex];
+            savedJobs[jobIndex] = {
+              ...existingJob, // Keep all existing fields
+              ...jobData, // Override with new form data
+              jobId: jobData.jobId, // Ensure jobId remains the same
+              timestamp: existingJob.timestamp, // Preserve original timestamp
+            };
+            console.log(
+              "Updated existing job:",
+              jobData.jobId,
+              "with data:",
+              savedJobs[jobIndex]
+            );
+          } else {
+            // If not found, add as new (should not happen in normal flow)
+            console.warn("Job not found for editing, adding as new:", jobData.jobId);
+            savedJobs.push(jobData);
+          }
+
+          safeLocalStorageSetItem("mangpongJobs", JSON.stringify(savedJobs));
+
+          // Also submit to Google Sheets
+          return submitToGoogleSheets({
+            action: "updateJob",
+            ...jobData,
+          });
+        } catch (error) {
+          console.error("Error updating job:", error);
+          throw new Error(`Failed to update job: ${error.message}`);
+        }
+      }
+      // --- END: JOB MANAGEMENT FUNCTIONS ---
+
+      // --- START: UI FUNCTIONS ---
+      // Go to history page
+      function goToHistory() {
+        window.location.href = "index.html#history-screen";
+      }
+
+      // --- END: UI FUNCTIONS ---
+
+      // --- START: EVENT LISTENERS ---
+      // Add job detail
+      document.getElementById("add-job-detail").addEventListener("click", function () {
+        addJobDetailCard();
+      });
+
+      // Add additional fee
+      document.getElementById("add-fee").addEventListener("click", function () {
+        addFeeCard();
+      });
+
+      // Form submission
+      document.getElementById("edit-job-form").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        // Show loading alert
+        Swal.fire({
+          title: "กำลังอัปเดตข้อมูล...",
+          text: "กรุณารอสักครู่",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          showConfirmButton: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        });
+
+        try {
+          const formData = collectFormData();
+          const response = await updateJob(formData);
+
+          // Show success message
+          await Swal.fire({
+            icon: "success",
+            title: "อัปเดตสำเร็จ!",
+            text: `งาน ${formData.jobId} ถูกอัปเดตเรียบร้อยแล้ว`,
+            confirmButtonText: "ตกลง",
+            confirmButtonColor: "#10b981",
+          });
+
+          // Go back to history screen
+          goToHistory();
+        } catch (error) {
+          console.error("Error submitting form:", error);
+
+          // Show error message
+          await Swal.fire({
+            icon: "error",
+            title: "เกิดข้อผิดพลาด!",
+            text: error.message,
+            confirmButtonText: "ตกลง",
+            confirmButtonColor: "#ef4444",
+          });
+        }
+      });
+
+      // Initialize when DOM is loaded
+      document.addEventListener("DOMContentLoaded", function () {
+        try {
+          // Get job ID from URL
+          const urlParams = new URLSearchParams(window.location.search);
+          const jobId = urlParams.get("id");
+
+          if (!jobId) {
+            Swal.fire({
+              icon: "error",
+              title: "ไม่พบข้อมูลงาน",
+              text: "ไม่พบ Job ID ใน URL",
+              confirmButtonText: "ตกลง",
+            }).then(() => {
+              goToHistory();
+            });
+            return;
+          }
+
+          // Load job data
+          loadJobForEdit(jobId);
+
+          // Add event listeners to amount inputs
+          document.querySelectorAll(".amount-input").forEach((input) => {
+            input.addEventListener("input", updateTotalAmount);
+          });
+
+          // Update totals initially
+          updateTotalAmount();
+        } catch (error) {
+          console.error("Error during DOMContentLoaded:", error);
+          Swal.fire({
+            icon: "error",
+            title: "เกิดข้อผิดพลาด",
+            text: `ไม่สามารถโหลดหน้าแก้ไขงานได้: ${error.message}`,
+            confirmButtonText: "ตกลง",
+            confirmButtonColor: "#ef4444",
+          }).then(() => {
+            goToHistory();
+          });
+        }
+      });
+      // --- END: EVENT LISTENERS ---
+    </script>
+  </body>
+</html>
