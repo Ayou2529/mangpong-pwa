@@ -485,7 +485,21 @@
       // Show error message
       function showError(message) {
         console.error("Showing error:", message);
-        document.getElementById("error-text").textContent = message;
+        const errorTextElement = document.getElementById("error-text");
+        if (errorTextElement) {
+          // Show user-friendly messages
+          if (message.includes("หมดเวลา")) {
+            errorTextElement.textContent = "การเชื่อมต่อใช้เวลานานเกินไป ระบบจะลองใหม่อีกครั้ง";
+          } else if (message.includes("ไม่สามารถเชื่อมต่อ")) {
+            errorTextElement.textContent = "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต";
+          } else if (message.includes("Job ID is required")) {
+            errorTextElement.textContent = "ไม่พบข้อมูลงานที่ต้องการแก้ไข";
+          } else if (message.includes("ไม่สามารถหางาน")) {
+            errorTextElement.textContent = "ไม่พบงานที่ต้องการแก้ไข ระบบจะลองค้นหาในข้อมูลออฟไลน์";
+          } else {
+            errorTextElement.textContent = "เกิดข้อผิดพลาดบางอย่าง โปรดลองใหม่อีกครั้ง";
+          }
+        }
         document.getElementById("error-message").classList.remove("hidden");
         document.getElementById("loading").classList.add("hidden");
         document.getElementById("edit-job-form").classList.add("hidden");
@@ -541,6 +555,31 @@
       // --- START: JOB MANAGEMENT FUNCTIONS ---
       // Submit data to Google Apps Script
       function submitToGoogleSheets(data) {
+        // Wrapper function to implement retry mechanism
+        return submitToGoogleSheetsWithRetry(data, 2); // Retry up to 2 times
+      }
+
+      // Submit data to Google Apps Script with retry mechanism
+      async function submitToGoogleSheetsWithRetry(data, maxRetries = 2) {
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+          try {
+            console.log(`Attempt ${attempt} to connect to Google Sheets`);
+            const result = await submitToGoogleSheetsInternal(data);
+            return result;
+          } catch (error) {
+            console.warn(`Attempt ${attempt} failed:`, error.message);
+            if (attempt === maxRetries) {
+              // Last attempt failed, rethrow the error
+              throw error;
+            }
+            // Wait a bit before retrying
+            await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+          }
+        }
+      }
+
+      // Internal function that does the actual submission
+      function submitToGoogleSheetsInternal(data) {
         return new Promise((resolve, reject) => {
           // Check if Google Script URL is defined
           if (!window.GOOGLE_SCRIPT_URL) {
@@ -574,7 +613,7 @@
           const timeoutId = setTimeout(() => {
             reject(new Error("การเชื่อมต่อกับ Google Apps Script หมดเวลา"));
             cleanUp();
-          }, 10000); // 10 second timeout
+          }, 30000); // 30 second timeout
 
           // cleanup function – remove script element and the temporary callback
           function cleanUp() {
@@ -657,9 +696,9 @@
           if (!job) {
             console.log("Trying localStorage...");
             const savedJobs = JSON.parse(safeLocalStorageGetItem("mangpongJobs") || "[]");
-            job = savedJobs.find((j) => j.jobId === jobId);
-            if (job) {
-              job = reconstructJobData(job);
+            const foundJob = savedJobs.find((j) => j.jobId === jobId);
+            if (foundJob) {
+              job = reconstructJobData(foundJob);
             }
           }
 
@@ -695,7 +734,10 @@
           }
 
           // Set the job ID
-          document.getElementById("job-id").value = job.jobId;
+          const jobIdElement = document.getElementById("job-id");
+          if (jobIdElement) {
+            jobIdElement.value = job.jobId || "";
+          }
 
           // Set job date - preserve the original job date
           if (job.jobDate) {
@@ -714,23 +756,38 @@
 
           // Basic information
           if (job.company) {
-            document.getElementById("company-select").value = job.company;
+            const companySelect = document.getElementById("company-select");
+            if (companySelect) {
+              companySelect.value = job.company;
+            }
           }
 
           if (job.assignedBy) {
-            document.getElementById("assigned-by").value = job.assignedBy;
+            const assignedByElement = document.getElementById("assigned-by");
+            if (assignedByElement) {
+              assignedByElement.value = job.assignedBy;
+            }
           }
 
           if (job.contact) {
-            document.getElementById("contact").value = job.contact;
+            const contactElement = document.getElementById("contact");
+            if (contactElement) {
+              contactElement.value = job.contact;
+            }
           }
 
           if (job.pickupProvince) {
-            document.getElementById("pickup-province").value = job.pickupProvince;
+            const pickupProvinceElement = document.getElementById("pickup-province");
+            if (pickupProvinceElement) {
+              pickupProvinceElement.value = job.pickupProvince;
+            }
           }
 
           if (job.pickupDistrict) {
-            document.getElementById("pickup-district").value = job.pickupDistrict;
+            const pickupDistrictElement = document.getElementById("pickup-district");
+            if (pickupDistrictElement) {
+              pickupDistrictElement.value = job.pickupDistrict;
+            }
           }
 
           // Job details
@@ -750,17 +807,20 @@
               jobDetails.forEach((detail, index) => {
                 if (index === 0) {
                   // Update the first job detail card
-                  const firstCardInputs = container.querySelector(".job-detail-card").querySelectorAll("input, textarea");
-                  if (firstCardInputs.length >= 6) {
-                    firstCardInputs[0].value = detail.destinationCompany || "";
-                    firstCardInputs[1].value = detail.deliveryProvince || "";
-                    firstCardInputs[2].value = detail.deliveryDistrict || "";
-                    firstCardInputs[3].value = detail.recipient || "";
-                    firstCardInputs[4].value = detail.description || "";
-                    firstCardInputs[5].value = detail.amount || 0;
-                    
-                    // Add event listener to amount input
-                    firstCardInputs[5].addEventListener("input", updateTotalAmount);
+                  const firstCard = container.querySelector(".job-detail-card");
+                  if (firstCard) {
+                    const firstCardInputs = firstCard.querySelectorAll("input, textarea");
+                    if (firstCardInputs.length >= 6) {
+                      firstCardInputs[0].value = detail.destinationCompany || "";
+                      firstCardInputs[1].value = detail.deliveryProvince || "";
+                      firstCardInputs[2].value = detail.deliveryDistrict || "";
+                      firstCardInputs[3].value = detail.recipient || "";
+                      firstCardInputs[4].value = detail.description || "";
+                      firstCardInputs[5].value = detail.amount || 0;
+                      
+                      // Add event listener to amount input
+                      firstCardInputs[5].addEventListener("input", updateTotalAmount);
+                    }
                   }
                 } else {
                   // Add additional job detail cards
@@ -769,17 +829,20 @@
               });
             } else {
               // If no job details, ensure we have at least one empty card
-              const firstCardInputs = container.querySelector(".job-detail-card").querySelectorAll("input, textarea");
-              if (firstCardInputs.length >= 6) {
-                firstCardInputs[0].value = "";
-                firstCardInputs[1].value = "";
-                firstCardInputs[2].value = "";
-                firstCardInputs[3].value = "";
-                firstCardInputs[4].value = "";
-                firstCardInputs[5].value = 0;
-                
-                // Add event listener to amount input
-                firstCardInputs[5].addEventListener("input", updateTotalAmount);
+              const firstCard = container.querySelector(".job-detail-card");
+              if (firstCard) {
+                const firstCardInputs = firstCard.querySelectorAll("input, textarea");
+                if (firstCardInputs.length >= 6) {
+                  firstCardInputs[0].value = "";
+                  firstCardInputs[1].value = "";
+                  firstCardInputs[2].value = "";
+                  firstCardInputs[3].value = "";
+                  firstCardInputs[4].value = "";
+                  firstCardInputs[5].value = 0;
+                  
+                  // Add event listener to amount input
+                  firstCardInputs[5].addEventListener("input", updateTotalAmount);
+                }
               }
             }
           }
@@ -808,7 +871,7 @@
           updateTotalAmount();
         } catch (error) {
           console.error("Error populating form with job data:", error);
-          showError(`Failed to populate form: ${error.message}`);
+          showError(`ไม่สามารถโหลดข้อมูลงานได้: ${error.message}`);
         }
       }
 
@@ -981,15 +1044,46 @@
           }
 
           // ข้อมูลหลักของงาน
+          const jobIdElement = document.getElementById("job-id");
+          const companySelect = document.getElementById("company-select");
+          const assignedByElement = document.getElementById("assigned-by");
+          const contactElement = document.getElementById("contact");
+          const pickupProvinceElement = document.getElementById("pickup-province");
+          const pickupDistrictElement = document.getElementById("pickup-district");
+
+          if (!jobIdElement) {
+            throw new Error("Job ID element not found");
+          }
+
+          if (!companySelect) {
+            throw new Error("Company select element not found");
+          }
+
+          if (!assignedByElement) {
+            throw new Error("Assigned by element not found");
+          }
+
+          if (!contactElement) {
+            throw new Error("Contact element not found");
+          }
+
+          if (!pickupProvinceElement) {
+            throw new Error("Pickup province element not found");
+          }
+
+          if (!pickupDistrictElement) {
+            throw new Error("Pickup district element not found");
+          }
+
           const base = {
-            jobId: document.getElementById("job-id").value,
+            jobId: jobIdElement.value,
             timestamp: selectedDate.toISOString(),
             jobDate: thaiDateValue,
-            company: document.getElementById("company-select").value,
-            assignedBy: document.getElementById("assigned-by").value,
-            contact: document.getElementById("contact").value,
-            pickupProvince: document.getElementById("pickup-province").value,
-            pickupDistrict: document.getElementById("pickup-district").value,
+            company: companySelect.value,
+            assignedBy: assignedByElement.value,
+            contact: contactElement.value,
+            pickupProvince: pickupProvinceElement.value,
+            pickupDistrict: pickupDistrictElement.value,
           };
 
           // รายละเอียดงาน (แบบโครงสร้างสำหรับใช้ในแอป)
@@ -997,14 +1091,16 @@
           const jobDetailCards = document.querySelectorAll(".job-detail-card");
           jobDetailCards.forEach((card) => {
             const inputs = card.querySelectorAll("input, textarea");
-            jobDetails.push({
-              destinationCompany: inputs[0] ? inputs[0].value : "",
-              deliveryProvince: inputs[1] ? inputs[1].value : "",
-              deliveryDistrict: inputs[2] ? inputs[2].value : "",
-              recipient: inputs[3] ? inputs[3].value : "",
-              description: inputs[4] ? inputs[4].value : "",
-              amount: inputs[5] ? parseFloat(inputs[5].value) || 0 : 0,
-            });
+            if (inputs.length >= 6) {
+              jobDetails.push({
+                destinationCompany: inputs[0] ? inputs[0].value : "",
+                deliveryProvince: inputs[1] ? inputs[1].value : "",
+                deliveryDistrict: inputs[2] ? inputs[2].value : "",
+                recipient: inputs[3] ? inputs[3].value : "",
+                description: inputs[4] ? inputs[4].value : "",
+                amount: inputs[5] ? parseFloat(inputs[5].value) || 0 : 0,
+              });
+            }
           });
 
           // ค่าบริการเพิ่มเติม (แบบโครงสร้างสำหรับใช้ในแอป)
@@ -1102,13 +1198,24 @@
             savedJobs.push(jobData);
           }
 
-          safeLocalStorageSetItem("mangpongJobs", JSON.stringify(savedJobs));
+          // Validate localStorage is available before saving
+          if (typeof localStorage !== 'undefined') {
+            safeLocalStorageSetItem("mangpongJobs", JSON.stringify(savedJobs));
+          } else {
+            console.warn("localStorage not available, skipping save");
+          }
 
-          // Also submit to Google Sheets
-          return submitToGoogleSheets({
-            action: "updateJob",
-            ...jobData,
-          });
+          // Also submit to Google Sheets if online
+          if (navigator.onLine) {
+            return submitToGoogleSheets({
+              action: "updateJob",
+              ...jobData,
+            });
+          } else {
+            // If offline, return a mock success response
+            console.log("Offline mode: Job updated in localStorage only");
+            return { success: true, message: "Job updated offline" };
+          }
         } catch (error) {
           console.error("Error updating job:", error);
           throw new Error(`Failed to update job: ${error.message}`);

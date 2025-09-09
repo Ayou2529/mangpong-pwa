@@ -264,10 +264,8 @@ if (loginForm) {
       console.error("Login error:", error);
       await Swal.fire({
         icon: "error",
-        title: "เกิดข้อผิดพลาด",
-        text:
-          error.message ||
-          "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต",
+        title: "ไม่สามารถเชื่อมต่อได้",
+        text: "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ ระบบจะใช้ข้อมูลออฟไลน์แทน",
         confirmButtonText: "ตกลง",
         confirmButtonColor: "#ef4444",
       });
@@ -406,10 +404,8 @@ if (registerForm) {
       console.error("Registration error:", error);
       await Swal.fire({
         icon: "error",
-        title: "เกิดข้อผิดพลาด",
-        text:
-          error.message ||
-          "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต",
+        title: "ไม่สามารถเชื่อมต่อได้",
+        text: "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ ระบบจะใช้ข้อมูลออฟไลน์แทน",
         confirmButtonText: "ตกลง",
         confirmButtonColor: "#ef4444",
       });
@@ -418,6 +414,31 @@ if (registerForm) {
 }
 
 function submitToGoogleSheets(data) {
+  // Wrapper function to implement retry mechanism
+  return submitToGoogleSheetsWithRetry(data, 2); // Retry up to 2 times
+}
+
+// Submit data to Google Apps Script with retry mechanism
+async function submitToGoogleSheetsWithRetry(data, maxRetries = 2) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`Attempt ${attempt} to connect to Google Sheets`);
+      const result = await submitToGoogleSheetsInternal(data);
+      return result;
+    } catch (error) {
+      console.warn(`Attempt ${attempt} failed:`, error.message);
+      if (attempt === maxRetries) {
+        // Last attempt failed, rethrow the error
+        throw error;
+      }
+      // Wait a bit before retrying
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+    }
+  }
+}
+
+// Internal function that does the actual submission
+function submitToGoogleSheetsInternal(data) {
   return new Promise((resolve, reject) => {
     // Check if Google Script URL is defined
     if (!window.GOOGLE_SCRIPT_URL) {
@@ -451,7 +472,7 @@ function submitToGoogleSheets(data) {
     const timeoutId = setTimeout(() => {
       reject(new Error("การเชื่อมต่อกับ Google Apps Script หมดเวลา"));
       cleanUp();
-    }, 10000); // 10 second timeout
+    }, 30000); // 30 second timeout
 
     // cleanup function – remove script element and the temporary callback
     function cleanUp() {
