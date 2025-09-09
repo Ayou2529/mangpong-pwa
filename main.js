@@ -103,7 +103,7 @@ function showPage(pageId) {
 
 // --- END: FIX FOR PAGE VISIBILITY ---
 
-// Function to load jobs from Google Sheets
+// Function to load jobs from Google Sheets with faster fallback
 async function loadJobsFromSheets() {
   try {
     // Check if we have a current user
@@ -115,6 +115,12 @@ async function loadJobsFromSheets() {
     // Check if Google Script URL is defined
     if (!window.GOOGLE_SCRIPT_URL) {
       console.warn("Google Script URL not defined, using localStorage only");
+      return JSON.parse(safeLocalStorageGetItem("mangpongJobs") || "[]");
+    }
+
+    // Check if we're offline first to avoid unnecessary delays
+    if (!navigator.onLine) {
+      console.log("Offline mode: Using localStorage only");
       return JSON.parse(safeLocalStorageGetItem("mangpongJobs") || "[]");
     }
 
@@ -431,8 +437,8 @@ async function submitToGoogleSheetsWithRetry(data, maxRetries = 2) {
         // Last attempt failed, rethrow the error
         throw error;
       }
-      // Wait a bit before retrying
-      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+      // Wait a shorter time before retrying (500ms instead of 1000ms * attempt)
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
   }
 }
@@ -472,7 +478,7 @@ function submitToGoogleSheetsInternal(data) {
     const timeoutId = setTimeout(() => {
       reject(new Error("การเชื่อมต่อกับ Google Apps Script หมดเวลา"));
       cleanUp();
-    }, 30000); // 30 second timeout
+    }, 15000); // 15 second timeout (balance between reliability and speed)
 
     // cleanup function – remove script element and the temporary callback
     function cleanUp() {

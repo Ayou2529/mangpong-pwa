@@ -572,8 +572,8 @@
               // Last attempt failed, rethrow the error
               throw error;
             }
-            // Wait a bit before retrying
-            await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+            // Wait a shorter time before retrying (500ms instead of 1000ms * attempt)
+            await new Promise(resolve => setTimeout(resolve, 500));
           }
         }
       }
@@ -613,7 +613,7 @@
           const timeoutId = setTimeout(() => {
             reject(new Error("การเชื่อมต่อกับ Google Apps Script หมดเวลา"));
             cleanUp();
-          }, 30000); // 30 second timeout
+          }, 15000); // 15 second timeout (balance between reliability and speed)
 
           // cleanup function – remove script element and the temporary callback
           function cleanUp() {
@@ -663,7 +663,7 @@
         return job;
       }
 
-      // Load job data for editing
+      // Load job data for editing with optimized offline check
       async function loadJobForEdit(jobId) {
         try {
           console.log("Loading job for edit:", jobId);
@@ -673,6 +673,21 @@
           }
 
           showLoading();
+
+          // Check if we're offline first to avoid unnecessary delays
+          if (!navigator.onLine) {
+            console.log("Offline mode: Trying localStorage first");
+            const savedJobs = JSON.parse(safeLocalStorageGetItem("mangpongJobs") || "[]");
+            const foundJob = savedJobs.find((j) => j.jobId === jobId);
+            if (foundJob) {
+              const job = reconstructJobData(foundJob);
+              console.log("Found job in localStorage:", job);
+              originalJobData = job;
+              populateFormWithJobData(job);
+              showForm();
+              return;
+            }
+          }
 
           // Try to get job data from backend first
           let job = null;
@@ -724,7 +739,7 @@
         }
       }
 
-      // Populate form with job data
+      // Populate form with job data - optimized version
       function populateFormWithJobData(job) {
         try {
           console.log("Populating form with job data:", job);
@@ -754,40 +769,32 @@
             }
           }
 
-          // Basic information
-          if (job.company) {
-            const companySelect = document.getElementById("company-select");
-            if (companySelect) {
-              companySelect.value = job.company;
-            }
+          // Basic information - get all elements at once
+          const companySelect = document.getElementById("company-select");
+          const assignedByElement = document.getElementById("assigned-by");
+          const contactElement = document.getElementById("contact");
+          const pickupProvinceElement = document.getElementById("pickup-province");
+          const pickupDistrictElement = document.getElementById("pickup-district");
+
+          // Update values only if elements exist
+          if (companySelect && job.company) {
+            companySelect.value = job.company;
           }
 
-          if (job.assignedBy) {
-            const assignedByElement = document.getElementById("assigned-by");
-            if (assignedByElement) {
-              assignedByElement.value = job.assignedBy;
-            }
+          if (assignedByElement && job.assignedBy) {
+            assignedByElement.value = job.assignedBy;
           }
 
-          if (job.contact) {
-            const contactElement = document.getElementById("contact");
-            if (contactElement) {
-              contactElement.value = job.contact;
-            }
+          if (contactElement && job.contact) {
+            contactElement.value = job.contact;
           }
 
-          if (job.pickupProvince) {
-            const pickupProvinceElement = document.getElementById("pickup-province");
-            if (pickupProvinceElement) {
-              pickupProvinceElement.value = job.pickupProvince;
-            }
+          if (pickupProvinceElement && job.pickupProvince) {
+            pickupProvinceElement.value = job.pickupProvince;
           }
 
-          if (job.pickupDistrict) {
-            const pickupDistrictElement = document.getElementById("pickup-district");
-            if (pickupDistrictElement) {
-              pickupDistrictElement.value = job.pickupDistrict;
-            }
+          if (pickupDistrictElement && job.pickupDistrict) {
+            pickupDistrictElement.value = job.pickupDistrict;
           }
 
           // Job details
@@ -804,6 +811,7 @@
                 jobDetails = [];
               }
 
+              // Process job details more efficiently
               jobDetails.forEach((detail, index) => {
                 if (index === 0) {
                   // Update the first job detail card
@@ -818,8 +826,11 @@
                       firstCardInputs[4].value = detail.description || "";
                       firstCardInputs[5].value = detail.amount || 0;
                       
-                      // Add event listener to amount input
-                      firstCardInputs[5].addEventListener("input", updateTotalAmount);
+                      // Add event listener to amount input only once
+                      if (!firstCardInputs[5].dataset.listenerAdded) {
+                        firstCardInputs[5].addEventListener("input", updateTotalAmount);
+                        firstCardInputs[5].dataset.listenerAdded = "true";
+                      }
                     }
                   }
                 } else {
@@ -840,8 +851,11 @@
                   firstCardInputs[4].value = "";
                   firstCardInputs[5].value = 0;
                   
-                  // Add event listener to amount input
-                  firstCardInputs[5].addEventListener("input", updateTotalAmount);
+                  // Add event listener to amount input only once
+                  if (!firstCardInputs[5].dataset.listenerAdded) {
+                    firstCardInputs[5].addEventListener("input", updateTotalAmount);
+                    firstCardInputs[5].dataset.listenerAdded = "true";
+                  }
                 }
               }
             }
@@ -1014,7 +1028,7 @@
         }
       }
 
-      // Collect form data
+      // Collect form data with optimized DOM validation
       function collectFormData() {
         try {
           const form = document.getElementById("edit-job-form");
@@ -1043,7 +1057,7 @@
             thaiDateValue = formatThaiDate(selectedDate);
           }
 
-          // ข้อมูลหลักของงาน
+          // ข้อมูลหลักของงาน - get all elements at once for efficiency
           const jobIdElement = document.getElementById("job-id");
           const companySelect = document.getElementById("company-select");
           const assignedByElement = document.getElementById("assigned-by");
@@ -1051,28 +1065,10 @@
           const pickupProvinceElement = document.getElementById("pickup-province");
           const pickupDistrictElement = document.getElementById("pickup-district");
 
-          if (!jobIdElement) {
-            throw new Error("Job ID element not found");
-          }
-
-          if (!companySelect) {
-            throw new Error("Company select element not found");
-          }
-
-          if (!assignedByElement) {
-            throw new Error("Assigned by element not found");
-          }
-
-          if (!contactElement) {
-            throw new Error("Contact element not found");
-          }
-
-          if (!pickupProvinceElement) {
-            throw new Error("Pickup province element not found");
-          }
-
-          if (!pickupDistrictElement) {
-            throw new Error("Pickup district element not found");
+          // Validate all required elements at once
+          if (!jobIdElement || !companySelect || !assignedByElement || 
+              !contactElement || !pickupProvinceElement || !pickupDistrictElement) {
+            throw new Error("One or more required form elements are missing");
           }
 
           const base = {
@@ -1091,6 +1087,7 @@
           const jobDetailCards = document.querySelectorAll(".job-detail-card");
           jobDetailCards.forEach((card) => {
             const inputs = card.querySelectorAll("input, textarea");
+            // Only process cards with all required inputs
             if (inputs.length >= 6) {
               jobDetails.push({
                 destinationCompany: inputs[0] ? inputs[0].value : "",
