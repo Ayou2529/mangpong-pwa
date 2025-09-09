@@ -1586,9 +1586,9 @@ function editJob(jobId) {
     if (!jobId) {
       throw new Error("Job ID is required");
     }
-
-    // Instead of redirecting to edit.html, we'll load the job data and populate the form
-    loadJobForEdit(jobId);
+    
+    // Redirect to edit page with job ID
+    window.location.href = `edit.html?id=${jobId}`;
   } catch (error) {
     console.error("Error editing job:", error);
     Swal.fire({

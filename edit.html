@@ -589,6 +589,41 @@
         });
       }
 
+      // Function to handle job data reconstruction from Sheets format
+      function reconstructJobData(job) {
+        // Reconstruct jobDetails if not present
+        if (!job.jobDetails && job.jobCount > 0) {
+          console.log("Reconstructing job details...");
+          const reconstructedDetails = [];
+          for (let i = 1; i <= job.jobCount; i++) {
+            reconstructedDetails.push({
+              destinationCompany: job[`companyTo${i}`] || "",
+              deliveryProvince: job[`province${i}`] || "",
+              deliveryDistrict: job[`district${i}`] || "",
+              recipient: job[`recipient${i}`] || "",
+              description: job[`detail${i}`] || "",
+              amount: parseFloat(job[`amount${i}`]) || 0,
+            });
+          }
+          job.jobDetails = JSON.stringify(reconstructedDetails);
+        }
+
+        // Reconstruct additionalFees if not present
+        if (!job.additionalFees && job.feeCount > 0) {
+          console.log("Reconstructing additional fees...");
+          const reconstructedFees = [];
+          for (let i = 1; i <= job.feeCount; i++) {
+            reconstructedFees.push({
+              description: job[`feeName${i}`] || "",
+              amount: parseFloat(job[`feeAmount${i}`]) || 0,
+            });
+          }
+          job.additionalFees = JSON.stringify(reconstructedFees);
+        }
+        
+        return job;
+      }
+
       // Load job data for editing
       async function loadJobForEdit(jobId) {
         try {
@@ -612,7 +647,7 @@
             console.log("Response from Google Sheets:", response);
             
             if (response && response.success && response.job) {
-              job = response.job;
+              job = reconstructJobData(response.job);
             }
           } catch (error) {
             console.warn("Failed to get job from backend, trying localStorage:", error);
@@ -623,6 +658,9 @@
             console.log("Trying localStorage...");
             const savedJobs = JSON.parse(safeLocalStorageGetItem("mangpongJobs") || "[]");
             job = savedJobs.find((j) => j.jobId === jobId);
+            if (job) {
+              job = reconstructJobData(job);
+            }
           }
 
           if (!job) {
@@ -655,37 +693,6 @@
           if (!job || typeof job !== "object") {
             throw new Error("Invalid job data provided");
           }
-
-          // --- FIX STARTS HERE ---
-          // Reconstruct structured data if it's not present (i.e., loaded from Sheets)
-          if (!job.jobDetails && job.jobCount > 0) {
-            console.log("Reconstructing job details...");
-            const reconstructedDetails = [];
-            for (let i = 1; i <= job.jobCount; i++) {
-              reconstructedDetails.push({
-                destinationCompany: job["companyTo" + i] || "",
-                deliveryProvince: job["province" + i] || "",
-                deliveryDistrict: job["district" + i] || "",
-                recipient: job["recipient" + i] || "",
-                description: job["detail" + i] || "",
-                amount: parseFloat(job["amount" + i]) || 0,
-              });
-            }
-            job.jobDetails = JSON.stringify(reconstructedDetails);
-          }
-
-          if (!job.additionalFees && job.feeCount > 0) {
-            console.log("Reconstructing additional fees...");
-            const reconstructedFees = [];
-            for (let i = 1; i <= job.feeCount; i++) {
-              reconstructedFees.push({
-                description: job["feeName" + i] || "",
-                amount: parseFloat(job["feeAmount" + i]) || 0,
-              });
-            }
-            job.additionalFees = JSON.stringify(reconstructedFees);
-          }
-          // --- FIX ENDS HERE ---
 
           // Set the job ID
           document.getElementById("job-id").value = job.jobId;
@@ -760,6 +767,20 @@
                   addJobDetailCard(detail);
                 }
               });
+            } else {
+              // If no job details, ensure we have at least one empty card
+              const firstCardInputs = container.querySelector(".job-detail-card").querySelectorAll("input, textarea");
+              if (firstCardInputs.length >= 6) {
+                firstCardInputs[0].value = "";
+                firstCardInputs[1].value = "";
+                firstCardInputs[2].value = "";
+                firstCardInputs[3].value = "";
+                firstCardInputs[4].value = "";
+                firstCardInputs[5].value = 0;
+                
+                // Add event listener to amount input
+                firstCardInputs[5].addEventListener("input", updateTotalAmount);
+              }
             }
           }
 
