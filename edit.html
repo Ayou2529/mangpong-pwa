@@ -322,7 +322,7 @@
                 </div>
                 <div>
                   <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
-                  <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" value="0" required>
+                  <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0" min="0" step="1" value="0" required>
                 </div>
               </div>
             </div>
@@ -553,12 +553,6 @@
       // --- END: SAFE LOCALSTORAGE WRAPPERS ---
 
       // --- START: JOB MANAGEMENT FUNCTIONS ---
-      // Submit data to Google Apps Script
-      function submitToGoogleSheets(data) {
-        // Wrapper function to implement retry mechanism
-        return submitToGoogleSheetsWithRetry(data, 2); // Retry up to 2 times
-      }
-
       // Submit data to Google Apps Script with retry mechanism
       async function submitToGoogleSheetsWithRetry(data, maxRetries = 2) {
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -609,11 +603,11 @@
             cleanUp();
           };
 
-          // Add timeout handling
+          // Add timeout handling - increased to 30 seconds
           const timeoutId = setTimeout(() => {
             reject(new Error("การเชื่อมต่อกับ Google Apps Script หมดเวลา"));
             cleanUp();
-          }, 15000); // 15 second timeout (balance between reliability and speed)
+          }, 30000); // 30 second timeout
 
           // cleanup function – remove script element and the temporary callback
           function cleanUp() {
@@ -641,7 +635,7 @@
               deliveryDistrict: job[`district${i}`] || "",
               recipient: job[`recipient${i}`] || "",
               description: job[`detail${i}`] || "",
-              amount: parseFloat(job[`amount${i}`]) || 0,
+              amount: parseInt(job[`amount${i}`]) || 0,
             });
           }
           job.jobDetails = JSON.stringify(reconstructedDetails);
@@ -654,7 +648,7 @@
           for (let i = 1; i <= job.feeCount; i++) {
             reconstructedFees.push({
               description: job[`feeName${i}`] || "",
-              amount: parseFloat(job[`feeAmount${i}`]) || 0,
+              amount: parseInt(job[`feeAmount${i}`]) || 0,
             });
           }
           job.additionalFees = JSON.stringify(reconstructedFees);
@@ -674,46 +668,35 @@
 
           showLoading();
 
-          // Check if we're offline first to avoid unnecessary delays
-          if (!navigator.onLine) {
-            console.log("Offline mode: Trying localStorage first");
-            const savedJobs = JSON.parse(safeLocalStorageGetItem("mangpongJobs") || "[]");
-            const foundJob = savedJobs.find((j) => j.jobId === jobId);
-            if (foundJob) {
-              const job = reconstructJobData(foundJob);
-              console.log("Found job in localStorage:", job);
-              originalJobData = job;
-              populateFormWithJobData(job);
-              showForm();
-              return;
-            }
+          // Try to get job data from localStorage first (faster)
+          const savedJobs = JSON.parse(safeLocalStorageGetItem("mangpongJobs") || "[]");
+          let job = savedJobs.find((j) => j.jobId === jobId);
+          
+          if (job) {
+            job = reconstructJobData(job);
+            console.log("Found job in localStorage:", job);
+            originalJobData = job;
+            populateFormWithJobData(job);
+            showForm();
+            return;
           }
 
-          // Try to get job data from backend first
-          let job = null;
-          try {
-            console.log("Fetching job from Google Sheets...");
-            const response = await submitToGoogleSheets({
-              action: "getJobById",
-              jobId: jobId
-            });
+          // If not found in localStorage, try to get from backend
+          if (navigator.onLine) {
+            try {
+              console.log("Fetching job from Google Sheets...");
+              const response = await submitToGoogleSheetsWithRetry({
+                action: "getJobById",
+                jobId: jobId
+              }, 2); // Retry up to 2 times
 
-            console.log("Response from Google Sheets:", response);
-            
-            if (response && response.success && response.job) {
-              job = reconstructJobData(response.job);
-            }
-          } catch (error) {
-            console.warn("Failed to get job from backend, trying localStorage:", error);
-          }
-
-          // If not found in backend, try localStorage
-          if (!job) {
-            console.log("Trying localStorage...");
-            const savedJobs = JSON.parse(safeLocalStorageGetItem("mangpongJobs") || "[]");
-            const foundJob = savedJobs.find((j) => j.jobId === jobId);
-            if (foundJob) {
-              job = reconstructJobData(foundJob);
+              console.log("Response from Google Sheets:", response);
+              
+              if (response && response.success && response.job) {
+                job = reconstructJobData(response.job);
+              }
+            } catch (error) {
+              console.warn("Failed to get job from backend:", error);
             }
           }
 
@@ -824,7 +807,7 @@
                       firstCardInputs[2].value = detail.deliveryDistrict || "";
                       firstCardInputs[3].value = detail.recipient || "";
                       firstCardInputs[4].value = detail.description || "";
-                      firstCardInputs[5].value = detail.amount || 0;
+                      firstCardInputs[5].value = parseInt(detail.amount) || 0;
                       
                       // Add event listener to amount input only once
                       if (!firstCardInputs[5].dataset.listenerAdded) {
@@ -929,7 +912,7 @@
             </div>
             <div>
               <label class="block text-gray-600 mb-1">จำนวนเงิน - บาท</label>
-              <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" value="${detail ? detail.amount || 0 : 0}" required>
+              <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0" min="0" step="1" value="${detail ? parseInt(detail.amount) || 0 : 0}" required>
             </div>
           `;
           container.appendChild(newDetail);
@@ -973,7 +956,7 @@
             </select>
           </div>
           <div class="w-24 mr-2">
-            <input type="number" class="w-full p-3 border border-gray-300 rounded-md fee-amount touch-target" placeholder="0.00" min="0" step="0.01" value="${fee ? fee.amount || 0 : 0}" required>
+            <input type="number" class="w-full p-3 border border-gray-300 rounded-md fee-amount touch-target" placeholder="0" min="0" step="1" value="${fee ? parseInt(fee.amount) || 0 : 0}" required>
           </div>
           <button type="button" class="text-red-500 remove-fee touch-target">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1003,28 +986,32 @@
           // Sum job detail amounts - optimized with direct DOM access
           const amountInputs = document.querySelectorAll(".amount-input");
           for (let i = 0; i < amountInputs.length; i++) {
-            const value = parseFloat(amountInputs[i].value) || 0;
+            const value = parseInt(amountInputs[i].value) || 0;
             total += value;
+            console.log("Job detail amount:", value, "Running total:", total);
           }
 
           // Update main service fee - direct access without extra validation
           const mainServiceFeeElement = document.getElementById("main-service-fee");
           if (mainServiceFeeElement) {
-            mainServiceFeeElement.textContent = total.toFixed(2) + " บาท";
+            mainServiceFeeElement.textContent = parseInt(total) + " บาท";
           }
 
           // Sum additional fees - optimized with direct DOM access
           const feeAmountInputs = document.querySelectorAll(".fee-amount");
           for (let i = 0; i < feeAmountInputs.length; i++) {
-            const value = parseFloat(feeAmountInputs[i].value) || 0;
+            const value = parseInt(feeAmountInputs[i].value) || 0;
             total += value;
+            console.log("Fee amount:", value, "Running total:", total);
           }
 
           // Update total - direct access without extra validation
           const totalAmountElement = document.getElementById("total-amount");
           if (totalAmountElement) {
-            totalAmountElement.textContent = total.toFixed(2) + " บาท";
+            totalAmountElement.textContent = parseInt(total) + " บาท";
           }
+          
+          console.log("Final total amount:", total);
         } catch (error) {
           console.error("Error updating total amount:", error);
         }
@@ -1097,7 +1084,7 @@
                 deliveryDistrict: inputs[2] ? inputs[2].value : "",
                 recipient: inputs[3] ? inputs[3].value : "",
                 description: inputs[4] ? inputs[4].value : "",
-                amount: inputs[5] ? parseFloat(inputs[5].value) || 0 : 0,
+                amount: inputs[5] ? parseInt(inputs[5].value) || 0 : 0,
               });
             }
           });
@@ -1113,18 +1100,18 @@
             if (select && input) {
               additionalFees.push({
                 description: select.value,
-                amount: parseFloat(input.value) || 0,
+                amount: parseInt(input.value) || 0,
               });
             }
           });
 
           // รวมยอดเงิน
           const mainServiceFee = jobDetails.reduce(
-            (sum, j) => sum + (parseFloat(j.amount) || 0),
+            (sum, j) => sum + (parseInt(j.amount) || 0),
             0
           );
           const additionalFeesTotal = additionalFees.reduce(
-            (sum, f) => sum + (parseFloat(f.amount) || 0),
+            (sum, f) => sum + (parseInt(f.amount) || 0),
             0
           );
           const totalAmount = mainServiceFee + additionalFeesTotal;
@@ -1138,14 +1125,14 @@
             flat["district" + idx] = d.deliveryDistrict || "";
             flat["recipient" + idx] = d.recipient || "";
             flat["detail" + idx] = d.description || "";
-            flat["amount" + idx] = parseFloat(d.amount) || 0;
+            flat["amount" + idx] = parseInt(d.amount) || 0;
           });
           flat.jobCount = jobDetails.length;
 
           additionalFees.forEach((f, i) => {
             const idx = i + 1;
             flat["feeName" + idx] = f.description || "";
-            flat["feeAmount" + idx] = parseFloat(f.amount) || 0;
+            flat["feeAmount" + idx] = parseInt(f.amount) || 0;
           });
           flat.feeCount = additionalFees.length;
 
@@ -1168,7 +1155,7 @@
         }
       }
 
-      // Update job
+      // Update job with retry mechanism
       async function updateJob(jobData) {
         try {
           // Save to localStorage first
@@ -1206,10 +1193,10 @@
 
           // Also submit to Google Sheets if online
           if (navigator.onLine) {
-            return submitToGoogleSheets({
+            return await submitToGoogleSheetsWithRetry({
               action: "updateJob",
               ...jobData,
-            });
+            }, 2); // Retry up to 2 times
           } else {
             // If offline, return a mock success response
             console.log("Offline mode: Job updated in localStorage only");

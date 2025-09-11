@@ -1,5 +1,3 @@
-// updated_main.js
-
 // This function receives the data from the Google Apps Script.
 function jsonpCallback(data) {
   // Check if the data is an array and contains records.
@@ -242,7 +240,7 @@ if (loginForm) {
       const timeout = new Promise((_, reject) =>
         setTimeout(
           () => reject(new Error("การเชื่อมต่อหมดเวลา กรุณาลองใหม่อีกครั้ง")),
-          10000
+          15000
         )
       );
 
@@ -395,7 +393,7 @@ if (registerForm) {
       const timeout = new Promise((_, reject) =>
         setTimeout(
           () => reject(new Error("การเชื่อมต่อหมดเวลา กรุณาลองใหม่อีกครั้ง")),
-          10000
+          15000
         )
       );
 
@@ -502,11 +500,11 @@ function submitToGoogleSheetsInternal(data) {
       cleanUp();
     };
 
-    // Add timeout handling
+    // Add timeout handling - increased to 30 seconds
     const timeoutId = setTimeout(() => {
       reject(new Error("การเชื่อมต่อกับ Google Apps Script หมดเวลา"));
       cleanUp();
-    }, 15000); // 15 second timeout (balance between reliability and speed)
+    }, 30000); // 30 second timeout
 
     // cleanup function – remove script element and the temporary callback
     function cleanUp() {
@@ -770,7 +768,7 @@ if (addJobDetail) {
                 </div>
                 <div>
                     <label class="block text-gray-600 mb-1">จำนวนเงิน - บาท</label>
-                    <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target job-amount" placeholder="0.00" min="0" step="0.01" required>
+                    <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target job-amount" placeholder="0" min="0" step="1" required>
                 </div>
             `;
       container.appendChild(newDetail);
@@ -817,7 +815,7 @@ if (addFee) {
                 </select>
             </div>
             <div class="w-24 mr-2">
-                <input type="number" class="w-full p-3 border border-gray-300 rounded-md fee-amount touch-target" placeholder="0.00" min="0" step="0.01" required>
+                <input type="number" class="w-full p-3 border border-gray-300 rounded-md fee-amount touch-target" placeholder="0" min="0" step="1" required>
             </div>
             <button type="button" class="text-red-500 remove-fee touch-target">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -848,27 +846,27 @@ function updateTotalAmount() {
     // Sum job detail amounts - optimized with direct DOM access
     const jobAmountInputs = document.querySelectorAll(".job-amount, .amount-input");
     for (let i = 0; i < jobAmountInputs.length; i++) {
-      const value = parseFloat(jobAmountInputs[i].value) || 0;
+      const value = parseInt(jobAmountInputs[i].value) || 0;
       total += value;
     }
 
     // Update main service fee - direct access without extra validation
     const mainServiceFeeElement = document.getElementById("main-service-fee");
     if (mainServiceFeeElement) {
-      mainServiceFeeElement.textContent = total.toFixed(2) + " บาท";
+      mainServiceFeeElement.textContent = parseInt(total) + " บาท";
     }
 
     // Sum additional fees - optimized with direct DOM access
     const feeAmountInputs = document.querySelectorAll(".fee-amount");
     for (let i = 0; i < feeAmountInputs.length; i++) {
-      const value = parseFloat(feeAmountInputs[i].value) || 0;
+      const value = parseInt(feeAmountInputs[i].value) || 0;
       total += value;
     }
 
     // Update total - direct access without extra validation
     const totalAmountElement = document.getElementById("total-amount");
     if (totalAmountElement) {
-      totalAmountElement.textContent = total.toFixed(2) + " บาท";
+      totalAmountElement.textContent = parseInt(total) + " บาท";
     }
   } catch (error) {
     console.error("Error updating total amount:", error);
@@ -1004,7 +1002,7 @@ function collectFormData() {
         deliveryDistrict: inputs[2] ? inputs[2].value : "",
         recipient: inputs[3] ? inputs[3].value : "",
         description: inputs[4] ? inputs[4].value : "",
-        amount: inputs[5] ? parseFloat(inputs[5].value) || 0 : 0,
+        amount: inputs[5] ? parseInt(inputs[5].value) || 0 : 0,
       });
     });
 
@@ -1019,18 +1017,18 @@ function collectFormData() {
       if (select && input) {
         additionalFees.push({
           description: select.value,
-          amount: parseFloat(input.value) || 0,
+          amount: parseInt(input.value) || 0,
         });
       }
     });
 
     // รวมยอดเงิน
     const mainServiceFee = jobDetails.reduce(
-      (sum, j) => sum + (parseFloat(j.amount) || 0),
+      (sum, j) => sum + (parseInt(j.amount) || 0),
       0
     );
     const additionalFeesTotal = additionalFees.reduce(
-      (sum, f) => sum + (parseFloat(f.amount) || 0),
+      (sum, f) => sum + (parseInt(f.amount) || 0),
       0
     );
     const totalAmount = mainServiceFee + additionalFeesTotal;
@@ -1044,14 +1042,14 @@ function collectFormData() {
       flat["district" + idx] = d.deliveryDistrict || "";
       flat["recipient" + idx] = d.recipient || "";
       flat["detail" + idx] = d.description || "";
-      flat["amount" + idx] = parseFloat(d.amount) || 0;
+      flat["amount" + idx] = parseInt(d.amount) || 0;
     });
     flat.jobCount = jobDetails.length;
 
     additionalFees.forEach((f, i) => {
       const idx = i + 1;
       flat["feeName" + idx] = f.description || "";
-      flat["feeAmount" + idx] = parseFloat(f.amount) || 0;
+      flat["feeAmount" + idx] = parseInt(f.amount) || 0;
     });
     flat.feeCount = additionalFees.length;
 
@@ -1139,7 +1137,7 @@ function resetForm() {
                 </div>
                 <div>
                     <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
-                    <input type="number" id="job-amount-1" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" value="0" required>
+                    <input type="number" id="job-amount-1" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0" min="0" step="1" value="0" required>
                 </div>
             </div>
         `;
@@ -1432,7 +1430,7 @@ function createJobHistoryItem(job) {
             <p>วันที่: ${jobDate}</p>
             <p>บริษัท: ${job.company || "ไม่ระบุ"}</p>
             <p>ผู้ติดต่อ: ${job.assignedBy || "ไม่ระบุ"}</p>
-            <p>จำนวน: ${job.totalAmount ? job.totalAmount.toFixed(2) : "0.00"} บาท</p>
+            <p>จำนวน: ${job.totalAmount ? parseInt(job.totalAmount) : "0"} บาท</p>
         </div>
         ${
           job.status === "incomplete"
@@ -1675,11 +1673,11 @@ async function editJob(jobId) {
     // Try to get job data from backend first
     let job = null;
     try {
-      const response = await submitToGoogleSheets({
+      const response = await submitToGoogleSheetsWithRetry({
         action: "getJobById",
         jobId: jobId,
         username: currentUser.username,
-      });
+      }, 2); // Retry up to 2 times
 
       if (response && response.success && response.job) {
         job = response.job;
@@ -1760,7 +1758,7 @@ function populateFormWithJobData(job) {
           deliveryDistrict: job["district" + i] || "",
           recipient: job["recipient" + i] || "",
           description: job["detail" + i] || "",
-          amount: parseFloat(job["amount" + i]) || 0,
+          amount: parseInt(job["amount" + i]) || 0,
         });
       }
       job.jobDetails = JSON.stringify(reconstructedDetails);
@@ -1771,7 +1769,7 @@ function populateFormWithJobData(job) {
       for (let i = 1; i <= job.feeCount; i++) {
         reconstructedFees.push({
           description: job["feeName" + i] || "",
-          amount: parseFloat(job["feeAmount" + i]) || 0,
+          amount: parseInt(job["feeAmount" + i]) || 0,
         });
       }
       job.additionalFees = JSON.stringify(reconstructedFees);
@@ -1887,7 +1885,7 @@ function populateFormWithJobData(job) {
                         </div>
                         <div>
                             <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
-                            <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target job-amount" placeholder="0.00" min="0" step="0.01" value="${detail.amount || 0}" required>
+                            <input type="number" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target job-amount" placeholder="0" min="0" step="1" value="${parseInt(detail.amount) || 0}" required>
                         </div>
                     `;
           container.appendChild(firstCard);
@@ -1911,7 +1909,7 @@ function populateFormWithJobData(job) {
           if (inputs[2]) inputs[2].value = detail.deliveryDistrict || "";
           if (inputs[3]) inputs[3].value = detail.recipient || "";
           if (inputs[4]) inputs[4].value = detail.description || "";
-          if (inputs[5]) inputs[5].value = detail.amount || 0;
+          if (inputs[5]) inputs[5].value = parseInt(detail.amount) || 0;
         }
       });
     } else {
@@ -1942,7 +1940,7 @@ function populateFormWithJobData(job) {
                 </div>
                 <div>
                     <label class="block text-gray-600 mb-1">จำนวนเงิน (บาท)</label>
-                    <input type="number" id="job-amount-1" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0.00" min="0" step="0.01" value="0" required>
+                    <input type="number" id="job-amount-1" class="w-full p-3 border border-gray-300 rounded-md amount-input touch-target" placeholder="0" min="0" step="1" value="0" required>
                 </div>
             `;
       container.appendChild(defaultCard);
@@ -1977,7 +1975,7 @@ function populateFormWithJobData(job) {
         const input = newFee.querySelector("input");
         if (select && input) {
           select.value = fee.description || "";
-          input.value = fee.amount || 0;
+          input.value = parseInt(fee.amount) || 0;
         }
       });
     }
@@ -1990,11 +1988,11 @@ function populateFormWithJobData(job) {
     if (mainServiceFeeElement) {
       console.log("Calculating total from jobDetails:", jobDetails);
       const totalAmount = jobDetails.reduce(
-        (sum, detail) => sum + (parseFloat(detail.amount) || 0),
+        (sum, detail) => sum + (parseInt(detail.amount) || 0),
         0
       );
       console.log("Calculated total amount:", totalAmount);
-      mainServiceFeeElement.textContent = totalAmount.toFixed(2) + " บาท";
+      mainServiceFeeElement.textContent = parseInt(totalAmount) + " บาท";
     }
 
     // Log the final state for debugging
@@ -2050,7 +2048,7 @@ async function viewJob(jobId) {
                         <p><strong>เขต/อำเภอส่งของ:</strong> ${detail.deliveryDistrict || "ไม่ระบุ"}</p>
                         <p><strong>ผู้รับงาน:</strong> ${detail.recipient || "ไม่ระบุ"}</p>
                         <p><strong>รายละเอียด:</strong> ${detail.description || "ไม่ระบุ"}</p>
-                        <p><strong>จำนวนเงิน:</strong> ${detail.amount ? detail.amount.toFixed(2) : "0.00"} บาท</p>
+                        <p><strong>จำนวนเงิน:</strong> ${detail.amount ? parseInt(detail.amount) : "0"} บาท</p>
                     </div>
                 </div>
             `;
@@ -2065,7 +2063,7 @@ async function viewJob(jobId) {
                     <div class="mb-2 p-2 bg-green-50 rounded border border-green-200">
                         <div class="text-sm">
                             <p><strong>รายการ #${index + 1}:</strong> ${fee.description}</p>
-                            <p><strong>จำนวนเงิน:</strong> ${fee.amount ? fee.amount.toFixed(2) : "0.00"} บาท</p>
+                            <p><strong>จำนวนเงิน:</strong> ${fee.amount ? parseInt(fee.amount) : "0"} บาท</p>
                         </div>
                     </div>
                 `;
@@ -2093,7 +2091,7 @@ async function viewJob(jobId) {
                     <div class="mt-4 pt-3 border-t">
                         <div class="flex justify-between font-bold">
                             <span>รวมทั้งหมด:</span>
-                            <span>${job.totalAmount ? job.totalAmount.toFixed(2) : "0.00"} บาท</span>
+                            <span>${job.totalAmount ? parseInt(job.totalAmount) : "0"} บาท</span>
                         </div>
                     </div>
                 </div>
@@ -2235,11 +2233,11 @@ function saveJob(jobData, isDraft = false) {
     // Also submit to Google Sheets if online
     if (navigator.onLine) {
       const action = editingJobId ? "updateJob" : "createJob";
-      return submitToGoogleSheets({
+      return submitToGoogleSheetsWithRetry({
         action: action,
         ...jobData,
         isDraft: isDraft,
-      });
+      }, 2); // Retry up to 2 times
     } else {
       // If offline, return a mock success response
       console.log("Offline mode: Job saved to localStorage only");
