@@ -124,20 +124,46 @@ async function loadJobsFromSheets() {
       return JSON.parse(safeLocalStorageGetItem("mangpongJobs") || "[]");
     }
 
-    const response = await submitToGoogleSheets({
-      action: "getJobs",
-      username: currentUser.username,
+    // Create a promise for localStorage fallback that resolves immediately
+    const localStorageFallback = Promise.resolve(JSON.parse(safeLocalStorageGetItem("mangpongJobs") || "[]"));
+
+    // Create a promise for the network request with timeout
+    const networkRequest = new Promise(async (resolve, reject) => {
+      try {
+        const response = await submitToGoogleSheets({
+          action: "getJobs",
+          username: currentUser.username,
+        });
+
+        if (response.success && response.jobs) {
+          safeLocalStorageSetItem("mangpongJobs", JSON.stringify(response.jobs));
+          resolve(response.jobs);
+        } else {
+          // If response is not successful, reject to trigger fallback
+          reject(new Error("Failed to load jobs from sheets"));
+        }
+      } catch (error) {
+        // Network error, reject to trigger fallback
+        reject(error);
+      }
     });
 
-    if (response.success && response.jobs) {
-      safeLocalStorageSetItem("mangpongJobs", JSON.stringify(response.jobs));
-      return response.jobs;
-    }
-    // If response is not successful, fall back to localStorage
-    console.warn(
-      "Failed to load jobs from sheets, falling back to localStorage"
+    // Race between network request (with 15s timeout) and localStorage fallback
+    // This ensures we don't wait for timeout to fallback to localStorage
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error("Network timeout")), 15000)
     );
-    return JSON.parse(safeLocalStorageGetItem("mangpongJobs") || "[]");
+
+    const networkWithTimeout = Promise.race([networkRequest, timeoutPromise]);
+
+    // Return network result if successful, otherwise fallback to localStorage
+    try {
+      const result = await networkWithTimeout;
+      return result;
+    } catch (error) {
+      console.warn("Failed to load jobs from sheets, falling back to localStorage", error.message);
+      return await localStorageFallback;
+    }
   } catch (error) {
     console.error("Error loading jobs:", error);
     // Always fall back to localStorage on error
@@ -214,7 +240,7 @@ if (loginForm) {
       const timeout = new Promise((_, reject) =>
         setTimeout(
           () => reject(new Error("การเชื่อมต่อหมดเวลา กรุณาลองใหม่อีกครั้ง")),
-          10000
+          15000
         )
       );
 
@@ -367,7 +393,7 @@ if (registerForm) {
       const timeout = new Promise((_, reject) =>
         setTimeout(
           () => reject(new Error("การเชื่อมต่อหมดเวลา กรุณาลองใหม่อีกครั้ง")),
-          10000
+          15000
         )
       );
 
@@ -826,25 +852,27 @@ function updateTotalAmount() {
   try {
     let total = 0;
 
-    // Sum job detail amounts
-    document.querySelectorAll(".amount-input").forEach((input) => {
-      const value = parseFloat(input.value) || 0;
+    // Sum job detail amounts - optimized with direct DOM access
+    const amountInputs = document.querySelectorAll(".amount-input");
+    for (let i = 0; i < amountInputs.length; i++) {
+      const value = parseFloat(amountInputs[i].value) || 0;
       total += value;
-    });
+    }
 
-    // Update main service fee
+    // Update main service fee - direct access without extra validation
     const mainServiceFeeElement = document.getElementById("main-service-fee");
     if (mainServiceFeeElement) {
       mainServiceFeeElement.textContent = total.toFixed(2) + " บาท";
     }
 
-    // Sum additional fees
-    document.querySelectorAll(".fee-amount").forEach((input) => {
-      const value = parseFloat(input.value) || 0;
+    // Sum additional fees - optimized with direct DOM access
+    const feeAmountInputs = document.querySelectorAll(".fee-amount");
+    for (let i = 0; i < feeAmountInputs.length; i++) {
+      const value = parseFloat(feeAmountInputs[i].value) || 0;
       total += value;
-    });
+    }
 
-    // Update total
+    // Update total - direct access without extra validation
     const totalAmountElement = document.getElementById("total-amount");
     if (totalAmountElement) {
       totalAmountElement.textContent = total.toFixed(2) + " บาท";

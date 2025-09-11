@@ -1000,25 +1000,27 @@
         try {
           let total = 0;
 
-          // Sum job detail amounts
-          document.querySelectorAll(".amount-input").forEach((input) => {
-            const value = parseFloat(input.value) || 0;
+          // Sum job detail amounts - optimized with direct DOM access
+          const amountInputs = document.querySelectorAll(".amount-input");
+          for (let i = 0; i < amountInputs.length; i++) {
+            const value = parseFloat(amountInputs[i].value) || 0;
             total += value;
-          });
+          }
 
-          // Update main service fee
+          // Update main service fee - direct access without extra validation
           const mainServiceFeeElement = document.getElementById("main-service-fee");
           if (mainServiceFeeElement) {
             mainServiceFeeElement.textContent = total.toFixed(2) + " บาท";
           }
 
-          // Sum additional fees
-          document.querySelectorAll(".fee-amount").forEach((input) => {
-            const value = parseFloat(input.value) || 0;
+          // Sum additional fees - optimized with direct DOM access
+          const feeAmountInputs = document.querySelectorAll(".fee-amount");
+          for (let i = 0; i < feeAmountInputs.length; i++) {
+            const value = parseFloat(feeAmountInputs[i].value) || 0;
             total += value;
-          });
+          }
 
-          // Update total
+          // Update total - direct access without extra validation
           const totalAmountElement = document.getElementById("total-amount");
           if (totalAmountElement) {
             totalAmountElement.textContent = total.toFixed(2) + " บาท";
