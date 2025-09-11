@@ -77,7 +77,10 @@
     "word-wrap": "^1.2.5",
     "yocto-queue": "^0.1.0"
   },
-  "scripts": {\n    "test": "echo \"Error: no test specified\" && exit 1",\n    "deploy": "node deploy.js"\n  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "node deploy.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Ayou2529/mangpong-pwa.git"
