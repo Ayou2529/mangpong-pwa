@@ -795,52 +795,12 @@
               }
 
               // Process job details more efficiently
-              jobDetails.forEach((detail, index) => {
-                if (index === 0) {
-                  // Update the first job detail card
-                  const firstCard = container.querySelector(".job-detail-card");
-                  if (firstCard) {
-                    const firstCardInputs = firstCard.querySelectorAll("input, textarea");
-                    if (firstCardInputs.length >= 6) {
-                      firstCardInputs[0].value = detail.destinationCompany || "";
-                      firstCardInputs[1].value = detail.deliveryProvince || "";
-                      firstCardInputs[2].value = detail.deliveryDistrict || "";
-                      firstCardInputs[3].value = detail.recipient || "";
-                      firstCardInputs[4].value = detail.description || "";
-                      firstCardInputs[5].value = parseInt(detail.amount) || 0;
-                      
-                      // Add event listener to amount input only once
-                      if (!firstCardInputs[5].dataset.listenerAdded) {
-                        firstCardInputs[5].addEventListener("input", updateTotalAmount);
-                        firstCardInputs[5].dataset.listenerAdded = "true";
-                      }
-                    }
-                  }
-                } else {
-                  // Add additional job detail cards
-                  addJobDetailCard(detail);
-                }
+              jobDetails.forEach((detail) => {
+                addJobDetailCard(detail);
               });
             } else {
               // If no job details, ensure we have at least one empty card
-              const firstCard = container.querySelector(".job-detail-card");
-              if (firstCard) {
-                const firstCardInputs = firstCard.querySelectorAll("input, textarea");
-                if (firstCardInputs.length >= 6) {
-                  firstCardInputs[0].value = "";
-                  firstCardInputs[1].value = "";
-                  firstCardInputs[2].value = "";
-                  firstCardInputs[3].value = "";
-                  firstCardInputs[4].value = "";
-                  firstCardInputs[5].value = 0;
-                  
-                  // Add event listener to amount input only once
-                  if (!firstCardInputs[5].dataset.listenerAdded) {
-                    firstCardInputs[5].addEventListener("input", updateTotalAmount);
-                    firstCardInputs[5].dataset.listenerAdded = "true";
-                  }
-                }
-              }
+              addJobDetailCard();
             }
           }
 

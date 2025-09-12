@@ -579,29 +579,25 @@ function handleGetJobById(p) {
 
   const ss = getSS();
   const jobsSheet = ss.getSheetByName(SHEET_JOBS);
-  const jobData = jobsSheet.getDataRange().getValues();
+  
+  // Use TextFinder to find the job ID in column C (index 3)
+  const textFinder = jobsSheet.getRange("C:C").createTextFinder(p.jobId);
+  const foundRange = textFinder.findNext();
 
-  if (jobData.length <= 1) {
+  if (!foundRange) {
     return { success: false, error: "Job not found" };
   }
 
-  const headers = jobData[0];
+  const rowIndex = foundRange.getRow();
+  const headers = jobsSheet.getRange(1, 1, 1, jobsSheet.getLastColumn()).getValues()[0];
+  const rowData = jobsSheet.getRange(rowIndex, 1, 1, jobsSheet.getLastColumn()).getValues()[0];
 
-  // Find the job with this jobId
-  for (let i = 1; i < jobData.length; i++) {
-    const row = jobData[i];
-    const jobId = row[2]; // jobId column (0-indexed)
+  const job = {};
+  headers.forEach((header, index) => {
+    job[header] = rowData[index];
+  });
 
-    if (String(jobId) === String(p.jobId)) {
-      const job = {};
-      headers.forEach((header, index) => {
-        job[header] = row[index];
-      });
-      return { success: true, job: job };
-    }
-  }
-
-  return { success: false, error: "Job not found" };
+  return { success: true, job: job };
 }
 
 function toNumber(v) {
