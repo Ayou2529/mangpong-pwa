@@ -1130,7 +1130,6 @@
               ...existingJob, // Keep all existing fields
               ...jobData, // Override with new form data
               jobId: jobData.jobId, // Ensure jobId remains the same
-              timestamp: existingJob.timestamp, // Preserve original timestamp
             };
             console.log(
               "Updated existing job:",
@@ -1138,11 +1137,6 @@
               "with data:",
               savedJobs[jobIndex]
             );
-          } else {
-            // If not found, add as new (should not happen in normal flow)
-            console.warn("Job not found for editing, adding as new:", jobData.jobId);
-            savedJobs.push(jobData);
-          }
 
           // Validate localStorage is available before saving
           if (typeof localStorage !== 'undefined') {

@@ -504,7 +504,7 @@ function submitToGoogleSheetsInternal(data) {
     const timeoutId = setTimeout(() => {
       reject(new Error("การเชื่อมต่อกับ Google Apps Script หมดเวลา"));
       cleanUp();
-    }, 15000); // 15 second timeout (balance between reliability and speed)
+    }, 30000); // 30 second timeout
 
     // cleanup function – remove script element and the temporary callback
     function cleanUp() {
@@ -2231,8 +2231,9 @@ function saveJob(jobData, isDraft = false) {
     safeLocalStorageSetItem("mangpongJobs", JSON.stringify(savedJobs));
 
     // Also submit to Google Sheets
+    const action = editingJobId ? "updateJob" : "createJob";
     return submitToGoogleSheets({
-      action: "saveJob",
+      action: action,
       ...jobData,
       isDraft: isDraft,
     });
