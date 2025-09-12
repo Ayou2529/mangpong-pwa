@@ -1137,6 +1137,11 @@
               "with data:",
               savedJobs[jobIndex]
             );
+          } else {
+            // If not found, add as new (should not happen in normal flow)
+            console.warn("Job not found for editing, adding as new:", jobData.jobId);
+            savedJobs.push(jobData);
+          }
 
           // Validate localStorage is available before saving
           if (typeof localStorage !== 'undefined') {
