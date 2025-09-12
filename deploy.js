@@ -13,7 +13,7 @@ async function deploy() {
 
     console.log('Deploying to Google Apps Script...');
     await execPromise('clasp push');
-    const { stdout } = await execPromise('clasp deploy --description "Mangpong Delivery App v1.0"');
+    const { stdout } = await execPromise('clasp deploy --deploymentId AKfycbwrfLlkWHqe2CkRjOH3iQpBVynXZHWkbjcVxmr-V25rtwkuQYIFj0UAznWadCPnDbQN --description "Mangpong Delivery App v1.0"');
     console.log('Google Apps Script deployment completed.');
     console.log(stdout);
   } catch (error) {
