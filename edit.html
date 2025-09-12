@@ -750,6 +750,12 @@
             if (originalDateField) {
               originalDateField.value = job.jobDate;
             }
+          } else {
+            // If no job date, set to today
+            const jobDatePicker = document.getElementById("job-date-picker");
+            if (jobDatePicker) {
+              jobDatePicker.value = formatDate(new Date());
+            }
           }
 
           // Basic information - get all elements at once
@@ -941,37 +947,36 @@
       // Update total amount
       function updateTotalAmount() {
         try {
-          let total = 0;
-
-          // Sum job detail amounts - optimized with direct DOM access
+          let mainServiceTotal = 0;
           const amountInputs = document.querySelectorAll(".amount-input");
+          console.log(`Found ${amountInputs.length} amount inputs for main service fee.`);
           for (let i = 0; i < amountInputs.length; i++) {
             const value = parseInt(amountInputs[i].value) || 0;
-            total += value;
-            console.log("Job detail amount:", value, "Running total:", total);
+            mainServiceTotal += value;
           }
+          console.log("Calculated Main Service Fee:", mainServiceTotal);
 
-          // Update main service fee - direct access without extra validation
           const mainServiceFeeElement = document.getElementById("main-service-fee");
           if (mainServiceFeeElement) {
-            mainServiceFeeElement.textContent = parseInt(total) + " บาท";
+            mainServiceFeeElement.textContent = mainServiceTotal + " บาท";
           }
 
-          // Sum additional fees - optimized with direct DOM access
+          let additionalFeeTotal = 0;
           const feeAmountInputs = document.querySelectorAll(".fee-amount");
+          console.log(`Found ${feeAmountInputs.length} additional fee inputs.`);
           for (let i = 0; i < feeAmountInputs.length; i++) {
             const value = parseInt(feeAmountInputs[i].value) || 0;
-            total += value;
-            console.log("Fee amount:", value, "Running total:", total);
+            additionalFeeTotal += value;
           }
+          console.log("Calculated Additional Fees Total:", additionalFeeTotal);
 
-          // Update total - direct access without extra validation
+          const totalAmount = mainServiceTotal + additionalFeeTotal;
+          console.log("Final Total Amount:", totalAmount);
+
           const totalAmountElement = document.getElementById("total-amount");
           if (totalAmountElement) {
-            totalAmountElement.textContent = parseInt(total) + " บาท";
+            totalAmountElement.textContent = totalAmount + " บาท";
           }
-          
-          console.log("Final total amount:", total);
         } catch (error) {
           console.error("Error updating total amount:", error);
         }
