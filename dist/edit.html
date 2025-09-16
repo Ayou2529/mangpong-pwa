@@ -722,7 +722,7 @@
         }
       }
 
-      // Populate form with job data - optimized version
+      // Populate form with job data - optimized version with error handling
       function populateFormWithJobData(job) {
         try {
           console.log("Populating form with job data:", job);
@@ -801,9 +801,14 @@
               }
 
               // Process job details more efficiently
-              jobDetails.forEach((detail) => {
-                addJobDetailCard(detail);
-              });
+              if (Array.isArray(jobDetails)) {
+                jobDetails.forEach((detail) => {
+                  addJobDetailCard(detail);
+                });
+              } else {
+                // If jobDetails is not an array, ensure we have at least one empty card
+                addJobDetailCard();
+              }
             } else {
               // If no job details, ensure we have at least one empty card
               addJobDetailCard();
@@ -824,9 +829,11 @@
                 additionalFees = [];
               }
 
-              additionalFees.forEach((fee) => {
-                addFeeCard(fee);
-              });
+              if (Array.isArray(additionalFees)) {
+                additionalFees.forEach((fee) => {
+                  addFeeCard(fee);
+                });
+              }
             }
           }
 
