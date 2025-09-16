@@ -1,6 +1,7 @@
-**/**
+# Ignore all files by default
+*
+
+# Don't ignore these files/folders
 !appsscript.json
-!updated_GAS_code.js
-!updated_index.html
-!updated_main.js
-!edit.html
+!dist/
+!dist/**
