@@ -1,6 +1,6 @@
 // src/hooks/useJobForm.js - Custom hook for Job Form logic
 
-import { submitToGoogleSheetsWithRetry } from '../utils/api.js';
+import { submitToGoogleSheets } from '../utils/api.js';
 import { safeLocalStorageGetItem, safeLocalStorageSetItem } from '../utils/storage.js';
 import { validateJobForm } from '../utils/validation.js';
 
@@ -31,7 +31,7 @@ export function useJobForm(onSuccess) {
     
     try {
       // Submit to Google Sheets
-      const response = await submitToGoogleSheetsWithRetry({
+      const response = await submitToGoogleSheets({
         action: jobData.jobId ? 'updateJob' : 'createJob',
         ...jobData,
       });
@@ -167,3 +167,6 @@ export function useJobForm(onSuccess) {
     updateTotalAmount,
   };
 }
+
+// Export updateTotalAmount directly for use in other modules
+export { updateTotalAmount };

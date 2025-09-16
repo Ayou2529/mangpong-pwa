@@ -1,6 +1,7 @@
 // src/pages/Admin.js - Admin role page
 
 import { Header } from '../components/Header.js';
+import { showScreen } from '../utils/navigation.js';
 
 /**
  * Admin dashboard page

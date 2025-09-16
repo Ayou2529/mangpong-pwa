@@ -1,6 +1,7 @@
 // src/utils/auth/user.js - User management functionality
 
 import { safeLocalStorageGetItem, safeLocalStorageRemoveItem } from '../storage.js';
+import { showPage } from '../navigation.js';
 
 /**
  * Check if user is already logged in

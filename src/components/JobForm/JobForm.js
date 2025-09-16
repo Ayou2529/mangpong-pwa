@@ -1,6 +1,6 @@
 // src/components/JobForm/JobForm.js - Job form component
 
-export function JobForm({ onSubmit, onCancel }) {
+export function JobForm({ onCancel }) {
   return `
     <form id="new-job-form" class="space-y-6">
       <!-- Job Date -->

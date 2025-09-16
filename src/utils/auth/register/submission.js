@@ -2,6 +2,7 @@
 
 import { submitToGoogleSheetsWithRetry } from '../../api/retry.js';
 import { ERROR_MESSAGES, ERROR_TITLES } from '../../../constants/errors.js';
+import { showPage } from '../../navigation.js';
 
 /**
  * Handle register form submission

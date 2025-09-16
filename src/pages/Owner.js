@@ -1,6 +1,7 @@
 // src/pages/Owner.js - Owner role page
 
 import { Header } from '../components/Header.js';
+import { showScreen } from '../utils/navigation.js';
 
 /**
  * Owner dashboard page

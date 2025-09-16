@@ -1,18 +1,18 @@
 // @context business/domain.md#commission-system
 // @feature payroll-calculation
-function calculateCommission(jobData) {
+function calculateCommission() {
   // Implementation
 }
 
 // @context business/roles.md#messenger
 // @feature job-recording
-function recordDelivery(jobData) {
+function recordDelivery() {
   // Implementation
 }
 
 // @context business/roles.md#messenger
 // @feature job-tracking
-function trackJobStatus(jobId) {
+function trackJobStatus() {
   // Implementation
 }
 

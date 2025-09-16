@@ -15,7 +15,7 @@ export const requestQueue = {
       attempts: 0,
     });
     this.saveToStorage();
-    console.log('Request added to queue:', requestData);
+    // console.log('Request added to queue:', requestData);
   },
   
   // Process queue
@@ -32,19 +32,19 @@ export const requestQueue = {
         request.attempts++;
         
         try {
-          console.log(`Processing queued request (attempt ${request.attempts}):`, request.data);
-          const response = await submitToGoogleSheetsInternal(request.data);
+          // console.log(`Processing queued request (attempt ${request.attempts}):`, request.data);
+          await submitToGoogleSheetsInternal(request.data);
           
           // If successful, remove from queue
           this.requests.shift();
           this.saveToStorage();
-          console.log('Queued request processed successfully');
-        } catch (error) {
-          console.warn(`Queued request failed (attempt ${request.attempts}):`, error);
+          // console.log('Queued request processed successfully');
+        } catch {
+          // console.warn(`Queued request failed (attempt ${request.attempts}):`, error);
           
           // If max attempts reached, remove from queue
           if (request.attempts >= 3) {
-            console.error('Request failed after 3 attempts, removing from queue:', request.data);
+            // console.error('Request failed after 3 attempts, removing from queue:', request.data);
             this.requests.shift();
             this.saveToStorage();
           } else {
@@ -62,8 +62,8 @@ export const requestQueue = {
   saveToStorage: function() {
     try {
       safeLocalStorageSetItem('mangpongRequestQueue', JSON.stringify(this.requests));
-    } catch (error) {
-      console.error('Failed to save request queue to storage:', error);
+    } catch {
+      // console.error('Failed to save request queue to storage:', error);
     }
   },
   
@@ -73,10 +73,10 @@ export const requestQueue = {
       const stored = safeLocalStorageGetItem('mangpongRequestQueue');
       if (stored) {
         this.requests = JSON.parse(stored);
-        console.log('Loaded request queue from storage:', this.requests);
+        // console.log('Loaded request queue from storage:', this.requests);
       }
-    } catch (error) {
-      console.error('Failed to load request queue from storage:', error);
+    } catch {
+      // console.error('Failed to load request queue from storage:', error);
     }
   },
   
@@ -90,7 +90,7 @@ export const requestQueue = {
 export async function submitToGoogleSheets(data) {
   // If offline, queue the request
   if (!navigator.onLine) {
-    console.log('Offline - queuing request:', data);
+    // console.log('Offline - queuing request:', data);
     requestQueue.add(data);
     // Return a mock success response for offline requests
     return Promise.resolve({ success: true, message: 'Request queued for later processing' });
@@ -104,15 +104,15 @@ export async function submitToGoogleSheets(data) {
 async function submitToGoogleSheetsWithRetry(data, maxRetries = 3) {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`Attempt ${attempt} to connect to Google Sheets`);
+      // console.log(`Attempt ${attempt} to connect to Google Sheets`);
       const result = await submitToGoogleSheetsInternal(data);
       return result;
-    } catch (error) {
-      console.warn(`Attempt ${attempt} failed:`, error.message);
+    } catch {
+      // console.warn(`Attempt ${attempt} failed:`, error.message);
       
       // If this is the last attempt, queue the request for later processing
       if (attempt === maxRetries) {
-        console.log('All attempts failed - queuing request for later:', data);
+        // console.log('All attempts failed - queuing request for later:', data);
         requestQueue.add(data);
         // Return a mock success response to prevent UI errors
         return { success: true, message: 'Request queued for later processing' };
@@ -132,78 +132,85 @@ function mockSubmitToGoogleSheetsInternal(data) {
   return new Promise((resolve) => {
     setTimeout(() => {
       // Mock responses based on action
-      switch (data.action) {
-        case 'login':
-          // Always allow login with username 'admin' and password 'password' in development
-          if (data.username === 'admin' && data.password === 'password') {
-            resolve({
-              success: true,
-              user: {
-                username: 'admin',
-                fullName: 'Admin User',
-                role: 'Admin'
-              }
-            });
-          } else if (data.username === 'messenger' && data.password === 'password') {
-            resolve({
-              success: true,
-              user: {
-                username: 'messenger',
-                fullName: 'Messenger User',
-                role: 'Messenger'
-              }
-            });
-          } else {
-            resolve({
-              success: false,
-              error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'
-              });
-          }
-          break;
-          
-        case 'register':
-          resolve({
-            success: true,
-            message: 'ลงทะเบียนสำเร็จ'
-          });
-          break;
-          
-        case 'createJob':
-          resolve({
-            success: true,
-            message: 'บันทึกงานสำเร็จ',
-            jobId: 'JOB-' + Date.now()
-          });
-          break;
-          
-        case 'getJobs':
-          resolve({
-            success: true,
-            jobs: [
-              {
-                jobId: 'JOB-001',
-                timestamp: new Date().toISOString(),
-                status: 'complete',
-                jobDate: new Date().toISOString(),
-                company: 'ทดสอบ บริษัท',
-                assignedBy: 'ทดสอบ ผู้สั่งงาน',
-                contact: '0123456789',
-                pickupProvince: 'กรุงเทพมหานคร',
-                pickupDistrict: 'บางนา',
-                totalAmount: 1000
-              }
-            ]
-          });
-          break;
-          
-        default:
-          resolve({
-            success: true,
-            message: 'ดำเนินการสำเร็จ'
-          });
-      }
+      const mockResponse = generateMockResponse(data);
+      resolve(mockResponse);
     }, delay);
   });
+}
+
+// Generate mock response based on action
+function generateMockResponse(data) {
+  switch (data.action) {
+  case 'login':
+    return generateLoginResponse(data);
+      
+  case 'register':
+    return {
+      success: true,
+      message: 'ลงทะเบียนสำเร็จ',
+    };
+      
+  case 'createJob':
+    return {
+      success: true,
+      message: 'บันทึกงานสำเร็จ',
+      jobId: 'JOB-' + Date.now(),
+    };
+      
+  case 'getJobs':
+    return {
+      success: true,
+      jobs: [
+        {
+          jobId: 'JOB-001',
+          timestamp: new Date().toISOString(),
+          status: 'complete',
+          jobDate: new Date().toISOString(),
+          company: 'ทดสอบ บริษัท',
+          assignedBy: 'ทดสอบ ผู้สั่งงาน',
+          contact: '0123456789',
+          pickupProvince: 'กรุงเทพมหานคร',
+          pickupDistrict: 'บางนา',
+          totalAmount: 1000,
+        },
+      ],
+    };
+      
+  default:
+    return {
+      success: true,
+      message: 'ดำเนินการสำเร็จ',
+    };
+  }
+}
+
+// Generate login response
+function generateLoginResponse(data) {
+  // Always allow login with username 'admin' and password 'password' in development
+  if (data.username === 'admin' && data.password === 'password') {
+    return {
+      success: true,
+      user: {
+        username: 'admin',
+        fullName: 'Admin User',
+        role: 'Admin',
+      },
+    };
+  } else if (data.username === 'messenger' && data.password === 'password') {
+    return {
+      success: true,
+      user: {
+        username: 'messenger',
+        fullName: 'Messenger User',
+        role: 'Messenger',
+      },
+    };
+  } else {
+    return {
+      success: false,
+      error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
+    };
+  }
 }
 
 // Internal function that does the actual submission using fetch

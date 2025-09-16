@@ -100,13 +100,24 @@ export function cancelEdit() {
 
 // Edit job
 export function editJob(jobId) {
+  if (!jobId) {
+    console.warn('No job ID provided for editJob');
+    return;
+  }
+  
   try {
-    if (!jobId) {
-      throw new Error('Job ID is required');
+    // Set the job ID in the hidden input field
+    const editJobIdInput = document.getElementById('edit-job-id');
+    if (editJobIdInput) {
+      editJobIdInput.value = jobId;
     }
-
-    // Instead of redirecting to edit.html, we'll load the job data and populate the form
-    loadJobForEdit(jobId);
+    
+    // Navigate to the new job screen for editing
+    showScreen('new-job-screen');
+    
+    // Here you would typically populate the form with the job data
+    // For now, we'll just log that we're entering edit mode
+    console.log('Entering edit mode for job:', jobId);
   } catch (error) {
     console.error('Error editing job:', error);
     Swal.fire({
@@ -120,17 +131,12 @@ export function editJob(jobId) {
 }
 
 // View job
-export function viewJob(jobId) {
+export function viewJob() {
   // Implementation would go here
 }
 
 // Reset form
 function resetForm() {
-  // Implementation would go here
-}
-
-// Load job for edit
-function loadJobForEdit(jobId) {
   // Implementation would go here
 }
 

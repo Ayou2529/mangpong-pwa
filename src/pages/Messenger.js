@@ -4,6 +4,7 @@ import { Header } from '../components/Header.js';
 import { Dashboard } from '../components/Dashboard.js';
 import { JobForm } from '../components/JobForm.js';
 import { JobHistory } from '../components/JobHistory.js';
+import { showScreen } from '../utils/navigation.js';
 
 /**
  * Messenger home page

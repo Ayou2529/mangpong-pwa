@@ -1,6 +1,7 @@
 // src/utils/auth/login/submission/handleResponse.js - Handle login response
 
 import { safeLocalStorageSetItem } from '../../../storage.js';
+import { showPage } from '../../../navigation.js';
 
 /**
  * Handle successful login response
