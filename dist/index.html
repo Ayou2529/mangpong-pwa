@@ -7,7 +7,6 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
     <title>แมงป่อง เทรดดิ้ง - Mangpong Delivery</title>
-    <link rel="stylesheet" href="src/styles/main.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link
@@ -16,22 +15,11 @@
     />
     <link
       rel="apple-touch-icon"
-      href="src/assets/logo_mangpong_120x120.png"
-      sizes="120x120"
+      href="/mangpong-pwa/icon-192.png"
+      sizes="192x192"
     />
-    <link
-      rel="apple-touch-icon"
-      href="src/assets/logo_mangpong_152x152.png"
-      sizes="152x152"
-    />
-    <link
-      rel="apple-touch-icon"
-      href="src/assets/logo_mangpong_180x180.png"
-      sizes="180x180"
-    />
-    <link rel="apple-touch-icon" href="src/assets/icon-192.png" sizes="192x192" />
-    <link rel="manifest" href="manifest.json" />
-    <link rel="icon" href="src/assets/favicon.ico" type="image/x-icon" />
+    <link rel="manifest" href="/mangpong-pwa/manifest.json" />
+    <link rel="icon" href="/mangpong-pwa/favicon.ico" type="image/x-icon" />
     <style>
       body {
         font-family: "Prompt", sans-serif;
@@ -206,6 +194,8 @@
         }
       }
     </style>
+    <script type="module" crossorigin src="/mangpong-pwa/assets/main-y_TzUicp.js"></script>
+    <link rel="modulepreload" crossorigin href="/mangpong-pwa/assets/config-d4aAC8yj.js">
   </head>
   <body>
     <!-- Login Screen -->
@@ -608,7 +598,5 @@
       </div>
     </div>
 
-    <script src="config.js" type="module"></script>
-    <script type="module" src="src/main.js"></script>
   </body>
 </html>
