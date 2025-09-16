@@ -1,0 +1,12 @@
+{
+  "name": "eslint-plugin-mangpong",
+  "version": "1.0.0",
+  "description": "Custom ESLint plugin for Mangpong PWA project",
+  "main": "index.js",
+  "keywords": [
+    "eslint",
+    "eslint-plugin"
+  ],
+  "author": "Mangpong Team",
+  "license": "MIT"
+}

@@ -1,7 +1,14 @@
 {
+  "type": "module",
   "devDependencies": {
-    "eslint": "^9.34.0",
-    "prettier": "^3.6.2"
+    "@tailwindcss/vite": "^4.1.13",
+    "concurrently": "^8.2.0",
+    "eslint": "^9.35.0",
+    "eslint-plugin-mangpong": "file:eslint-plugin-mangpong",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "prettier": "^3.6.2",
+    "tailwindcss": "^4.1.13"
   },
   "name": "mangpong-pwa",
   "version": "1.0.0",
@@ -17,9 +24,11 @@
     "brace-expansion": "^1.1.12",
     "callsites": "^3.1.0",
     "chalk": "^4.1.2",
+    "chokidar": "^4.0.3",
     "color-convert": "^2.0.1",
     "color-name": "^1.1.4",
     "concat-map": "^0.0.1",
+    "cors": "^2.8.5",
     "cross-spawn": "^7.0.6",
     "debug": "^4.4.1",
     "deep-is": "^0.1.4",
@@ -31,6 +40,7 @@
     "esrecurse": "^4.3.0",
     "estraverse": "^5.3.0",
     "esutils": "^2.0.3",
+    "express": "^4.18.2",
     "fast-deep-equal": "^3.1.3",
     "fast-json-stable-stringify": "^2.1.0",
     "fast-levenshtein": "^2.0.6",
@@ -78,8 +88,20 @@
     "yocto-queue": "^0.1.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "node deploy.js"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "deploy": "node deploy.js",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "eslint src/**/*.js --fix",
+    "check:sizes": "node scripts/check-file-sizes.js",
+    "context:validate": "node context/context-engine.js validate",
+    "context:visualize": "node context/context-engine.js visualize",
+    "context:update": "node context/context-engine.js update",
+    "context:watch": "node context/context-engine.js watch",
+    "context:search": "node context/context-engine.js search"
   },
   "repository": {
     "type": "git",
@@ -91,5 +113,11 @@
   "bugs": {
     "url": "https://github.com/Ayou2529/mangpong-pwa/issues"
   },
-  "homepage": "https://github.com/Ayou2529/mangpong-pwa#readme"
+  "homepage": "https://github.com/Ayou2529/mangpong-pwa#readme",
+  "jest": {
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": [
+      "<rootDir>/tests/setupTests.js"
+    ]
+  }
 }

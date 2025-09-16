@@ -1,0 +1,101 @@
+{
+  "error_context_mapping": [
+    {
+      "error_pattern": "Cannot read property 'data' of undefined",
+      "context_files": [
+        "/context/technical/architecture.md#data-flow",
+        "/context/business/processes.md#job-tracking"
+      ],
+      "solutions": [
+        "Ensure data is loaded before accessing it",
+        "Add proper null checks",
+        "Implement loading states in UI"
+      ],
+      "prevention": [
+        "Add error boundaries in components",
+        "Implement better data validation",
+        "Use optional chaining (?.) operator"
+      ]
+    },
+    {
+      "error_id": "ERR001",
+      "context_files": [
+        "/context/technical/architecture.md#backend-architecture",
+        "/context/business/processes.md#job-tracking"
+      ],
+      "solutions": [
+        "Check network connectivity",
+        "Verify Google Apps Script URL in config.js",
+        "Review API endpoint status"
+      ],
+      "prevention": [
+        "Implement retry mechanism",
+        "Add offline support",
+        "Create mock API for development"
+      ]
+    },
+    {
+      "error_id": "ERR002",
+      "context_files": [
+        "/context/technical/architecture.md#frontend-components",
+        "/context/user/personas.md#messenger"
+      ],
+      "solutions": [
+        "Check CSS styling for modal",
+        "Verify JavaScript for modal display",
+        "Test on different mobile devices"
+      ],
+      "prevention": [
+        "Implement responsive design testing",
+        "Add cross-browser testing",
+        "Create mobile-specific components"
+      ]
+    },
+    {
+      "error_id": "ERR004",
+      "context_files": [
+        "/context/technical/architecture.md"
+      ],
+      "solutions": [
+        "Review error message and stack trace",
+        "Check related documentation"
+      ],
+      "prevention": [
+        "Add proper error handling",
+        "Implement logging",
+        "Add unit tests"
+      ]
+    }
+  ],
+  "chat_log_insights": [
+    {
+      "topic": "history page filtering",
+      "context_files": [
+        "/context/business/roles.md#messenger",
+        "/context/technical/architecture.md#frontend-components"
+      ],
+      "feature_request": "Add date filtering to history page",
+      "status": "planned"
+    },
+    {
+      "topic": "login issues on Android",
+      "context_files": [
+        "/context/technical/architecture.md#pwa-features",
+        "/context/user/personas.md#messenger"
+      ],
+      "issue": "Service worker not loading properly on some Android browsers",
+      "solution": "Add fallback mechanism",
+      "status": "in-progress"
+    },
+    {
+      "topic": "automatic commission calculation",
+      "context_files": [
+        "/context/business/domain.md#commission-system",
+        "/context/business/roles.md#owner"
+      ],
+      "feature_request": "Add automatic commission calculation in payroll",
+      "status": "planned"
+    }
+  ],
+  "last_updated": "2025-09-16T08:30:10.729Z"
+}

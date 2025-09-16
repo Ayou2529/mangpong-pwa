@@ -45,16 +45,16 @@ self.addEventListener('install', event => {
               console.warn('Service Worker: Failed to cache offline page:', error);
               return Promise.resolve();
             });
-        })
+        }),
     ])
-    .then(() => {
-      console.log('Service Worker: Installation complete');
-      // Skip waiting to activate the new service worker immediately
-      return self.skipWaiting();
-    })
-    .catch(error => {
-      console.error('Service Worker: Installation failed:', error);
-    })
+      .then(() => {
+        console.log('Service Worker: Installation complete');
+        // Skip waiting to activate the new service worker immediately
+        return self.skipWaiting();
+      })
+      .catch(error => {
+        console.error('Service Worker: Installation failed:', error);
+      }),
   );
 });
 
@@ -72,7 +72,7 @@ self.addEventListener('activate', event => {
               console.log('Service Worker: Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
-          })
+          }),
         );
       })
       .then(() => {
@@ -82,7 +82,7 @@ self.addEventListener('activate', event => {
       })
       .catch(error => {
         console.error('Service Worker: Activation failed:', error);
-      })
+      }),
   );
 });
 
@@ -222,7 +222,7 @@ async function getOfflineFallbackPage() {
       </body>
       </html>
     `, {
-      headers: { 'Content-Type': 'text/html' }
+      headers: { 'Content-Type': 'text/html' },
     });
   } catch (error) {
     console.error('Service Worker: Failed to get offline fallback:', error);
@@ -243,7 +243,7 @@ async function getOfflineFallbackPage() {
       </body>
       </html>
     `, {
-      headers: { 'Content-Type': 'text/html' }
+      headers: { 'Content-Type': 'text/html' },
     });
   }
 }
@@ -264,6 +264,12 @@ self.addEventListener('fetch', event => {
   }
   
   console.log('Service Worker: Handling fetch event for:', url.href);
+  
+  // Skip Google Apps Script URLs to prevent caching issues
+  if (url.hostname.includes('script.google.com') || url.hostname.includes('googleapis.com')) {
+    console.log('Service Worker: Skipping Google Apps Script URL');
+    return;
+  }
   
   // Handle navigation requests (HTML pages)
   if (request.mode === 'navigate') {
@@ -287,7 +293,7 @@ self.addEventListener('fetch', event => {
           // Serve offline fallback page
           return getOfflineFallbackPage();
         }
-      })()
+      })(),
     );
     return;
   }

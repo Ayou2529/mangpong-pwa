@@ -722,7 +722,7 @@
         }
       }
 
-      // Populate form with job data - optimized version
+      // Populate form with job data - optimized version with error handling
       function populateFormWithJobData(job) {
         try {
           console.log("Populating form with job data:", job);
@@ -801,9 +801,14 @@
               }
 
               // Process job details more efficiently
-              jobDetails.forEach((detail) => {
-                addJobDetailCard(detail);
-              });
+              if (Array.isArray(jobDetails)) {
+                jobDetails.forEach((detail) => {
+                  addJobDetailCard(detail);
+                });
+              } else {
+                // If jobDetails is not an array, ensure we have at least one empty card
+                addJobDetailCard();
+              }
             } else {
               // If no job details, ensure we have at least one empty card
               addJobDetailCard();
@@ -824,9 +829,11 @@
                 additionalFees = [];
               }
 
-              additionalFees.forEach((fee) => {
-                addFeeCard(fee);
-              });
+              if (Array.isArray(additionalFees)) {
+                additionalFees.forEach((fee) => {
+                  addFeeCard(fee);
+                });
+              }
             }
           }
 
@@ -990,6 +997,12 @@
             throw new Error("Form not found - edit-job-form element missing");
           }
 
+          // Validate the form before collecting data
+          const validationErrors = validateJobForm(form);
+          if (validationErrors.length > 0) {
+            throw new Error(`กรุณาตรวจสอบข้อมูลในฟอร์ม:\n${validationErrors.join('\n')}`);
+          }
+
           // วันที่บันทึกงาน
           const jobDatePicker = document.getElementById("job-date-picker");
           if (!jobDatePicker) {
@@ -1120,6 +1133,100 @@
         }
       }
 
+      // Validate job form
+      function validateJobForm(form) {
+        const errors = [];
+
+        // Validate basic job information
+        const companySelect = document.getElementById("company-select");
+        if (!companySelect || !companySelect.value) {
+          errors.push("กรุณาเลือกบริษัท/สถานที่รับงาน");
+        }
+
+        const assignedBy = document.getElementById("assigned-by");
+        if (!assignedBy || !assignedBy.value.trim()) {
+          errors.push("กรุณากรอกชื่อผู้มอบงาน");
+        }
+
+        const contact = document.getElementById("contact");
+        if (!contact || !contact.value.trim()) {
+          errors.push("กรุณากรอกข้อมูลติดต่อ");
+        }
+
+        const pickupProvince = document.getElementById("pickup-province");
+        if (!pickupProvince || !pickupProvince.value.trim()) {
+          errors.push("กรุณากรอกจังหวัดรับของ");
+        }
+
+        const pickupDistrict = document.getElementById("pickup-district");
+        if (!pickupDistrict || !pickupDistrict.value.trim()) {
+          errors.push("กรุณากรอกเขต/อำเภอรับของ");
+        }
+
+        // Validate job details
+        const jobDetailCards = document.querySelectorAll(".job-detail-card");
+        if (jobDetailCards.length === 0) {
+          errors.push("กรุณาเพิ่มรายละเอียดงานอย่างน้อย 1 รายการ");
+        } else {
+          jobDetailCards.forEach((card, index) => {
+            const inputs = card.querySelectorAll("input, textarea");
+            const destinationCompany = inputs[0];
+            const deliveryProvince = inputs[1];
+            const deliveryDistrict = inputs[2];
+            const recipient = inputs[3];
+            const description = inputs[4];
+            const amount = inputs[5];
+
+            if (!destinationCompany || !destinationCompany.value.trim()) {
+              errors.push(`กรุณากรอกบริษัทปลายทางสำหรับงาน #${index + 1}`);
+            }
+
+            if (!deliveryProvince || !deliveryProvince.value.trim()) {
+              errors.push(`กรุณากรอกจังหวัดส่งของสำหรับงาน #${index + 1}`);
+            }
+
+            if (!deliveryDistrict || !deliveryDistrict.value.trim()) {
+              errors.push(`กรุณากรอกเขต/อำเภอส่งของสำหรับงาน #${index + 1}`);
+            }
+
+            if (!recipient || !recipient.value.trim()) {
+              errors.push(`กรุณากรอกชื่อผู้รับงานสำหรับงาน #${index + 1}`);
+            }
+
+            if (!description || !description.value.trim()) {
+              errors.push(`กรุณากรอกรายละเอียดงาน #${index + 1}`);
+            }
+
+            if (!amount || isNaN(parseInt(amount.value)) || parseInt(amount.value) <= 0) {
+              errors.push(`กรุณากรอกจำนวนเงินที่ถูกต้องสำหรับงาน #${index + 1}`);
+            }
+          });
+        }
+
+        // Validate additional fees (if any)
+        const feeItems = document.querySelectorAll("#additional-fees-container > div");
+        feeItems.forEach((item, index) => {
+          const select = item.querySelector("select");
+          const input = item.querySelector("input");
+
+          if (select && select.value && (!input || !input.value.trim())) {
+            errors.push(`กรุณากรอกจำนวนเงินสำหรับค่าบริการเพิ่มเติม #${index + 1}`);
+          }
+
+          if (input && input.value.trim() && (!select || !select.value)) {
+            errors.push(`กรุณาเลือกรายการค่าบริการเพิ่มเติม #${index + 1}`);
+          }
+
+          if (input && input.value.trim() && select && select.value) {
+            if (isNaN(parseInt(input.value)) || parseInt(input.value) <= 0) {
+              errors.push(`กรุณากรอกจำนวนเงินที่ถูกต้องสำหรับค่าบริการเพิ่มเติม #${index + 1}`);
+            }
+          }
+        });
+
+        return errors;
+      }
+
       // Update job with retry mechanism
       async function updateJob(jobData) {
         try {
@@ -1168,7 +1275,17 @@
           }
         } catch (error) {
           console.error("Error updating job:", error);
-          throw new Error(`Failed to update job: ${error.message}`);
+          
+          // Provide more specific error messages based on the type of error
+          let message = `Failed to update job: ${error.message}`;
+          
+          if (error.message && error.message.includes("หมดเวลา")) {
+            message = "การเชื่อมต่อใช้เวลานานเกินไป โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตของคุณ";
+          } else if (error.message && error.message.includes("ไม่สามารถเชื่อมต่อ")) {
+            message = "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตของคุณ";
+          }
+          
+          throw new Error(message);
         }
       }
       // --- END: JOB MANAGEMENT FUNCTIONS ---
@@ -1251,11 +1368,26 @@
             } catch (error) {
               console.error("Error submitting form:", error);
 
+              // Provide more specific error messages based on the type of error
+              let title = "เกิดข้อผิดพลาด!";
+              let text = error.message || "ไม่สามารถอัปเดตงานได้ กรุณาลองใหม่อีกครั้ง";
+              
+              if (error.message && error.message.includes("หมดเวลา")) {
+                title = "การเชื่อมต่อใช้เวลานานเกินไป";
+                text = "การเชื่อมต่อกับเซิร์ฟเวอร์ใช้เวลานานเกินไป โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตของคุณ";
+              } else if (error.message && error.message.includes("ไม่สามารถเชื่อมต่อ")) {
+                title = "ไม่สามารถเชื่อมต่อได้";
+                text = "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตของคุณ";
+              } else if (error.message && error.message.includes("Failed to collect form data")) {
+                title = "ข้อมูลไม่ถูกต้อง";
+                text = "ข้อมูลในฟอร์มไม่ถูกต้อง กรุณาตรวจสอบข้อมูลที่กรอก";
+              }
+              
               // Show error message
               await Swal.fire({
                 icon: "error",
-                title: "เกิดข้อผิดพลาด!",
-                text: error.message,
+                title: title,
+                text: text,
                 confirmButtonText: "ตกลง",
                 confirmButtonColor: "#ef4444",
               });
@@ -1265,7 +1397,17 @@
           console.log("Event listeners attached successfully");
         } catch (error) {
           console.error("Error during DOMContentLoaded:", error);
-          showError(`ไม่สามารถโหลดหน้าแก้ไขงานได้: ${error.message}`);
+          
+          // Provide more specific error messages based on the type of error
+          let message = `ไม่สามารถโหลดหน้าแก้ไขงานได้: ${error.message}`;
+          
+          if (error.message && error.message.includes("หมดเวลา")) {
+            message = "การเชื่อมต่อใช้เวลานานเกินไป โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตของคุณ";
+          } else if (error.message && error.message.includes("ไม่สามารถเชื่อมต่อ")) {
+            message = "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตของคุณ";
+          }
+          
+          showError(message);
         }
       });
       // --- END: EVENT LISTENERS ---

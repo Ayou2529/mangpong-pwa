@@ -1,0 +1,541 @@
+{
+  "projectName": "mangpong-pwa",
+  "version": "1.0.0",
+  "description": "Progressive Web App for Mangpong Trading Delivery (แมงป่อง เทรดดิ้ง)",
+  "technologies": {
+    "frontend": "HTML5, CSS3, JavaScript (ES6+)",
+    "uiFramework": "Tailwind CSS",
+    "notification": "SweetAlert2",
+    "font": "Prompt (Google Fonts)",
+    "pwa": "Service Worker, Manifest, Offline Support",
+    "backend": "Google Apps Script",
+    "database": "Google Sheets"
+  },
+  "googleAppsScript": {
+    "url": "https://script.google.com/macros/s/AKfycbxZIMrFlOm3IzVSM-PqmgA91v-t48szqLLk9HD0IKdW9FBd3BFJ7SE9Eci6NEBcNa9v/exec",
+    "spreadsheetId": "1fcq5P7vm3IxtJMDS9BLDwO8B14hFmmDdK257GHyoM"
+  },
+  "projectStructure": {
+    "mainFiles": [
+      "main.js",
+      "index.html",
+      "edit.html",
+      "config.js",
+      "service-worker.js"
+    ],
+    "database": {
+      "sheets": [
+        "Jobs",
+        "JobDetails",
+        "AdditionalFees",
+        "Users",
+        "JobHistory"
+      ]
+    }
+  },
+  "roles": [
+    {
+      "name": "Messenger",
+      "features": [
+        "Login/Register",
+        "Home Screen (Dashboard)",
+        "New Job Screen",
+        "History Screen",
+        "Edit Job Screen",
+        "Upload Images",
+        "Offline Support"
+      ],
+      "count": 7
+    },
+    {
+      "name": "Employee (Admin)",
+      "features": [
+        "View data from Google Sheet",
+        "Dashboard with company/employee selection",
+        "Monthly reports",
+        "Export PDF (Billing/Payroll)",
+        "Auto query/filter to separate sheets"
+      ],
+      "count": 5
+    },
+    {
+      "name": "Owner",
+      "features": [
+        "Overall monthly dashboard",
+        "Company/employee summary",
+        "Payroll approval",
+        "Bill verification"
+      ],
+      "count": 4
+    }
+  ],
+  "salarySystem": {
+    "split": "70/30 (Messenger gets 70%, Company gets 30%)",
+    "baseSalary": "15,000 THB",
+    "socialSecurity": "5% of earnings (max 750 THB)",
+    "specialAllowance": "Difference when 70% >= 15,000 THB",
+    "deductions": "Difference when 70% < 15,000 THB"
+  },
+  "contextEngineering": {
+    "version": "2.0",
+    "structure": {
+      "business": "Business domain, roles, processes",
+      "technical": "Architecture, components, data model",
+      "operational": "Workflows, policies",
+      "user": "Personas, journeys"
+    },
+    "state": {
+      "version": "2.0.0",
+      "last_updated": "2025-09-15T10:30:00Z",
+      "context_engineering_version": "2.0",
+      "key_context_changes": [
+        "ปรับโครงสร้างไฟล์ context ให้ชัดเจนขึ้น",
+        "เพิ่ม business rules แบบละเอียด",
+        "สร้าง context mapping ระหว่างส่วนต่างๆ"
+      ],
+      "context_sources": [
+        "/context/business/domain.md",
+        "/context/business/roles.md",
+        "/context/technical/architecture.md",
+        "context.json"
+      ]
+    },
+    "versionInfo": {
+      "current_version": "2.0.0",
+      "last_updated": "2025-09-15T10:30:00Z",
+      "context_engineering_version": "2.0"
+    },
+    "mapping": {
+      "nodes": [
+        {
+          "id": "business_domain",
+          "type": "business",
+          "label": "Business Domain",
+          "file": "/context/business/domain.md"
+        },
+        {
+          "id": "business_roles",
+          "type": "business",
+          "label": "Business Roles",
+          "file": "/context/business/roles.md"
+        },
+        {
+          "id": "business_processes",
+          "type": "business",
+          "label": "Business Processes",
+          "file": "/context/business/processes.md"
+        },
+        {
+          "id": "technical_architecture",
+          "type": "technical",
+          "label": "Technical Architecture",
+          "file": "/context/technical/architecture.md"
+        },
+        {
+          "id": "technical_components",
+          "type": "technical",
+          "label": "Technical Components",
+          "file": "/context/technical/components.md"
+        },
+        {
+          "id": "technical_data",
+          "type": "technical",
+          "label": "Data Model",
+          "file": "/context/technical/data-model.md"
+        },
+        {
+          "id": "operational_workflows",
+          "type": "operational",
+          "label": "Operational Workflows",
+          "file": "/context/operational/workflows.md"
+        },
+        {
+          "id": "operational_policies",
+          "type": "operational",
+          "label": "Operational Policies",
+          "file": "/context/operational/policies.md"
+        },
+        {
+          "id": "user_personas",
+          "type": "user",
+          "label": "User Personas",
+          "file": "/context/user/personas.md"
+        },
+        {
+          "id": "user_journeys",
+          "type": "user",
+          "label": "User Journeys",
+          "file": "/context/user/journeys.md"
+        }
+      ],
+      "edges": [
+        {
+          "source": "business_domain",
+          "target": "business_roles",
+          "relationship": "influences",
+          "description": "Business domain influences the roles defined in the organization"
+        },
+        {
+          "source": "business_domain",
+          "target": "business_processes",
+          "relationship": "contains",
+          "description": "Business domain contains various business processes"
+        },
+        {
+          "source": "business_roles",
+          "target": "user_personas",
+          "relationship": "maps_to",
+          "description": "Business roles map to user personas"
+        },
+        {
+          "source": "business_processes",
+          "target": "operational_workflows",
+          "relationship": "implements",
+          "description": "Business processes are implemented as operational workflows"
+        },
+        {
+          "source": "technical_architecture",
+          "target": "technical_components",
+          "relationship": "contains",
+          "description": "Technical architecture contains various components"
+        },
+        {
+          "source": "technical_components",
+          "target": "technical_data",
+          "relationship": "uses",
+          "description": "Technical components use the data model"
+        },
+        {
+          "source": "user_journeys",
+          "target": "operational_workflows",
+          "relationship": "follows",
+          "description": "User journeys follow operational workflows"
+        },
+        {
+          "source": "operational_policies",
+          "target": "business_processes",
+          "relationship": "governs",
+          "description": "Operational policies govern business processes"
+        }
+      ]
+    },
+    "dependencies": {
+      "dependencies": [
+        {
+          "id": "dep-001",
+          "source": "main.js",
+          "target": "config.js",
+          "type": "component",
+          "description": "Main application file depends on configuration settings",
+          "impact": "high"
+        },
+        {
+          "id": "dep-002",
+          "source": "main.js",
+          "target": "Google Apps Script API",
+          "type": "external",
+          "description": "Main application depends on backend API for data",
+          "impact": "critical"
+        },
+        {
+          "id": "dep-003",
+          "source": "edit.html",
+          "target": "main.js",
+          "type": "component",
+          "description": "Edit page depends on main application logic",
+          "impact": "medium"
+        },
+        {
+          "id": "dep-004",
+          "source": "Messenger Role",
+          "target": "Job Tracking Feature",
+          "type": "feature",
+          "description": "Messenger role depends on job tracking functionality",
+          "impact": "high"
+        },
+        {
+          "id": "dep-005",
+          "source": "Employee Role",
+          "target": "Reporting Feature",
+          "type": "feature",
+          "description": "Employee role depends on reporting functionality",
+          "impact": "high"
+        },
+        {
+          "id": "dep-006",
+          "source": "Owner Role",
+          "target": "Payroll Feature",
+          "type": "feature",
+          "description": "Owner role depends on payroll functionality",
+          "impact": "high"
+        },
+        {
+          "id": "dep-007",
+          "source": "Commission Calculation",
+          "target": "Job Data",
+          "type": "data",
+          "description": "Commission calculation depends on accurate job data",
+          "impact": "critical"
+        },
+        {
+          "id": "dep-008",
+          "source": "Payroll Processing",
+          "target": "Commission Calculation",
+          "type": "process",
+          "description": "Payroll processing depends on commission calculation results",
+          "impact": "critical"
+        }
+      ],
+      "dependency_types": {
+        "component": "Dependencies between software components",
+        "feature": "Dependencies between features",
+        "data": "Dependencies between data elements",
+        "process": "Dependencies between business processes",
+        "external": "Dependencies on external systems",
+        "team": "Dependencies between team members or teams"
+      },
+      "last_updated": "2025-09-15T15:00:00Z"
+    },
+    "codeContextMapping": {
+      "mappings": [
+        {
+          "context_file": "/context/business/domain.md",
+          "context_element": "commission-system",
+          "code_files": [
+            {
+              "file": "main.js",
+              "elements": [
+                "calculateCommission",
+                "processPayroll"
+              ],
+              "type": "function"
+            }
+          ]
+        },
+        {
+          "context_file": "/context/business/roles.md",
+          "context_element": "messenger",
+          "code_files": [
+            {
+              "file": "main.js",
+              "elements": [
+                "recordDelivery",
+                "trackJobStatus",
+                "viewJobHistory"
+              ],
+              "type": "function"
+            },
+            {
+              "file": "index.html",
+              "elements": [
+                "dashboard",
+                "new-job-form",
+                "history-view"
+              ],
+              "type": "component"
+            }
+          ]
+        },
+        {
+          "context_file": "/context/business/roles.md",
+          "context_element": "employee",
+          "code_files": [
+            {
+              "file": "main.js",
+              "elements": [
+                "generateReport",
+                "manageUsers"
+              ],
+              "type": "function"
+            }
+          ]
+        },
+        {
+          "context_file": "/context/business/roles.md",
+          "context_element": "owner",
+          "code_files": [
+            {
+              "file": "main.js",
+              "elements": [
+                "viewAnalytics",
+                "accessPayroll"
+              ],
+              "type": "function"
+            }
+          ]
+        },
+        {
+          "context_file": "/context/technical/architecture.md",
+          "context_element": "frontend-components",
+          "code_files": [
+            {
+              "file": "index.html",
+              "elements": [
+                "header",
+                "dashboard",
+                "job-form",
+                "history-view"
+              ],
+              "type": "component"
+            },
+            {
+              "file": "edit.html",
+              "elements": [
+                "edit-form",
+                "image-upload"
+              ],
+              "type": "component"
+            }
+          ]
+        },
+        {
+          "context_file": "/context/technical/architecture.md",
+          "context_element": "offline-support",
+          "code_files": [
+            {
+              "file": "main.js",
+              "elements": [
+                "saveOffline",
+                "syncData",
+                "checkConnection"
+              ],
+              "type": "function"
+            },
+            {
+              "file": "service-worker.js",
+              "elements": [
+                "fetch",
+                "cache"
+              ],
+              "type": "function"
+            }
+          ]
+        }
+      ],
+      "last_generated": "2025-09-15T15:30:00Z"
+    },
+    "errorContextMapping": {
+      "error_context_mapping": [
+        {
+          "error_pattern": "Cannot read property 'data' of undefined",
+          "context_files": [
+            "/context/technical/architecture.md#data-flow",
+            "/context/business/processes.md#job-tracking"
+          ],
+          "solutions": [
+            "Ensure data is loaded before accessing it",
+            "Add proper null checks",
+            "Implement loading states in UI"
+          ],
+          "prevention": [
+            "Add error boundaries in components",
+            "Implement better data validation",
+            "Use optional chaining (?.) operator"
+          ]
+        },
+        {
+          "error_id": "ERR001",
+          "context_files": [
+            "/context/technical/architecture.md#backend-architecture",
+            "/context/business/processes.md#job-tracking"
+          ],
+          "solutions": [
+            "Check network connectivity",
+            "Verify Google Apps Script URL in config.js",
+            "Review API endpoint status"
+          ],
+          "prevention": [
+            "Implement retry mechanism",
+            "Add offline support",
+            "Create mock API for development"
+          ]
+        },
+        {
+          "error_id": "ERR002",
+          "context_files": [
+            "/context/technical/architecture.md#frontend-components",
+            "/context/user/personas.md#messenger"
+          ],
+          "solutions": [
+            "Check CSS styling for modal",
+            "Verify JavaScript for modal display",
+            "Test on different mobile devices"
+          ],
+          "prevention": [
+            "Implement responsive design testing",
+            "Add cross-browser testing",
+            "Create mobile-specific components"
+          ]
+        },
+        {
+          "error_id": "ERR004",
+          "context_files": [
+            "/context/technical/architecture.md"
+          ],
+          "solutions": [
+            "Review error message and stack trace",
+            "Check related documentation"
+          ],
+          "prevention": [
+            "Add proper error handling",
+            "Implement logging",
+            "Add unit tests"
+          ]
+        }
+      ],
+      "chat_log_insights": [
+        {
+          "topic": "history page filtering",
+          "context_files": [
+            "/context/business/roles.md#messenger",
+            "/context/technical/architecture.md#frontend-components"
+          ],
+          "feature_request": "Add date filtering to history page",
+          "status": "planned"
+        },
+        {
+          "topic": "login issues on Android",
+          "context_files": [
+            "/context/technical/architecture.md#pwa-features",
+            "/context/user/personas.md#messenger"
+          ],
+          "issue": "Service worker not loading properly on some Android browsers",
+          "solution": "Add fallback mechanism",
+          "status": "in-progress"
+        },
+        {
+          "topic": "automatic commission calculation",
+          "context_files": [
+            "/context/business/domain.md#commission-system",
+            "/context/business/roles.md#owner"
+          ],
+          "feature_request": "Add automatic commission calculation in payroll",
+          "status": "planned"
+        }
+      ],
+      "last_updated": "2025-09-16T08:29:23.232Z"
+    },
+    "detailedContext": {
+      "business": {
+        "domain": "# Business Domain\n\n## ภาพรวม\nMangpong Trading PWA เป็นแอปพลิเคชัน Progressive Web App ที่ออกแบบมาเพื่อบริษัท Mangpong Trading เพื่อปรับปรุงกระบวนการทำงานจัดส่ง\n\n## โดเมนธุรกิจ\n- **Courier and delivery services**: ให้บริการรับ-ส่งเอกสารและสินค้า\n- **Job tracking**: การติดตามสถานะงานจัดส่ง\n- **Commission system**: ระบบค่าคอมมิชชั่นตามสัดส่วน 70/30\n- **Payroll management**: การจัดการเงินเดือนและค่าตอบแทน\n\n## กฎทางธุรกิจ (Business Rules)\n1. **Commission Split**: 70/30 (Messenger ได้ 70%, บริษัทได้ 30%)\n2. **Base Salary**: เงินเดือนฐาน 15,000 บาท\n3. **Social Security**: หัก 5% ของรายได้ (สูงสุด 750 บาท)\n4. **Special Allowance**: กรณี 70% ของรายได้ ≥ 15,000 บาท จะได้รับเบี้ยเลี้ยงพิเศษ\n5. **Deductions**: กรณี 70% ของรายได้ < 15,000 บาท จะมีการหักเงิน\n\n## กระบวนการทางธุรกิจ\n1. ผู้ส่งของสร้างงานจัดส่งใหม่\n2. ระบบบันทึกข้อมูลงาน\n3. ระบบคำนวณค่าคอมมิชชั่นตามสูตร\n4. ระบบติดตามสถานะงาน\n5. ระบบจัดการเงินเดือนประจำเดือน",
+        "processes": "# Business Processes\n\n## กระบวนการทางธุรกิจ\n\n### 1. การสร้างงานจัดส่ง (Job Creation Process)\n1. Messenger ล็อกอินเข้าสู่ระบบ\n2. กดปุ่ม \"งานใหม่\"\n3. กรอกข้อมูลงาน:\n   - วันที่บันทึกงาน\n   - ข้อมูลการรับ (บริษัท, ผู้มอบงาน, ข้อมูลติดต่อ)\n   - สถานที่รับของ (จังหวัด, เขต/อำเภอ)\n   - ข้อมูลการส่ง (บริษัทปลายทาง, จังหวัดส่งของ, เขต/อำเภอส่งของ, ผู้รับงาน, รายละเอียด)\n   - ค่าบริการหลัก\n   - ค่าบริการเพิ่มเติม (ถ้ามี)\n4. ตรวจสอบข้อมูล\n5. บันทึกงาน\n\n### 2. การติดตามสถานะงาน (Job Tracking Process)\n1. ระบบแสดงงานในแดชบอร์ด\n2. ผู้ใช้สามารถดูสถานะงาน:\n   - Complete (สมบูรณ์)\n   - Incomplete (ไม่สมบูรณ์)\n   - Draft (ร่าง)\n3. ผู้ใช้สามารถกรองงานตามสถานะ\n4. ผู้ใช้สามารถดูประวัติงานย้อนหลัง\n\n### 3. การคำนวณเงินเดือน (Salary Calculation Process)\n1. ระบบดึงข้อมูลงานที่สมบูรณ์ในเดือนนั้น\n2. คำนวณยอดรวมค่าบริการ\n3. คำนวณค่าคอมมิชชั่น 70% สำหรับ Messenger\n4. คำนวณค่าคอมมิชชั่น 30% สำหรับบริษัท\n5. ตรวจสอบกับเงินเดือนฐาน 15,000 บาท\n6. คำนวณประกันสังคม 5% (สูงสุด 750 บาท)\n7. คำนวณเบี้ยเลี้ยงพิเศษหรือการหักเงินตามเงื่อนไข\n\n### 4. การทำงานแบบออฟไลน์ (Offline Work Process)\n1. เมื่อไม่มีการเชื่อมต่ออินเทอร์เน็ต\n2. ระบบบันทึกงานเป็นแบบร่าง\n3. ระบบจัดคิวคำขอ\n4. เมื่อมีการเชื่อมต่ออีกครั้ง\n5. ระบบประมวลผลคิวอัตโนมัติ\n6. แสดงการแจ้งเตือนเมื่อซิงค์สำเร็จ",
+        "roles": "# Business Roles\n\n## บทบาทผู้ใช้\n\n### 1. Messenger (7 features)\n- Record delivery jobs: บันทึกงานจัดส่ง\n- Track job statuses: ติดตามสถานะงาน\n- View job history: ดูประวัติงาน\n- Manage drafts: จัดการงานร่าง\n- Calculate earnings: คำนวณรายได้\n- Export job reports: ส่งออกรายงานงาน\n- Offline job recording: บันทึกงานแบบออฟไลน์\n\n### 2. Employee (Admin) (5 features)\n- Manage job records: จัดการบันทึกงาน\n- Generate reports: สร้างรายงาน\n- Monitor messenger performance: ติดตามประสิทธิภาพของผู้ส่งของ\n- Handle incomplete jobs: จัดการงานที่ไม่สมบูรณ์\n- User management: การจัดการผู้ใช้\n\n### 3. Owner (4 features)\n- View business analytics: ดูการวิเคราะห์ธุรกิจ\n- Monitor financial performance: ติดตามประสิทธิภาพทางการเงิน\n- Track employee productivity: ติดตามประสิทธิภาพของพนักงาน\n- Access payroll information: เข้าถึงข้อมูลเงินเดือน"
+      },
+      "technical": {
+        "architecture": "# Technical Architecture\n\n## สถาปัตยกรรมระบบ\n\n### Frontend Architecture\n- **Core Technologies**: HTML5, CSS3, JavaScript (ES6+)\n- **UI Framework**: Tailwind CSS\n- **PWA Features**: Service workers, Web App Manifest, Offline Support\n- **Libraries**: \n  - SweetAlert2 สำหรับการแจ้งเตือน\n  - jsPDF สำหรับการส่งออก PDF\n  - Google Fonts (Prompt)\n\n### Backend Architecture\n- **Backend**: Google Apps Script\n- **Database**: Google Sheets\n- **API Endpoint**: https://script.google.com/macros/s/AKfycbxZIMrFlOm3IzVSM-PqmgA91v-t48szqLLk9HD0IKdW9FBd3BFJ7SE9Eci6NEBcNa9v/exec\n\n### Data Flow\n1. ผู้ใช้ป้อนข้อมูลผ่าน UI\n2. ข้อมูลถูกส่งไปยัง Google Apps Script ผ่าน API\n3. Google Apps Script ประมวลผลและบันทึกข้อมูลลง Google Sheets\n4. ข้อมูลถูกดึงกลับมาแสดงใน UI\n\n### Offline Support\n- **Service Worker**: จัดการ caching ของ assets\n- **Request Queue**: จัดคิวคำขอเมื่อไม่มีการเชื่อมต่อ\n- **Local Storage**: จัดเก็บข้อมูลชั่วคราว\n- **Sync Mechanism**: ซิงค์ข้อมูลเมื่อมีการเชื่อมต่ออีกครั้ง",
+        "components": "# Technical Components\n\n## ส่วนประกอบทางเทคนิค\n\n### 1. Authentication Module\n- **Login Screen**: หน้าจอเข้าสู่ระบบ\n- **Register Screen**: หน้าจอลงทะเบียน\n- **Session Management**: การจัดการเซสชันผู้ใช้\n\n### 2. Dashboard Module\n- **Home Screen**: หน้าจอหลักแสดงสถิติ\n- **Stats Section**: ส่วนแสดงสถิติ\n- **Quick Actions**: การดำเนินการด่วน\n- **Incomplete Jobs Section**: ส่วนงานที่ไม่สมบูรณ์\n- **Draft Jobs Section**: ส่วนงานร่าง\n\n### 3. Job Management Module\n- **New Job Screen**: หน้าจอสร้างงานใหม่\n- **Job Form**: แบบฟอร์มงาน\n- **Job Details**: รายละเอียดงาน\n- **Additional Fees**: ค่าบริการเพิ่มเติม\n- **Service Summary**: สรุปค่าบริการ\n\n### 4. History Module\n- **History Screen**: หน้าจอประวัติงาน\n- **Job History Container**: ส่วนแสดงประวัติงาน\n- **Date Filter**: การกรองตามวันที่\n- **Status Filter**: การกรองตามสถานะ\n- **PDF Export**: ส่งออกเป็น PDF\n\n### 5. API & Data Management\n- **API Service**: บริการ API\n- **Request Queue**: คิวคำขอ\n- **Data Sync**: การซิงค์ข้อมูล\n- **Error Handling**: การจัดการข้อผิดพลาด\n\n### 6. Utilities\n- **Storage Management**: การจัดการ storage\n- **Date Formatting**: การจัดรูปแบบวันที่\n- **Validation**: การตรวจสอบข้อมูล",
+        "data-model": "# Data Model\n\n## โมเดลข้อมูล\n\n### 1. Job Model\n```javascript\n{\n  jobId: String,           // รหัสงาน (auto-generated)\n  timestamp: Date,         // ประทับเวลา\n  status: String,          // สถานะ (complete, incomplete, draft)\n  company: String,         // ข้อมูลบริษัท\n  assignedBy: String,      // ผู้มอบงาน\n  contact: String,         // ข้อมูลติดต่อ\n  pickupProvince: String,  // จังหวัดรับของ\n  pickupDistrict: String,  // เขต/อำเภอรับของ\n  deliveryDetails: [       // รายละเอียดการส่ง\n    {\n      company: String,     // บริษัทปลายทาง\n      province: String,    // จังหวัดส่งของ\n      district: String,    // เขต/อำเภอส่งของ\n      recipient: String,   // ผู้รับงาน\n      description: String, // รายละเอียด\n      amount: Number       // จำนวนเงิน\n    }\n  ],\n  additionalFees: [        // ค่าบริการเพิ่มเติม\n    {\n      description: String, // คำอธิบาย\n      amount: Number       // จำนวนเงิน\n    }\n  ],\n  totalAmount: Number,     // จำนวนเงินรวม\n  incompleteReason: String // เหตุผลที่ไม่สมบูรณ์ (สำหรับงานที่ไม่สมบูรณ์)\n}\n```\n\n### 2. User Model\n```javascript\n{\n  userId: String,          // รหัสผู้ใช้\n  username: String,        // ชื่อผู้ใช้\n  password: String,        // รหัสผ่าน (hashed)\n  fullName: String,        // ชื่อ-นามสกุล\n  phone: String,           // เบอร์โทรศัพท์\n  email: String,           // อีเมล\n  role: String,            // บทบาท (messenger, admin, owner)\n  createdAt: Date,         // วันที่สร้าง\n  lastLogin: Date          // วันที่ล็อกอินล่าสุด\n}\n```\n\n### 3. Salary Model\n```javascript\n{\n  userId: String,          // รหัสผู้ใช้\n  month: String,           // เดือน (YYYY-MM)\n  totalJobs: Number,       // จำนวนงานทั้งหมด\n  totalAmount: Number,     // จำนวนเงินรวม\n  commission: Number,      // ค่าคอมมิชชั่น (70%)\n  companyShare: Number,    // ส่วนแบ่งบริษัท (30%)\n  baseSalary: Number,      // เงินเดือนฐาน (15,000)\n  socialSecurity: Number,  // ประกันสังคม (5%, สูงสุด 750)\n  specialAllowance: Number,// เบี้ยเลี้ยงพิเศษ\n  deductions: Number,      // การหักเงิน\n  netSalary: Number,       // เงินเดือนสุทธิ\n  calculatedAt: Date       // วันที่คำนวณ\n}\n```"
+      },
+      "operational": {
+        "policies": "# Operational Policies\n\n## นโยบายการดำเนินงาน\n\n### 1. นโยบายการจัดการข้อมูล\n- ข้อมูลทั้งหมดถูกจัดเก็บใน Google Sheets\n- ข้อมูลถูกเข้ารหัสขณะส่งผ่าน (HTTPS)\n- รหัสผ่านถูกแฮชก่อนจัดเก็บ\n- ข้อมูลจะถูกสำรองข้อมูลทุกวัน\n\n### 2. นโยบายการสำรองข้อมูล\n- ระบบสำรองข้อมูลอัตโนมัติทุกวัน\n- ข้อมูลสำรองถูกเก็บไว้เป็นเวลา 30 วัน\n- ผู้ดูแลระบบสามารถกู้คืนข้อมูลได้\n\n### 3. นโยบายการเข้าถึง\n- ผู้ใช้ต้องลงทะเบียนก่อนใช้งาน\n- แต่ละบทบาทมีสิทธิ์การเข้าถึงที่แตกต่างกัน\n- ระบบบันทึกกิจกรรมของผู้ใช้\n\n### 4. นโยบายการจัดการข้อผิดพลาด\n- ระบบจัดการข้อผิดพลาดอย่างสง่างาม\n- แสดงข้อความที่เป็นมิตรกับผู้ใช้\n- บันทึกข้อผิดพลาดใน log\n- แจ้งเตือนผู้ดูแลระบบเมื่อมีข้อผิดพลาดร้ายแรง\n\n### 5. นโยบายการอัปเดต\n- ระบบตรวจสอบการอัปเดตอัตโนมัติ\n- ผู้ใช้จะได้รับการแจ้งเตือนเมื่อมีการอัปเดต\n- การอัปเดตจะไม่กระทบกับข้อมูลที่มีอยู่\n\n### 6. นโยบายความปลอดภัย\n- ใช้ HTTPS สำหรับการสื่อสารทั้งหมด\n- ตรวจสอบสิทธิ์ก่อนการเข้าถึงข้อมูล\n- ป้องกัน CSRF และ XSS\n- จำกัดจำนวนคำขอเพื่อป้องกัน DDoS",
+        "workflows": "# Operational Workflows\n\n## ขั้นตอนการทำงาน\n\n### 1. Workflow การล็อกอิน\n1. ผู้ใช้เปิดแอปพลิเคชัน\n2. ระบบตรวจสอบว่ามีการล็อกอินไว้หรือไม่\n3. หากล็อกอินไว้แล้ว ไปยังหน้าหลัก\n4. หากไม่ได้ล็อกอิน แสดงหน้าล็อกอิน\n5. ผู้ใช้ป้อนชื่อผู้ใช้และรหัสผ่าน\n6. ระบบตรวจสอบข้อมูล\n7. หากถูกต้อง บันทึกเซสชันและไปยังหน้าหลัก\n8. หากไม่ถูกต้อง แสดงข้อผิดพลาด\n\n### 2. Workflow การสร้างงานใหม่\n1. ผู้ใช้กดปุ่ม \"งานใหม่\"\n2. ระบบแสดงแบบฟอร์มงานใหม่\n3. ผู้ใช้กรอกข้อมูล:\n   - วันที่บันทึกงาน\n   - ข้อมูลการรับ\n   - สถานที่รับของ\n   - รายละเอียดการส่ง\n   - ค่าบริการ\n4. ผู้ใช้กด \"บันทึกงาน\"\n5. ระบบตรวจสอบข้อมูล\n6. หากข้อมูลถูกต้อง ส่งไปยัง API\n7. ระบบแสดงผลลัพธ์\n8. หากสำเร็จ กลับไปยังหน้าหลัก\n9. หากไม่สำเร็จ แสดงข้อผิดพลาด\n\n### 3. Workflow การดูประวัติงาน\n1. ผู้ใช้กดปุ่ม \"ประวัติ\"\n2. ระบบแสดงหน้าประวัติงาน\n3. ระบบโหลดข้อมูลงานจาก API\n4. แสดงรายการงานในตาราง\n5. ผู้ใช้สามารถ:\n   - กรองตามวันที่\n   - กรองตามสถานะ\n   - ค้นหาตามรหัสงาน\n   - ส่งออกเป็น PDF\n\n### 4. Workflow การทำงานออฟไลน์\n1. ระบบตรวจสอบสถานะการเชื่อมต่อ\n2. หากไม่มีการเชื่อมต่อ:\n   - แสดงไอคอนออฟไลน์\n   - บันทึกงานเป็นร่าง\n   - จัดคิวคำขอ\n3. เมื่อมีการเชื่อมต่ออีกครั้ง:\n   - ประมวลผลคิวคำขอ\n   - ซิงค์ข้อมูล\n   - แสดงการแจ้งเตือนเมื่อสำเร็จ"
+      },
+      "user": {
+        "journeys": "# User Journeys\n\n## เส้นทางผู้ใช้\n\n### 1. User Journey: Messenger - การสร้างงานใหม่\n1. **เป้าหมาย**: พิชัยต้องการบันทึกงานจัดส่งใหม่\n2. **สถานการณ์**: พิชัยไปรับเอกสารที่บริษัทเวอริโฟน\n3. **ขั้นตอน**:\n   - เปิดแอปพลิเคชันบนมือถือ\n   - ล็อกอินเข้าสู่ระบบ\n   - กดปุ่ม \"งานใหม่\"\n   - เลือกวันที่ (ระบบกำหนดเป็นวันนี้โดยอัตโนมัติ)\n   - เลือกบริษัท \"บจก.เวอริโฟน (ชั้น 3.2)\"\n   - กรอกชื่อผู้มอบงาน \"คุณสมชาย\"\n   - กรอกข้อมูลติดต่อ \"081-234-5678\"\n   - กรอกจังหวัดรับของ \"กรุงเทพมหานคร\"\n   - กรอกเขต/อำเภอรับของ \"สาทร\"\n   - กรอกข้อมูลการส่ง:\n     - บริษัทปลายทาง \"บจก.ไอมาร์ค\"\n     - จังหวัดส่งของ \"กรุงเทพมหานคร\"\n     - เขต/อำเภอส่งของ \"พระโขนง\"\n     - ผู้รับงาน \"คุณสุภาพร\"\n     - รายละเอียด \"ส่งเอกสารสำคัญ\"\n     - จำนวนเงิน \"500\"\n   - ตรวจสอบข้อมูล\n   - กด \"บันทึกงาน\"\n   - ระบบแสดงการยืนยัน\n   - งานถูกบันทึกและแสดงในหน้าหลัก\n\n### 2. User Journey: Admin - การสร้างรายงานประจำเดือน\n1. **เป้าหมาย**: นรินทร์ต้องการสร้างรายงานประจำเดือน\n2. **สถานการณ์**: สิ้นเดือน ต้องสร้างรายงานสำหรับผู้บริหาร\n3. **ขั้นตอน**:\n   - เปิดแอปพลิเคชันบนคอมพิวเตอร์\n   - ล็อกอินเข้าสู่ระบบด้วยสิทธิ์ Admin\n   - ไปที่หน้า Dashboard\n   - เลือกเดือนที่ต้องการรายงาน\n   - ดูสถิติจำนวนงานทั้งหมด\n   - ดูรายได้รวม\n   - ดูประสิทธิภาพของแต่ละ Messenger\n   - กดปุ่ม \"ส่งออก PDF\"\n   - ระบบสร้างรายงาน PDF\n   - ดาวน์โหลดรายงาน\n   - ส่งรายงานให้ผู้บริหาร\n\n### 3. User Journey: Owner - การตรวจสอบประสิทธิภาพทางการเงิน\n1. **เป้าหมาย**: จตุรงค์ต้องการตรวจสอบประสิทธิภาพทางการเงิน\n2. **สถานการณ์**: ต้องการพิจารณาแผนธุรกิจในไตรมาสถัดไป\n3. **ขั้นตอน**:\n   - เปิดแอปพลิเคชันบน iPad\n   - ล็อกอินเข้าสู่ระบบด้วยสิทธิ์ Owner\n   - ไปที่หน้า Dashboard\n   - ดูกราฟรายได้ใน 6 เดือนที่ผ่านมา\n   - เปรียบเทียบประสิทธิภาพของแต่ละบริษัท\n   - ดูจำนวนงานเฉลี่ยต่อวัน\n   - ดูอัตราการเติบโต\n   - ดูข้อมูลเงินเดือนของ Messenger\n   - วิเคราะห์ ROI ของแต่ละพื้นที่\n   - ใช้ข้อมูลในการตัดสินใจวางแผนธุรกิจ",
+        "personas": "# User Personas\n\n## ตัวแทนผู้ใช้\n\n### 1. Persona: Messenger (ผู้ส่งของ)\n- **ชื่อ**: พิชัย\n- **อายุ**: 28 ปี\n- **อาชีพ**: ผู้ส่งของอิสระ\n- **ประสบการณ์เทคโนโลยี**: ระดับกลาง\n- **เป้าหมาย**:\n  - ต้องการบันทึกงานได้อย่างรวดเร็ว\n  - ต้องการทราบรายได้แบบ real-time\n  - ต้องการสามารถทำงานได้แม้ในพื้นที่ที่ไม่มีสัญญาณ\n- **ความเจ็บปวด**:\n  - เคยใช้กระดาษบันทึกงาน ทำให้สูญหาย\n  - ไม่สามารถติดตามรายได้ได้ชัดเจน\n  - เคยมีข้อผิดพลาดในการคำนวณค่าคอมมิชชั่น\n- **พฤติกรรมการใช้งาน**:\n  - ใช้แอปตลอดวันขณะทำงาน\n  - ต้องการ UI ที่ง่ายและใช้งานได้เร็ว\n  - ต้องการสามารถทำงานได้ทั้งออนไลน์และออฟไลน์\n\n### 2. Persona: Admin (ผู้ดูแลระบบ)\n- **ชื่อ**: นรินทร์\n- **อายุ**: 35 ปี\n- **อาชี่พ**: พนักงานฝ่าย IT\n- **ประสบการณ์เทคโนโลยี**: สูง\n- **เป้าหมาย**:\n  - ต้องการติดตามประสิทธิภาพของผู้ส่งของ\n  - ต้องการสร้างรายงานทางธุรกิจ\n  - ต้องการจัดการผู้ใช้และสิทธิ์การเข้าถึง\n- **ความเจ็บปวด**:\n  - ข้อมูลกระจัดกระจายในหลายระบบ\n  - ใช้เวลานานในการสร้างรายงาน\n  - ยากในการตรวจสอบความถูกต้องของข้อมูล\n- **พฤติกรรมการใช้งาน**:\n  - ใช้แอปในออฟฟิศ\n  - ต้องการ dashboard ที่แสดงข้อมูลภาพรวม\n  - ต้องการฟีเจอร์ export ข้อมูล\n\n### 3. Persona: Owner (เจ้าของกิจการ)\n- **ชื่อ**: จตุรงค์\n- **อายุ**: 45 ปี\n- **อาชีพ**: เจ้าของบริษัท\n- **ประสบการณ์เทคโนโลยี**: ระดับกลาง\n- **เป้าหมาย**:\n  - ต้องการเข้าใจภาพรวมของธุรกิจ\n  - ต้องการติดตามประสิทธิภาพทางการเงิน\n  - ต้องการตัดสินใจทางธุรกิจจากข้อมูล\n- **ความเจ็บปวด**:\n  - ข้อมูลไม่ชัดเจนและไม่ทันเวลา\n  - ต้องพึ่งรายงานจากพนักงาน\n  - ไม่สามารถติดตาม KPI ได้แบบเรียลไทม์\n- **พฤติกรรมการใช้งาน**:\n  - ใช้แอปในออฟฟิศหรือที่บ้าน\n  - ต้องการรายงานที่สรุปอย่างชัดเจน\n  - ต้องการกราฟและแผนภูมิเพื่อการวิเคราะห์"
+      }
+    }
+  },
+  "createdAt": "2025-09-16T08:30:10.481Z",
+  "lastUpdated": "2025-09-16T08:30:10.482Z"
+}

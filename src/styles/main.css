@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: "Prompt", sans-serif;
+    background-color: #f5f7fa;
+    touch-action: manipulation;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl shadow-sm transition-all duration-300;
+  }
+  
+  .card:hover {
+    @apply shadow-md;
+  }
+  
+  .btn-primary {
+    @apply bg-blue-500 text-white transition-all duration-300;
+  }
+  
+  .btn-primary:hover {
+    @apply bg-blue-600;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-700 transition-all duration-300;
+  }
+  
+  .btn-secondary:hover {
+    @apply bg-gray-300;
+  }
+  
+  .btn-success {
+    @apply bg-green-500 text-white transition-all duration-300;
+  }
+  
+  .btn-success:hover {
+    @apply bg-green-600;
+  }
+  
+  .btn-danger {
+    @apply bg-red-500 text-white transition-all duration-300;
+  }
+  
+  .btn-danger:hover {
+    @apply bg-red-600;
+  }
+  
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  .auth-container {
+    @apply bg-gradient-to-br from-blue-500 to-purple-600 min-h-screen flex items-center justify-center;
+  }
+  
+  .auth-card {
+    @apply bg-white rounded-2xl shadow-xl p-8 w-full max-w-md mx-4;
+  }
+}
+
+@layer utilities {
+  .incomplete-badge {
+    @apply bg-red-500 text-white;
+  }
+  
+  .complete-badge {
+    @apply bg-green-500 text-white;
+  }
+  
+  .draft-badge {
+    @apply bg-orange-500 text-white;
+  }
+}

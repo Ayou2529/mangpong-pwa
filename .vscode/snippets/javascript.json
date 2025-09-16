@@ -1,0 +1,80 @@
+{
+  "Component Template": {
+    "prefix": "mangpong-component",
+    "body": [
+      "// src/components/${1:ComponentName}/${1:ComponentName}UI.js - UI for ${1:ComponentName} component",
+      "",
+      "/**",
+      " * ${1:ComponentName} UI component",
+      " * @param {Object} props - Component properties",
+      " * @returns {string} - HTML string for the ${1:ComponentName} UI",
+      " */",
+      "export function ${1:ComponentName}UI(props) {",
+      "  return `",
+      "    <div class=\"${2:component-class}\">",
+      "      ${3:Component content}",
+      "    </div>",
+      "  `;",
+      "}"
+    ],
+    "description": "Template for creating a new Mangpong component UI"
+  },
+  "Component Hook Template": {
+    "prefix": "mangpong-hook",
+    "body": [
+      "// src/hooks/use${1:ComponentName}.js - Custom hook for ${1:ComponentName} logic",
+      "",
+      "/**",
+      " * Custom hook for ${1:ComponentName} logic",
+      " * @returns {Object} - Object containing ${1:ComponentName} functions",
+      " */",
+      "export function use${1:ComponentName}() {",
+      "  ${2:// Hook logic}",
+      "  ",
+      "  return {",
+      "    ${3:// Return functions and data}",
+      "  };",
+      "}"
+    ],
+    "description": "Template for creating a new Mangpong custom hook"
+  },
+  "Utility Template": {
+    "prefix": "mangpong-utility",
+    "body": [
+      "// src/utils/${1:utilityName}.js - ${2:Utility description}",
+      "",
+      "/**",
+      " * ${3:Function description}",
+      " * @param {${4:paramType}} ${5:paramName} - ${6:Parameter description}",
+      " * @returns {${7:returnType}} - ${8:Return description}",
+      " */",
+      "export function ${9:functionName}(${5:paramName}) {",
+      "  ${10:// Implementation}",
+      "}"
+    ],
+    "description": "Template for creating a new Mangpong utility function"
+  },
+  "Validation Template": {
+    "prefix": "mangpong-validation",
+    "body": [
+      "// src/utils/validation/${1:validationName}.js - ${2:Validation description}",
+      "",
+      "/**",
+      " * ${3:Validation description}",
+      " * @param {${4:paramType}} ${5:paramName} - ${6:Parameter description}",
+      " * @returns {Object} - Validation result",
+      " */",
+      "export function ${7:validateFunctionName}(${5:paramName}) {",
+      "  const errors = [];",
+      "  ",
+      "  ${8:// Validation logic}",
+      "  ",
+      "  return {",
+      "    isValid: errors.length === 0,",
+      "    errors",
+      "  };",
+      "}"
+    ],
+    "description": "Template for creating a new Mangpong validation function"
+  }
+}

@@ -1,0 +1,120 @@
+[
+  {
+    "id": "ERR001",
+    "timestamp": "2025-09-12T10:30:00Z",
+    "type": "Network Error",
+    "message": "Failed to fetch data from Google Apps Script API",
+    "file": "main.js",
+    "line": 125,
+    "status": "unresolved",
+    "priority": "high",
+    "context": "This error typically occurs when the Google Apps Script URL is incorrect or the script is not deployed properly.",
+    "solutions": [
+      "Check the Google Apps Script URL in config.js",
+      "Verify that the script is deployed with 'Anyone' access",
+      "Test the API endpoint directly in browser"
+    ]
+  },
+  {
+    "id": "ERR002",
+    "timestamp": "2025-09-11T15:45:00Z",
+    "type": "UI Rendering Error",
+    "message": "Modal dialog not displaying correctly on mobile devices",
+    "file": "edit.html",
+    "line": 87,
+    "status": "unresolved",
+    "priority": "medium",
+    "context": "This error occurs when the modal dialog CSS is not responsive on smaller screens.",
+    "solutions": [
+      "Add responsive CSS for mobile devices",
+      "Use viewport units instead of fixed pixels",
+      "Test on multiple device sizes"
+    ]
+  },
+  {
+    "id": "ERR003",
+    "timestamp": "2025-09-10T09:15:00Z",
+    "type": "Service Worker Error",
+    "message": "Service worker failed to register",
+    "file": "service-worker.js",
+    "line": 1,
+    "status": "resolved",
+    "priority": "high",
+    "context": "This error occurred when the service worker file was not in the root directory.",
+    "solutions": [
+      "Ensure service-worker.js is in the root directory",
+      "Check the path in the registration code",
+      "Verify service worker scope"
+    ],
+    "resolution": "Moved service-worker.js to root directory and updated registration path"
+  },
+  {
+    "id": "ERR004",
+    "timestamp": "2025-09-08T14:20:00Z",
+    "type": "Reference Error",
+    "message": "Cannot read property 'data' of undefined",
+    "file": "main.js",
+    "line": 89,
+    "status": "recurring",
+    "priority": "high",
+    "context": "This error happens when trying to access data before it's loaded from the API.",
+    "solutions": [
+      "Add proper null checks before accessing data",
+      "Implement loading states in UI",
+      "Use optional chaining (?.) operator"
+    ],
+    "occurrence_count": 15
+  },
+  {
+    "id": "ERR005",
+    "timestamp": "2025-09-05T11:30:00Z",
+    "type": "CORS Error",
+    "message": "Blocked by CORS policy: No 'Access-Control-Allow-Origin' header",
+    "file": "main.js",
+    "line": 210,
+    "status": "resolved",
+    "priority": "critical",
+    "context": "This error occurred when trying to make direct API calls to Google Sheets without using Google Apps Script as a proxy.",
+    "solutions": [
+      "Use Google Apps Script as a proxy for API calls",
+      "Set proper CORS headers in the backend",
+      "Ensure the API endpoint allows requests from the app domain"
+    ],
+    "resolution": "Implemented Google Apps Script as proxy for all API calls"
+  },
+  {
+    "id": "ERR006",
+    "timestamp": "2025-09-03T16:45:00Z",
+    "type": "Storage Error",
+    "message": "Quota exceeded for localStorage",
+    "file": "main.js",
+    "line": 155,
+    "status": "resolved",
+    "priority": "medium",
+    "context": "This error happened when trying to store too much data in localStorage without cleaning it up.",
+    "solutions": [
+      "Implement data cleanup mechanism",
+      "Use IndexedDB for larger data storage",
+      "Compress data before storing",
+      "Set expiration for stored data"
+    ],
+    "resolution": "Implemented automatic cleanup of old data and compression for large objects"
+  },
+  {
+    "id": "ERR007",
+    "timestamp": "2025-09-01T08:20:00Z",
+    "type": "Authentication Error",
+    "message": "LINE LIFF initialization failed",
+    "file": "main.js",
+    "line": 35,
+    "status": "resolved",
+    "priority": "critical",
+    "context": "This error occurred when the LINE LIFF ID was incorrect or not properly configured.",
+    "solutions": [
+      "Verify the LINE LIFF ID in config.js",
+      "Check LINE Developer Console for correct configuration",
+      "Ensure the LIFF app is in 'Published' status"
+    ],
+    "resolution": "Updated LINE LIFF ID and verified configuration in LINE Developer Console"
+  }
+]

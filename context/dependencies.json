@@ -1,0 +1,77 @@
+{
+  "dependencies": [
+    {
+      "id": "dep-001",
+      "source": "main.js",
+      "target": "config.js",
+      "type": "component",
+      "description": "Main application file depends on configuration settings",
+      "impact": "high"
+    },
+    {
+      "id": "dep-002",
+      "source": "main.js",
+      "target": "Google Apps Script API",
+      "type": "external",
+      "description": "Main application depends on backend API for data",
+      "impact": "critical"
+    },
+    {
+      "id": "dep-003",
+      "source": "edit.html",
+      "target": "main.js",
+      "type": "component",
+      "description": "Edit page depends on main application logic",
+      "impact": "medium"
+    },
+    {
+      "id": "dep-004",
+      "source": "Messenger Role",
+      "target": "Job Tracking Feature",
+      "type": "feature",
+      "description": "Messenger role depends on job tracking functionality",
+      "impact": "high"
+    },
+    {
+      "id": "dep-005",
+      "source": "Employee Role",
+      "target": "Reporting Feature",
+      "type": "feature",
+      "description": "Employee role depends on reporting functionality",
+      "impact": "high"
+    },
+    {
+      "id": "dep-006",
+      "source": "Owner Role",
+      "target": "Payroll Feature",
+      "type": "feature",
+      "description": "Owner role depends on payroll functionality",
+      "impact": "high"
+    },
+    {
+      "id": "dep-007",
+      "source": "Commission Calculation",
+      "target": "Job Data",
+      "type": "data",
+      "description": "Commission calculation depends on accurate job data",
+      "impact": "critical"
+    },
+    {
+      "id": "dep-008",
+      "source": "Payroll Processing",
+      "target": "Commission Calculation",
+      "type": "process",
+      "description": "Payroll processing depends on commission calculation results",
+      "impact": "critical"
+    }
+  ],
+  "dependency_types": {
+    "component": "Dependencies between software components",
+    "feature": "Dependencies between features",
+    "data": "Dependencies between data elements",
+    "process": "Dependencies between business processes",
+    "external": "Dependencies on external systems",
+    "team": "Dependencies between team members or teams"
+  },
+  "last_updated": "2025-09-15T15:00:00Z"
+}

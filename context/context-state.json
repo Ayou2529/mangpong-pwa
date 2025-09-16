@@ -1,0 +1,16 @@
+{
+  "version": "2.0.0",
+  "last_updated": "2025-09-15T10:30:00Z",
+  "context_engineering_version": "2.0",
+  "key_context_changes": [
+    "ปรับโครงสร้างไฟล์ context ให้ชัดเจนขึ้น",
+    "เพิ่ม business rules แบบละเอียด",
+    "สร้าง context mapping ระหว่างส่วนต่างๆ"
+  ],
+  "context_sources": [
+    "/context/business/domain.md",
+    "/context/business/roles.md",
+    "/context/technical/architecture.md",
+    "context.json"
+  ]
+}

@@ -1,0 +1,40 @@
+[
+  {
+    "id": "REC001",
+    "pattern": "Cannot read property 'data' of undefined",
+    "first_occurrence": "2025-08-15T09:20:00Z",
+    "last_occurrence": "2025-09-12T14:30:00Z",
+    "count": 15,
+    "files": ["main.js", "JobForm.js", "HistoryPage.js"],
+    "solutions_applied": [
+      "Added null checks in main.js",
+      "Implemented optional chaining in JobForm.js"
+    ],
+    "status": "partially_resolved"
+  },
+  {
+    "id": "REC002",
+    "pattern": "Quota exceeded for localStorage",
+    "first_occurrence": "2025-07-22T11:15:00Z",
+    "last_occurrence": "2025-09-06T16:45:00Z",
+    "count": 8,
+    "files": ["main.js", "service-worker.js"],
+    "solutions_applied": [
+      "Implemented automatic cleanup mechanism",
+      "Added data compression"
+    ],
+    "status": "resolved"
+  },
+  {
+    "id": "REC003",
+    "pattern": "Modal dialog display issues on mobile",
+    "first_occurrence": "2025-08-30T10:30:00Z",
+    "last_occurrence": "2025-09-11T15:45:00Z",
+    "count": 5,
+    "files": ["edit.html", "JobForm.js"],
+    "solutions_applied": [
+      "Added responsive CSS for edit.html"
+    ],
+    "status": "in_progress"
+  }
+]

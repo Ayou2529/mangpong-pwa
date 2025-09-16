@@ -1,0 +1,24 @@
+{
+  "Type Interface Template": {
+    "prefix": "mangpong-interface",
+    "body": [
+      "// src/types/${1:interfaceName}.ts - ${2:Interface description}",
+      "",
+      "export interface ${3:InterfaceName} {",
+      "  ${4:// Properties}",
+      "}"
+    ],
+    "description": "Template for creating a new Mangpong TypeScript interface"
+  },
+  "Type Enum Template": {
+    "prefix": "mangpong-enum",
+    "body": [
+      "// src/types/${1:enumName}.ts - ${2:Enum description}",
+      "",
+      "export enum ${3:EnumName} {",
+      "  ${4:// Enum values}",
+      "}"
+    ],
+    "description": "Template for creating a new Mangpong TypeScript enum"
+  }
+}

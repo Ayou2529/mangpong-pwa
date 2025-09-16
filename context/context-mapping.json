@@ -1,0 +1,114 @@
+{
+  "nodes": [
+    {
+      "id": "business_domain",
+      "type": "business",
+      "label": "Business Domain",
+      "file": "/context/business/domain.md"
+    },
+    {
+      "id": "business_roles",
+      "type": "business",
+      "label": "Business Roles",
+      "file": "/context/business/roles.md"
+    },
+    {
+      "id": "business_processes",
+      "type": "business",
+      "label": "Business Processes",
+      "file": "/context/business/processes.md"
+    },
+    {
+      "id": "technical_architecture",
+      "type": "technical",
+      "label": "Technical Architecture",
+      "file": "/context/technical/architecture.md"
+    },
+    {
+      "id": "technical_components",
+      "type": "technical",
+      "label": "Technical Components",
+      "file": "/context/technical/components.md"
+    },
+    {
+      "id": "technical_data",
+      "type": "technical",
+      "label": "Data Model",
+      "file": "/context/technical/data-model.md"
+    },
+    {
+      "id": "operational_workflows",
+      "type": "operational",
+      "label": "Operational Workflows",
+      "file": "/context/operational/workflows.md"
+    },
+    {
+      "id": "operational_policies",
+      "type": "operational",
+      "label": "Operational Policies",
+      "file": "/context/operational/policies.md"
+    },
+    {
+      "id": "user_personas",
+      "type": "user",
+      "label": "User Personas",
+      "file": "/context/user/personas.md"
+    },
+    {
+      "id": "user_journeys",
+      "type": "user",
+      "label": "User Journeys",
+      "file": "/context/user/journeys.md"
+    }
+  ],
+  "edges": [
+    {
+      "source": "business_domain",
+      "target": "business_roles",
+      "relationship": "influences",
+      "description": "Business domain influences the roles defined in the organization"
+    },
+    {
+      "source": "business_domain",
+      "target": "business_processes",
+      "relationship": "contains",
+      "description": "Business domain contains various business processes"
+    },
+    {
+      "source": "business_roles",
+      "target": "user_personas",
+      "relationship": "maps_to",
+      "description": "Business roles map to user personas"
+    },
+    {
+      "source": "business_processes",
+      "target": "operational_workflows",
+      "relationship": "implements",
+      "description": "Business processes are implemented as operational workflows"
+    },
+    {
+      "source": "technical_architecture",
+      "target": "technical_components",
+      "relationship": "contains",
+      "description": "Technical architecture contains various components"
+    },
+    {
+      "source": "technical_components",
+      "target": "technical_data",
+      "relationship": "uses",
+      "description": "Technical components use the data model"
+    },
+    {
+      "source": "user_journeys",
+      "target": "operational_workflows",
+      "relationship": "follows",
+      "description": "User journeys follow operational workflows"
+    },
+    {
+      "source": "operational_policies",
+      "target": "business_processes",
+      "relationship": "governs",
+      "description": "Operational policies govern business processes"
+    }
+  ]
+}
