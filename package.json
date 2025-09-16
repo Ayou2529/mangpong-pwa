@@ -93,7 +93,7 @@
     "preview": "vite preview",
     "test": "jest",
     "test:watch": "jest --watch",
-    "deploy": "node deploy.js",
+    "deploy": "node deploy.cjs",
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix",
     "check:sizes": "node scripts/check-file-sizes.js",

@@ -18,13 +18,6 @@ function doGet(e) {
     "Access-Control-Max-Age": "3600"
   };
   
-  // Handle preflight OPTIONS request
-  if (e && e.parameter && Object.keys(e.parameter).length === 0) {
-    return ContentService.createTextOutput('')
-      .setHeaders(CORS_HEADERS)
-      .setMimeType(ContentService.MimeType.TEXT);
-  }
-  
   const params = e && e.parameter ? e.parameter : {};
   const action = (params.action || '').toLowerCase();
   const callback = params.callback || 'callback';
@@ -73,13 +66,6 @@ function doPost(e) {
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Access-Control-Max-Age": "3600"
   };
-  
-  // Handle preflight OPTIONS request
-  if (!e || !e.postData) {
-    return ContentService.createTextOutput('')
-      .setHeaders(CORS_HEADERS)
-      .setMimeType(ContentService.MimeType.TEXT);
-  }
   
   let params = {};
   try {
@@ -668,4 +654,14 @@ function ensureSheets() {
       'Timestamp', 'JobId', 'Username', 'Action', 'Details', 'OldValue', 'NewValue', 'ModifiedBy', 'IPAddress'
     ]]);
   }
+}
+
+function doOptions(e) {
+  return ContentService.createTextOutput()
+    .setMimeType(ContentService.MimeType.TEXT)
+    .setHeaders({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    });
 }
