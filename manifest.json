@@ -1,30 +1,41 @@
 {
-  "name": "แมงป่อง เทรดดิ้ง",
-  "short_name": "Mangpong",
-  "description": "Mangpong Trading Delivery System Progressive Web App",
-  "start_url": ".",
-  "scope": ".",
+  "name": "แมงป่อง เทรดดิ้ง - ระบบจัดการงานส่ง",
+  "short_name": "แมงป่อง",
+  "description": "Progressive Web App สำหรับจัดการงานส่งของแมงป่อง เทรดดิ้ง",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#f5f7fa",
   "theme_color": "#3b82f6",
   "orientation": "portrait",
   "lang": "th",
+  "categories": ["business", "productivity"],
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "dist/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-maskable.png",
+      "src": "dist/icon-512.png", 
       "sizes": "512x512",
       "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "dist/icon-maskable.png",
+      "sizes": "512x512", 
+      "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot-narrow.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow"
     }
   ]
 }

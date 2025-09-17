@@ -157,5 +157,27 @@ function displayJobHistory() {
 
 // Setup history filters
 export function setupHistoryFilters() {
-  // Implementation would go here
+  // Add event listeners to status filter buttons
+  const statusFilters = document.querySelectorAll('.status-filter');
+  statusFilters.forEach(button => {
+    button.addEventListener('click', function() {
+      // Remove active class from all buttons
+      statusFilters.forEach(btn => btn.classList.remove('active'));
+      // Add active class to clicked button
+      this.classList.add('active');
+      
+      // Get the status to filter by
+      const status = this.getAttribute('data-status');
+      
+      // Show all jobs if 'all' is selected, otherwise filter by status
+      const jobItems = document.querySelectorAll('.job-item');
+      jobItems.forEach(item => {
+        if (status === 'all' || item.getAttribute('data-status') === status) {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+  });
 }
