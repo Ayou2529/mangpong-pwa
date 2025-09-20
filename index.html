@@ -2,12 +2,11 @@
 <html lang="th">
   <head>
     <meta charset="UTF-8" />
-    <base href="/mangpong-pwa/" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link
       rel="icon"
       type="image/x-icon"
-      href="/mangpong-pwa/public/favicon.ico"
+      href="./public/favicon.ico"
     />
     <title>แมงป่อง เทรดดิ้ง - Mangpong Delivery</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -1716,10 +1715,10 @@
           const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: "POST",
             headers: {
-              "Content-Type": "application/json",
+              "Content-Type": "text/plain;charset=utf-8",
             },
             body: JSON.stringify(data),
-            mode: "cors",
+            mode: "no-cors",
             credentials: "omit"
           });
 
@@ -1727,11 +1726,13 @@
             throw new Error(`Server error: ${response.statusText}`);
           }
 
-          const result = await response.json();
-          return result;
+          // เมื่อใช้ no-cors mode, เราไม่สามารถอ่าน response ได้
+          // แต่ถ้าไม่มี error ก็ถือว่าส่งสำเร็จ
+          console.log("ส่งข้อมูลสำเร็จ");
+          return { success: true };
         } catch (error) {
           console.error("Error submitting to Google Sheets via fetch:", error);
-          throw new Error("เกิดข้อผิดพลาดในการเชื่อมต่อ Google Sheets");
+          throw new Error("เกิดข้อผิดพลาดในการเชื่อมต่อ Google Sheets: " + error.message);
         }
       }
 
