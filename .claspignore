@@ -1,0 +1,7 @@
+# Ignore all files by default
+*
+
+# Don't ignore these files/folders
+!appsscript.json
+!dist/
+!dist/**

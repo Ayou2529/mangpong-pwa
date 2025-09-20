@@ -1,0 +1,28 @@
+/*
+  ไฟล์นี้ควรบันทึกเป็น manifest.json และวางไว้ใน root directory ของ GitHub Pages
+  This file should be saved as manifest.json and placed in the root directory of your GitHub Pages.
+*/
+{
+  "name": "แมงป่อง เทรดดิ้ง",
+  "short_name": "Mangpong",
+  "description": "Mangpong Trading Delivery System Progressive Web App",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#f5f7fa",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait",
+  "lang": "th",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
