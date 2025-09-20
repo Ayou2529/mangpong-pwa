@@ -1,72 +1,38 @@
-const CACHE_NAME = 'mangpong-v5';
-const OFFLINE_CACHE_NAME = 'mangpong-offline-v2';
-
-// แก้ไข URLs สำหรับ GitHub Pages
+/*
+  ไฟล์นี้ควรบันทึกเป็น service-worker.js และวางไว้ใน root directory ของ GitHub Pages
+  This file should be saved as service-worker.js and placed in the root directory of your GitHub Pages.
+*/
+const CACHE_NAME = 'mangpong-v1';
 const urlsToCache = [
-  '/mangpong-pwa/',
-  '/mangpong-pwa/index.html',
-  '/mangpong-pwa/manifest.json',
-  '/mangpong-pwa/dist/icon-192.png',
-  '/mangpong-pwa/dist/icon-512.png',
-  '/mangpong-pwa/dist/icon-maskable.png',
-  '/mangpong-pwa/dist/favicon.ico',
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/icon-192.png',
+  '/icon-512.png',
+  // เพิ่มไฟล์ asset อื่นๆตามต้องการ เช่น css js รูปภาพ ฯลฯ
 ];
 
-const OFFLINE_URL = '/mangpong-pwa/offline.html';
-
-// เพิ่ม offline.html fallback page
 self.addEventListener('install', event => {
-  console.log('Service Worker: Installing v5...');
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Service Worker: Caching files');
-        return cache.addAll(urlsToCache);
-      })
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then(cache =>
+      cache.addAll(urlsToCache)
+    )
   );
 });
 
 self.addEventListener('activate', event => {
-  console.log('Service Worker: Activating v5...');
   event.waitUntil(
-    caches.keys()
-      .then(cacheNames => {
-        return Promise.all(
-          cacheNames.map(cacheName => {
-            if (cacheName !== CACHE_NAME && cacheName !== OFFLINE_CACHE_NAME) {
-              console.log('Service Worker: Deleting old cache:', cacheName);
-              return caches.delete(cacheName);
-            }
-          })
-        );
-      })
-      .then(() => self.clients.claim())
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))
+    )
   );
 });
 
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
-  
-  const url = new URL(event.request.url);
-  
-  // Skip chrome extensions and Google APIs
-  if (url.protocol === 'chrome-extension:' || 
-      url.hostname.includes('googleapis.com') || 
-      url.hostname.includes('script.google.com')) {
-    return;
-  }
-
   event.respondWith(
     caches.match(event.request)
-      .then(response => {
-        return response || fetch(event.request);
-      })
-      .catch(() => {
-        // Return offline page for navigation requests
-        if (event.request.mode === 'navigate') {
-          return caches.match('/mangpong-pwa/offline.html');
-        }
-      })
+      .then(response => response || fetch(event.request))
+      .catch(() => caches.match('/index.html'))
   );
 });
