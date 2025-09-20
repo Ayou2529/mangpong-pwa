@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <base href="/mangpong-pwa/" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="public/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="/mangpong-pwa/public/favicon.ico" />
     <title>แมงป่อง เทรดดิ้ง - Mangpong Delivery</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1027,9 +1027,39 @@
       // Global variables
       let currentUser = null;
       const GOOGLE_SCRIPT_URL =
-        "https://script.google.com/macros/s/AKfycbwKzBLABvSk4u-AtuXEMEEMjeteJVrqrvAml5nSRJnlyikki9Ov_d-XZ0ghJDgxOEv9/exec";
-      // Set the Google Script URL globally
+        "https://script.google.com/macros/s/AKfycbzLcQlxEJdKcTxlHXAG_z68ZEXCZ9gv1Ba2Ko7CQlg/exec";
+
+      // ตรวจสอบและตั้งค่า Google Script URL
+      if (!GOOGLE_SCRIPT_URL) {
+        console.error("กรุณากำหนด Google Script URL");
+      }
       window.GOOGLE_SCRIPT_URL = GOOGLE_SCRIPT_URL;
+
+      // ทดสอบการเชื่อมต่อกับ Google Script
+      async function testGoogleScriptConnection() {
+        try {
+          const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ action: "test" }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          console.log("เชื่อมต่อกับ Google Script สำเร็จ");
+          return true;
+        } catch (error) {
+          console.error("ไม่สามารถเชื่อมต่อกับ Google Script:", error);
+          return false;
+        }
+      }
+
+      // ทดสอบการเชื่อมต่อเมื่อโหลดหน้า
+      testGoogleScriptConnection();
 
       // --- START: FIX FOR PAGE VISIBILITY ---
 
