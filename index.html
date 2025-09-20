@@ -1042,19 +1042,24 @@
       // ทดสอบการเชื่อมต่อกับ Google Script
       async function testGoogleScriptConnection() {
         try {
+          console.log("กำลังทดสอบการเชื่อมต่อกับ URL:", GOOGLE_SCRIPT_URL);
           const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({ action: "test" }),
+            mode: "cors",
+            credentials: "omit"
           });
 
           if (!response.ok) {
+            console.error("การเชื่อมต่อล้มเหลว:", response.status, response.statusText);
             throw new Error(`HTTP error! status: ${response.status}`);
           }
 
-          console.log("เชื่อมต่อกับ Google Script สำเร็จ");
+          const result = await response.json();
+          console.log("ผลการทดสอบการเชื่อมต่อ:", result);
           return true;
         } catch (error) {
           console.error("ไม่สามารถเชื่อมต่อกับ Google Script:", error);
@@ -1711,10 +1716,11 @@
           const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: "POST",
             headers: {
-              "Content-Type": "text/plain;charset=utf-8", // GAS doPost quirk
+              "Content-Type": "application/json",
             },
             body: JSON.stringify(data),
             mode: "cors",
+            credentials: "omit"
           });
 
           if (!response.ok) {
