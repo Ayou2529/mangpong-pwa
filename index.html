@@ -6,7 +6,7 @@
     <link
       rel="icon"
       type="image/x-icon"
-      href="./public/favicon.ico"
+      href="favicon.ico"
     />
     <title>แมงป่อง เทรดดิ้ง - Mangpong Delivery</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -1715,21 +1715,31 @@
           const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: "POST",
             headers: {
-              "Content-Type": "text/plain;charset=utf-8",
+              "Content-Type": "application/json", // Changed from text/plain
             },
             body: JSON.stringify(data),
-            mode: "no-cors",
-            credentials: "omit"
+            mode: "cors", // Changed from no-cors
+            // credentials: "omit" removed
           });
 
           if (!response.ok) {
-            throw new Error(`Server error: ${response.statusText}`);
+            // Attempt to read error message from response if available
+            let errorMessage = `Server error: ${response.status} ${response.statusText}`;
+            try {
+                const errorData = await response.json();
+                if (errorData && errorData.error) {
+                    errorMessage = errorData.error;
+                }
+            } catch (e) {
+                // If response is not JSON, use default error message
+                console.warn("Could not parse error response as JSON:", e);
+            }
+            throw new Error(errorMessage);
           }
 
-          // เมื่อใช้ no-cors mode, เราไม่สามารถอ่าน response ได้
-          // แต่ถ้าไม่มี error ก็ถือว่าส่งสำเร็จ
-          console.log("ส่งข้อมูลสำเร็จ");
-          return { success: true };
+          const result = await response.json(); // Parse JSON response
+          console.log("ส่งข้อมูลสำเร็จ:", result);
+          return result; // Return the actual result from GAS
         } catch (error) {
           console.error("Error submitting to Google Sheets via fetch:", error);
           throw new Error("เกิดข้อผิดพลาดในการเชื่อมต่อ Google Sheets: " + error.message);
