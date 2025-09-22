@@ -122,7 +122,7 @@ function updateErrorContextMapping() {
         error_id: error.id,
         context_files: getContextFilesForError(error),
         solutions: getSuggestedSolutions(error),
-        prevention: getPreventionStrategies(error)
+        prevention: getPreventionStrategies(error),
       });
     } else if (existing && error.status === 'resolved') {
       console.log(`✅ Marking error as resolved in context mapping: ${error.id}`);
@@ -257,7 +257,7 @@ function createContextDiff() {
 export {
   syncContextWithCode,
   updateErrorContextMapping,
-  createContextDiff
+  createContextDiff,
 };
 
 // Run if called directly
@@ -272,21 +272,21 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const command = args[0];
     
     switch (command) {
-      case 'sync':
-        syncContextWithCode();
-        break;
+    case 'sync':
+      syncContextWithCode();
+      break;
         
-      case 'update-errors':
-        updateErrorContextMapping();
-        break;
+    case 'update-errors':
+      updateErrorContextMapping();
+      break;
         
-      case 'diff':
-        createContextDiff();
-        break;
+    case 'diff':
+      createContextDiff();
+      break;
         
-      default:
-        console.log(`Unknown command: ${command}`);
-        process.exit(1);
+    default:
+      console.log(`Unknown command: ${command}`);
+      process.exit(1);
     }
   }
 }

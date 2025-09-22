@@ -5,6 +5,29 @@ import { safeLocalStorageGetItem, safeLocalStorageSetItem } from '../utils/stora
 import { validateJobForm } from '../utils/validation.js';
 
 /**
+ * Update total amount in the form
+ */
+function updateTotalAmount() {
+  const amountInputs = document.querySelectorAll('.amount-input');
+  let total = 0;
+  
+  amountInputs.forEach(input => {
+    const value = parseFloat(input.value) || 0;
+    total += value;
+  });
+  
+  const totalElement = document.getElementById('total-amount');
+  if (totalElement) {
+    totalElement.textContent = `${total.toFixed(2)} บาท`;
+  }
+  
+  const mainServiceFeeElement = document.getElementById('main-service-fee');
+  if (mainServiceFeeElement) {
+    mainServiceFeeElement.textContent = `${total.toFixed(2)} บาท`;
+  }
+}
+
+/**
  * Custom hook for Job Form logic
  * @param {Function} onSuccess - Callback function when form is submitted successfully
  * @returns {Object} - Object containing form functions
@@ -136,29 +159,6 @@ export function useJobForm(onSuccess) {
         heading.textContent = `รายละเอียดงาน #${index + 1}`;
       }
     });
-  }
-  
-  /**
-   * Update total amount in the form
-   */
-  function updateTotalAmount() {
-    const amountInputs = document.querySelectorAll('.amount-input');
-    let total = 0;
-    
-    amountInputs.forEach(input => {
-      const value = parseFloat(input.value) || 0;
-      total += value;
-    });
-    
-    const totalElement = document.getElementById('total-amount');
-    if (totalElement) {
-      totalElement.textContent = `${total.toFixed(2)} บาท`;
-    }
-    
-    const mainServiceFeeElement = document.getElementById('main-service-fee');
-    if (mainServiceFeeElement) {
-      mainServiceFeeElement.textContent = `${total.toFixed(2)} บาท`;
-    }
   }
   
   return {

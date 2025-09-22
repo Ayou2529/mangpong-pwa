@@ -12,10 +12,10 @@ const SHEET_HISTORY = 'JobHistory';
 
 function doGet(e) {
   const CORS_HEADERS = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    "Access-Control-Max-Age": "3600"
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Max-Age': '3600',
   };
   
   const params = e && e.parameter ? e.parameter : {};
@@ -61,10 +61,10 @@ function doGet(e) {
 
 function doPost(e) {
   const CORS_HEADERS = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    "Access-Control-Max-Age": "3600"
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Max-Age': '3600',
   };
   
   let params = {};
@@ -177,8 +177,8 @@ function handleLogin(params) {
           user: {
             username: row[usernameIndex],
             fullName: row[fullNameIndex],
-            role: row[roleIndex]
-          }
+            role: row[roleIndex],
+          },
         };
       }
     }
@@ -232,7 +232,7 @@ function handleCreateJob(params) {
   try {
     const { 
       jobId, username, jobDate, company, assignedBy, contact, 
-      pickupProvince, pickupDistrict, jobDetails, additionalFees, totalAmount 
+      pickupProvince, pickupDistrict, jobDetails, additionalFees, totalAmount, 
     } = params;
 
     if (!jobId || !username || !jobDate || !company || !assignedBy || !contact || 
@@ -251,7 +251,7 @@ function handleCreateJob(params) {
     const timestamp = new Date();
     jobs.appendRow([
       timestamp, jobId, username, 'complete', jobDate, company, 
-      assignedBy, contact, pickupProvince, pickupDistrict, totalAmount
+      assignedBy, contact, pickupProvince, pickupDistrict, totalAmount,
     ]);
 
     // Save job details
@@ -265,7 +265,7 @@ function handleCreateJob(params) {
       details.appendRow([
         jobId, detail.destinationCompany, detail.deliveryProvince, 
         detail.deliveryDistrict, detail.recipient, detail.description, 
-        detail.amount, i + 1, username
+        detail.amount, i + 1, username,
       ]);
     }
 
@@ -279,7 +279,7 @@ function handleCreateJob(params) {
       for (let i = 0; i < additionalFees.length; i++) {
         const fee = additionalFees[i];
         fees.appendRow([
-          jobId, fee.description, fee.amount, i + 1, username
+          jobId, fee.description, fee.amount, i + 1, username,
         ]);
       }
     }
@@ -289,7 +289,7 @@ function handleCreateJob(params) {
     if (history) {
       history.appendRow([
         new Date(), jobId, username, 'create', 
-        `สร้างงาน ${jobId}`, '', JSON.stringify(params), 'System'
+        `สร้างงาน ${jobId}`, '', JSON.stringify(params), 'System',
       ]);
     }
 
@@ -304,7 +304,7 @@ function handleUpdateJob(params) {
   try {
     const { 
       jobId, username, jobDate, company, assignedBy, contact, 
-      pickupProvince, pickupDistrict, jobDetails, additionalFees, totalAmount, status
+      pickupProvince, pickupDistrict, jobDetails, additionalFees, totalAmount, status,
     } = params;
 
     if (!jobId || !username || !jobDate || !company || !assignedBy || !contact || 
@@ -379,7 +379,7 @@ function handleUpdateJob(params) {
       details.appendRow([
         jobId, detail.destinationCompany, detail.deliveryProvince, 
         detail.deliveryDistrict, detail.recipient, detail.description, 
-        detail.amount, i + 1, username
+        detail.amount, i + 1, username,
       ]);
     }
 
@@ -401,7 +401,7 @@ function handleUpdateJob(params) {
         for (let i = 0; i < additionalFees.length; i++) {
           const fee = additionalFees[i];
           fees.appendRow([
-            jobId, fee.description, fee.amount, i + 1, username
+            jobId, fee.description, fee.amount, i + 1, username,
           ]);
         }
       }
@@ -412,7 +412,7 @@ function handleUpdateJob(params) {
     if (history) {
       history.appendRow([
         new Date(), jobId, username, 'update', 
-        `แก้ไขงาน ${jobId}`, '', JSON.stringify(params), 'System'
+        `แก้ไขงาน ${jobId}`, '', JSON.stringify(params), 'System',
       ]);
     }
 
@@ -469,7 +469,7 @@ function handleGetJobs(params) {
           contact: row[contactIndex],
           pickupProvince: row[pickupProvinceIndex],
           pickupDistrict: row[pickupDistrictIndex],
-          totalAmount: row[totalAmountIndex]
+          totalAmount: row[totalAmountIndex],
         });
       }
     }
@@ -527,7 +527,7 @@ function handleGetJobById(params) {
           contact: row[contactIndex],
           pickupProvince: row[pickupProvinceIndex],
           pickupDistrict: row[pickupDistrictIndex],
-          totalAmount: row[totalAmountIndex]
+          totalAmount: row[totalAmountIndex],
         };
         break;
       }
@@ -563,7 +563,7 @@ function handleGetJobById(params) {
             recipient: row[detailRecipientIndex],
             description: row[detailDescriptionIndex],
             amount: row[detailAmountIndex],
-            sequence: row[detailSequenceIndex]
+            sequence: row[detailSequenceIndex],
           });
         }
       }
@@ -591,7 +591,7 @@ function handleGetJobById(params) {
           additionalFees.push({
             description: row[feeDescriptionIndex],
             amount: row[feeAmountIndex],
-            sequence: row[feeSequenceIndex]
+            sequence: row[feeSequenceIndex],
           });
         }
       }
@@ -617,7 +617,7 @@ function ensureSheets() {
   if (jobs.getLastRow() === 0) {
     jobs.getRange(1, 1, 1, 11).setValues([[
       'Timestamp', 'JobId', 'Username', 'Status', 'JobDate', 'Company', 
-      'AssignedBy', 'Contact', 'PickupProvince', 'PickupDistrict', 'TotalAmount'
+      'AssignedBy', 'Contact', 'PickupProvince', 'PickupDistrict', 'TotalAmount',
     ]]);
   }
   
@@ -627,7 +627,7 @@ function ensureSheets() {
   if (details.getLastRow() === 0) {
     details.getRange(1, 1, 1, 10).setValues([[
       'JobId', 'DestinationCompany', 'DeliveryProvince', 'DeliveryDistrict', 
-      'Recipient', 'Description', 'Amount', 'Sequence', 'Username', 'Timestamp'
+      'Recipient', 'Description', 'Amount', 'Sequence', 'Username', 'Timestamp',
     ]]);
   }
   
@@ -636,7 +636,7 @@ function ensureSheets() {
   if (!fees) fees = ss.insertSheet(SHEET_FEES);
   if (fees.getLastRow() === 0) {
     fees.getRange(1, 1, 1, 6).setValues([[
-      'JobId', 'Description', 'Amount', 'Sequence', 'Username', 'Timestamp'
+      'JobId', 'Description', 'Amount', 'Sequence', 'Username', 'Timestamp',
     ]]);
   }
   
@@ -645,7 +645,7 @@ function ensureSheets() {
   if (!users) users = ss.insertSheet(SHEET_USERS);
   if (users.getLastRow() === 0) {
     users.getRange(1, 1, 1, 8).setValues([[
-      'Timestamp', 'Username', 'Password', 'FullName', 'Phone', 'Email', 'Role', 'LastLogin'
+      'Timestamp', 'Username', 'Password', 'FullName', 'Phone', 'Email', 'Role', 'LastLogin',
     ]]);
   }
   
@@ -654,7 +654,7 @@ function ensureSheets() {
   if (!history) history = ss.insertSheet(SHEET_HISTORY);
   if (history.getLastRow() === 0) {
     history.getRange(1, 1, 1, 9).setValues([[
-      'Timestamp', 'JobId', 'Username', 'Action', 'Details', 'OldValue', 'NewValue', 'ModifiedBy', 'IPAddress'
+      'Timestamp', 'JobId', 'Username', 'Action', 'Details', 'OldValue', 'NewValue', 'ModifiedBy', 'IPAddress',
     ]]);
   }
 }
@@ -665,6 +665,6 @@ function doOptions(e) {
     .setHeaders({
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     });
 }

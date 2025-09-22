@@ -16,31 +16,31 @@ const validationRules = {
     requiredSections: {
       'domain.md': ['## ภาพรวม', '## โดเมนธุรกิจ', '## กฎทางธุรกิจ', '## กระบวนการทางธุรกิจ'],
       'roles.md': ['## บทบาทผู้ใช้'],
-      'processes.md': ['## กระบวนการทางธุรกิจ']
-    }
+      'processes.md': ['## กระบวนการทางธุรกิจ'],
+    },
   },
   technical: {
     requiredFiles: ['architecture.md', 'components.md', 'data-model.md'],
     requiredSections: {
       'architecture.md': ['## สถาปัตยกรรมระบบ'],
       'components.md': ['## ส่วนประกอบทางเทคนิค'],
-      'data-model.md': ['## โมเดลข้อมูล']
-    }
+      'data-model.md': ['## โมเดลข้อมูล'],
+    },
   },
   operational: {
     requiredFiles: ['workflows.md', 'policies.md'],
     requiredSections: {
       'workflows.md': ['## ขั้นตอนการทำงาน'],
-      'policies.md': ['## นโยบายการดำเนินงาน']
-    }
+      'policies.md': ['## นโยบายการดำเนินงาน'],
+    },
   },
   user: {
     requiredFiles: ['personas.md', 'journeys.md'],
     requiredSections: {
       'personas.md': ['## ตัวแทนผู้ใช้'],
-      'journeys.md': ['## เส้นทางผู้ใช้']
-    }
-  }
+      'journeys.md': ['## เส้นทางผู้ใช้'],
+    },
+  },
 };
 
 // Function to validate context directory structure
@@ -176,7 +176,7 @@ function generateContextReport() {
     timestamp: new Date().toISOString(),
     directories: {},
     completeness: 0,
-    issues: []
+    issues: [],
   };
   
   const contextDirs = ['business', 'technical', 'operational', 'user'];
@@ -187,7 +187,7 @@ function generateContextReport() {
     const dirPath = path.join(contextRoot, dir);
     report.directories[dir] = {
       present: fs.existsSync(dirPath),
-      files: {}
+      files: {},
     };
     
     if (!fs.existsSync(dirPath)) {
@@ -231,7 +231,7 @@ function watchContextFiles() {
     import('chokidar').then(({ default: chokidar }) => {
       const watcher = chokidar.watch(path.join(projectRoot, 'context/**/*'), {
         ignored: /(^|[\/\\])\../, // ignore dotfiles
-        persistent: true
+        persistent: true,
       });
       
       watcher.on('change', (filePath) => {
@@ -292,7 +292,7 @@ export {
   validateContextContent,
   validateContextLinks,
   generateContextReport,
-  watchContextFiles
+  watchContextFiles,
 };
 
 // Run validation if called directly

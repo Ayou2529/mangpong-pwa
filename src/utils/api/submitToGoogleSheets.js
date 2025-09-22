@@ -3,7 +3,7 @@
 import {
   safeLocalStorageGetItem,
   safeLocalStorageSetItem,
-} from "../storage.js";
+} from '../storage.js';
 
 // Request queue for handling offline scenarios
 export const requestQueue = {
@@ -53,7 +53,7 @@ export const requestQueue = {
           } else {
             // Wait before retrying
             await new Promise((resolve) =>
-              setTimeout(resolve, 1000 * request.attempts)
+              setTimeout(resolve, 1000 * request.attempts),
             );
           }
         }
@@ -67,8 +67,8 @@ export const requestQueue = {
   saveToStorage: function () {
     try {
       safeLocalStorageSetItem(
-        "mangpongRequestQueue",
-        JSON.stringify(this.requests)
+        'mangpongRequestQueue',
+        JSON.stringify(this.requests),
       );
     } catch {
       // console.error('Failed to save request queue to storage:', error);
@@ -78,7 +78,7 @@ export const requestQueue = {
   // Load queue from localStorage
   loadFromStorage: function () {
     try {
-      const stored = safeLocalStorageGetItem("mangpongRequestQueue");
+      const stored = safeLocalStorageGetItem('mangpongRequestQueue');
       if (stored) {
         this.requests = JSON.parse(stored);
         // console.log('Loaded request queue from storage:', this.requests);
@@ -103,7 +103,7 @@ export async function submitToGoogleSheets(data) {
     // Return a mock success response for offline requests
     return Promise.resolve({
       success: true,
-      message: "Request queued for later processing",
+      message: 'Request queued for later processing',
     });
   }
 
@@ -128,7 +128,7 @@ async function submitToGoogleSheetsWithRetry(data, maxRetries = 3) {
         // Return a mock success response to prevent UI errors
         return {
           success: true,
-          message: "Request queued for later processing",
+          message: 'Request queued for later processing',
         };
       }
 
@@ -155,74 +155,74 @@ function mockSubmitToGoogleSheetsInternal(data) {
 // Generate mock response based on action
 function generateMockResponse(data) {
   switch (data.action) {
-    case "login":
-      return generateLoginResponse(data);
+  case 'login':
+    return generateLoginResponse(data);
 
-    case "register":
-      return {
-        success: true,
-        message: "ลงทะเบียนสำเร็จ",
-      };
+  case 'register':
+    return {
+      success: true,
+      message: 'ลงทะเบียนสำเร็จ',
+    };
 
-    case "createJob":
-      return {
-        success: true,
-        message: "บันทึกงานสำเร็จ",
-        jobId: "JOB-" + Date.now(),
-      };
+  case 'createJob':
+    return {
+      success: true,
+      message: 'บันทึกงานสำเร็จ',
+      jobId: 'JOB-' + Date.now(),
+    };
 
-    case "getJobs":
-      return {
-        success: true,
-        jobs: [
-          {
-            jobId: "JOB-001",
-            timestamp: new Date().toISOString(),
-            status: "complete",
-            jobDate: new Date().toISOString(),
-            company: "ทดสอบ บริษัท",
-            assignedBy: "ทดสอบ ผู้สั่งงาน",
-            contact: "0123456789",
-            pickupProvince: "กรุงเทพมหานคร",
-            pickupDistrict: "บางนา",
-            totalAmount: 1000,
-          },
-        ],
-      };
+  case 'getJobs':
+    return {
+      success: true,
+      jobs: [
+        {
+          jobId: 'JOB-001',
+          timestamp: new Date().toISOString(),
+          status: 'complete',
+          jobDate: new Date().toISOString(),
+          company: 'ทดสอบ บริษัท',
+          assignedBy: 'ทดสอบ ผู้สั่งงาน',
+          contact: '0123456789',
+          pickupProvince: 'กรุงเทพมหานคร',
+          pickupDistrict: 'บางนา',
+          totalAmount: 1000,
+        },
+      ],
+    };
 
-    default:
-      return {
-        success: true,
-        message: "ดำเนินการสำเร็จ",
-      };
+  default:
+    return {
+      success: true,
+      message: 'ดำเนินการสำเร็จ',
+    };
   }
 }
 
 // Generate login response
 function generateLoginResponse(data) {
   // Always allow login with username 'admin' and password 'password' in development
-  if (data.username === "admin" && data.password === "password") {
+  if (data.username === 'admin' && data.password === 'password') {
     return {
       success: true,
       user: {
-        username: "admin",
-        fullName: "Admin User",
-        role: "Admin",
+        username: 'admin',
+        fullName: 'Admin User',
+        role: 'Admin',
       },
     };
-  } else if (data.username === "messenger" && data.password === "password") {
+  } else if (data.username === 'messenger' && data.password === 'password') {
     return {
       success: true,
       user: {
-        username: "messenger",
-        fullName: "Messenger User",
-        role: "Messenger",
+        username: 'messenger',
+        fullName: 'Messenger User',
+        role: 'Messenger',
       },
     };
   } else {
     return {
       success: false,
-      error: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง",
+      error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
     };
   }
 }
@@ -231,47 +231,47 @@ function generateLoginResponse(data) {
 export async function submitToGoogleSheetsInternal(data) {
   // Use mock implementation in development mode by checking if we're on localhost
   const isDev =
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1";
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1';
   if (isDev) {
     return mockSubmitToGoogleSheetsInternal(data);
   }
 
   // Check if Google Script URL is defined
   if (!window.GOOGLE_SCRIPT_URL) {
-    throw new Error("Google Script URL ไม่ได้ถูกกำหนดไว้");
+    throw new Error('Google Script URL ไม่ได้ถูกกำหนดไว้');
   }
 
   try {
-    console.log("Sending request to:", window.GOOGLE_SCRIPT_URL);
-    console.log("Request data:", data);
+    console.log('Sending request to:', window.GOOGLE_SCRIPT_URL);
+    console.log('Request data:', data);
 
     const response = await fetch(window.GOOGLE_SCRIPT_URL, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
       },
-      mode: "cors",
+      mode: 'cors',
       body: JSON.stringify(data),
     });
 
-    console.log("Response status:", response.status);
+    console.log('Response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("API Error:", errorText);
+      console.error('API Error:', errorText);
       throw new Error(
-        `HTTP error! status: ${response.status}, message: ${errorText}`
+        `HTTP error! status: ${response.status}, message: ${errorText}`,
       );
     }
 
     const result = await response.json();
-    console.log("API Response:", result);
+    console.log('API Response:', result);
     return result;
   } catch (error) {
     throw new Error(
-      `ไม่สามารถเชื่อมต่อกับ Google Apps Script ได้: ${error.message}`
+      `ไม่สามารถเชื่อมต่อกับ Google Apps Script ได้: ${error.message}`,
     );
   }
 }

@@ -1,6 +1,6 @@
 // src/utils/auth/login/authentication.js
-import { saveUserData } from "../../storage/index.js";
-import { submitToGoogleSheetsWithRetry } from "../../api/retry.js";
+import { saveUserData } from '../../storage/index.js';
+import { submitToGoogleSheetsWithRetry } from '../../api/retry.js';
 
 /**
  * ตรวจสอบการเข้าสู่ระบบ
@@ -11,7 +11,7 @@ import { submitToGoogleSheetsWithRetry } from "../../api/retry.js";
 export async function authenticate(username, password) {
   try {
     const response = await submitToGoogleSheetsWithRetry({
-      action: "login",
+      action: 'login',
       username: username,
       password: password,
     });
@@ -26,14 +26,14 @@ export async function authenticate(username, password) {
     } else {
       return {
         success: false,
-        error: response?.error || "เกิดข้อผิดพลาดในการเข้าสู่ระบบ",
+        error: response?.error || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ',
       };
     }
   } catch (error) {
-    console.error("เกิดข้อผิดพลาดในการตรวจสอบการเข้าสู่ระบบ:", error);
+    console.error('เกิดข้อผิดพลาดในการตรวจสอบการเข้าสู่ระบบ:', error);
     return {
       success: false,
-      error: "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้",
+      error: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้',
     };
   }
 }

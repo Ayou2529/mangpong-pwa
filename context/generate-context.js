@@ -38,7 +38,7 @@ function readContextFiles() {
       business: {},
       technical: {},
       operational: {},
-      user: {}
+      user: {},
     };
 
     // Read business context files
@@ -106,7 +106,7 @@ function readContextState() {
     return {
       version: '1.0.0',
       last_updated: new Date().toISOString(),
-      context_engineering_version: '1.0'
+      context_engineering_version: '1.0',
     };
   }
 }
@@ -121,7 +121,7 @@ function readContextVersion() {
     return {
       current_version: '1.0.0',
       last_updated: new Date().toISOString(),
-      context_engineering_version: '1.0'
+      context_engineering_version: '1.0',
     };
   }
 }
@@ -240,7 +240,7 @@ const context = {
         'Upload Images',
         'Offline Support',
       ],
-      count: 7
+      count: 7,
     },
     {
       name: 'Employee (Admin)',
@@ -251,7 +251,7 @@ const context = {
         'Export PDF (Billing/Payroll)',
         'Auto query/filter to separate sheets',
       ],
-      count: 5
+      count: 5,
     },
     {
       name: 'Owner',
@@ -261,7 +261,7 @@ const context = {
         'Payroll approval',
         'Bill verification',
       ],
-      count: 4
+      count: 4,
     },
   ],
   salarySystem: {
@@ -278,7 +278,7 @@ const context = {
       business: 'Business domain, roles, processes',
       technical: 'Architecture, components, data model',
       operational: 'Workflows, policies',
-      user: 'Personas, journeys'
+      user: 'Personas, journeys',
     },
     state: readContextState(),
     versionInfo: readContextVersion(),
@@ -286,7 +286,7 @@ const context = {
     dependencies: readDependencies(),
     codeContextMapping: readCodeContextMapping(),
     errorContextMapping: readErrorContextMapping(),
-    detailedContext: readContextFiles()
+    detailedContext: readContextFiles(),
   },
   createdAt: new Date().toISOString(),
   lastUpdated: new Date().toISOString(),

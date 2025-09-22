@@ -40,17 +40,17 @@ export function JobHistory({ jobs = [] }) {
               <p class="text-sm text-gray-500">${job.jobId}</p>
             </div>
             <span class="px-2 py-1 rounded-full text-xs font-medium ${
-              job.status === 'complete' ? 'bg-green-100 text-green-800' :
-              job.status === 'incomplete' ? 'bg-red-100 text-red-800' :
-              job.status === 'draft' ? 'bg-orange-100 text-orange-800' :
-              'bg-gray-100 text-gray-800'
-            }">
+  job.status === 'complete' ? 'bg-green-100 text-green-800' :
+    job.status === 'incomplete' ? 'bg-red-100 text-red-800' :
+      job.status === 'draft' ? 'bg-orange-100 text-orange-800' :
+        'bg-gray-100 text-gray-800'
+}">
               ${
-                job.status === 'complete' ? 'สมบูรณ์' :
-                job.status === 'incomplete' ? 'ไม่สมบูรณ์' :
-                job.status === 'draft' ? 'ร่าง' :
-                'ไม่ทราบสถานะ'
-              }
+  job.status === 'complete' ? 'สมบูรณ์' :
+    job.status === 'incomplete' ? 'ไม่สมบูรณ์' :
+      job.status === 'draft' ? 'ร่าง' :
+        'ไม่ทราบสถานะ'
+}
             </span>
           </div>
           

@@ -13,16 +13,16 @@ async function checkFileSize(filePath) {
       const lines = content.split('\n').length;
       
       if (lines > MAX_FILE_SIZE) {
-        console.warn(\`⚠️  File \${filePath} exceeds \${MAX_FILE_SIZE} lines: \${lines} lines\`);
+        console.warn(`⚠️  File ${filePath} exceeds ${MAX_FILE_SIZE} lines: ${lines} lines`);
         return false;
       } else {
-        console.log(\`✅ File \${filePath}: \${lines} lines\`);
+        console.log(`✅ File ${filePath}: ${lines} lines`);
         return true;
       }
     }
     return true;
   } catch (error) {
-    console.error(\`Error checking file \${filePath}:\`, error.message);
+    console.error(`Error checking file ${filePath}:`, error.message);
     return false;
   }
 }
@@ -50,7 +50,7 @@ async function walkDirectory(dir) {
     
     return results;
   } catch (error) {
-    console.error(\`Error reading directory \${dir}:\`, error.message);
+    console.error(`Error reading directory ${dir}:`, error.message);
     return [];
   }
 }
@@ -60,7 +60,7 @@ async function checkAllFiles() {
   let allPassed = true;
   
   for (const dir of directories) {
-    console.log(\`\\nChecking files in \${dir}...\`);
+    console.log(`\nChecking files in ${dir}...`);
     const files = await walkDirectory(dir);
     
     for (const file of files) {
@@ -69,7 +69,7 @@ async function checkAllFiles() {
     }
   }
   
-  console.log(\`\\n\${allPassed ? '✅ All files are within size limits' : '⚠️  Some files exceed size limits'}\`);
+  console.log(`\n${allPassed ? '✅ All files are within size limits' : '⚠️  Some files exceed size limits'}`);
   return allPassed;
 }
 

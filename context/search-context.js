@@ -20,11 +20,11 @@ function searchContext(query, options = {}) {
   const opts = {
     caseSensitive: false,
     wholeWord: false,
-    ...options
+    ...options,
   };
   
   // Prepare search term
-  let searchTerm = opts.caseSensitive ? query : query.toLowerCase();
+  const searchTerm = opts.caseSensitive ? query : query.toLowerCase();
   
   // Get all context files
   const contextDirs = ['business', 'technical', 'operational', 'user'];
@@ -40,7 +40,7 @@ function searchContext(query, options = {}) {
       const content = fs.readFileSync(filePath, 'utf8');
       
       // Process content based on options
-      let fileContent = opts.caseSensitive ? content : content.toLowerCase();
+      const fileContent = opts.caseSensitive ? content : content.toLowerCase();
       
       // Check if query exists in file
       let found = false;
@@ -62,7 +62,7 @@ function searchContext(query, options = {}) {
           if (line.includes(searchTerm)) {
             matches.push({
               line: i + 1,
-              content: lines[i].trim()
+              content: lines[i].trim(),
             });
           }
         }
@@ -70,7 +70,7 @@ function searchContext(query, options = {}) {
         results.push({
           file: `${dir}/${file}`,
           path: filePath,
-          matches: matches.slice(0, 5) // Limit to first 5 matches
+          matches: matches.slice(0, 5), // Limit to first 5 matches
         });
       }
     }
@@ -136,7 +136,7 @@ function getContextStatistics() {
     files: 0,
     totalLines: 0,
     totalWords: 0,
-    totalCharacters: 0
+    totalCharacters: 0,
   };
   
   const contextDirs = ['business', 'technical', 'operational', 'user'];
@@ -199,7 +199,7 @@ function findRelatedContext(filePath) {
     if (sourceNode) {
       related.push({
         relationship: `is ${edge.relationship} by`,
-        node: sourceNode
+        node: sourceNode,
       });
     }
   }
@@ -211,7 +211,7 @@ function findRelatedContext(filePath) {
     if (targetNode) {
       related.push({
         relationship: `${edge.relationship}`,
-        node: targetNode
+        node: targetNode,
       });
     }
   }
@@ -229,7 +229,7 @@ export {
   searchContext,
   listContextFiles,
   getContextStatistics,
-  findRelatedContext
+  findRelatedContext,
 };
 
 // CLI interface
@@ -249,32 +249,32 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const command = args[0];
   
   switch (command) {
-    case 'search':
-      if (args.length < 2) {
-        console.log('Please provide a search term');
-        process.exit(1);
-      }
-      searchContext(args[1]);
-      break;
-      
-    case 'list':
-      listContextFiles();
-      break;
-      
-    case 'stats':
-      getContextStatistics();
-      break;
-      
-    case 'related':
-      if (args.length < 2) {
-        console.log('Please provide a file path');
-        process.exit(1);
-      }
-      findRelatedContext(args[1]);
-      break;
-      
-    default:
-      console.log(`Unknown command: ${command}`);
+  case 'search':
+    if (args.length < 2) {
+      console.log('Please provide a search term');
       process.exit(1);
+    }
+    searchContext(args[1]);
+    break;
+      
+  case 'list':
+    listContextFiles();
+    break;
+      
+  case 'stats':
+    getContextStatistics();
+    break;
+      
+  case 'related':
+    if (args.length < 2) {
+      console.log('Please provide a file path');
+      process.exit(1);
+    }
+    findRelatedContext(args[1]);
+    break;
+      
+  default:
+    console.log(`Unknown command: ${command}`);
+    process.exit(1);
   }
 }

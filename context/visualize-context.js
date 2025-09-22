@@ -191,7 +191,7 @@ ${dependenciesDiagram}
 export {
   generateContextDiagram,
   generateDependenciesDiagram,
-  generateVisualizationReport
+  generateVisualizationReport,
 };
 
 // Run if called directly

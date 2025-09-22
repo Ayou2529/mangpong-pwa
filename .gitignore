@@ -1,2 +1,7 @@
 node_modules/
 .clasprc.json
+
+# Sensitive and local configuration
+.clasp.json
+*.xlsx
+รวมข้อมูลที่ควรรู้ แมงป่อง/

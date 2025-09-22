@@ -2,8 +2,6 @@
 module.exports = {
   content: [
     './index.html',
-    './edit.html',
-    './updated_index.html',
     './main.js',
     './service-worker.js',
     './dist/**/*.html',

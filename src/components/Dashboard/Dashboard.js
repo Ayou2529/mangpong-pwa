@@ -145,7 +145,7 @@ export function Dashboard({ stats, draftJobs = [], incompleteJobs = [] }) {
         <ul id="draft-jobs-list" class="text-sm text-gray-600 ml-7 list-disc">
           ${draftJobs.map(job => `
             <li class="cursor-pointer hover:text-indigo-600" onclick="editJob('${job.jobId}')">
-              ${job.jobId}: ${job.company || "ไม่ระบุบริษัท"}
+              ${job.jobId}: ${job.company || 'ไม่ระบุบริษัท'}
             </li>
           `).join('')}
         </ul>
@@ -194,7 +194,7 @@ export function Dashboard({ stats, draftJobs = [], incompleteJobs = [] }) {
         <ul id="incomplete-jobs-list" class="text-sm text-gray-600 ml-7 list-disc">
           ${incompleteJobs.map(job => `
             <li class="cursor-pointer hover:text-indigo-600" onclick="editJob('${job.jobId}')">
-              ${job.jobId}: ${job.incompleteReason || "ข้อมูลไม่ครบถ้วน"}
+              ${job.jobId}: ${job.incompleteReason || 'ข้อมูลไม่ครบถ้วน'}
             </li>
           `).join('')}
         </ul>
