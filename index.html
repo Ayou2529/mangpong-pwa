@@ -3,11 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="icon"
-      type="image/x-icon"
-      href="favicon.ico"
-    />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="manifest" href="/manifest.json" />
     <title>แมงป่อง เทรดดิ้ง - Mangpong Delivery</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -17,20 +14,24 @@
     />
     <link
       rel="apple-touch-icon"
-      href="logo_mangpong_120x120.png"
+      href="/logo_mangpong_120x120.png"
       sizes="120x120"
     />
     <link
       rel="apple-touch-icon"
-      href="logo_mangpong_152x152.png"
+      href="/logo_mangpong_152x152.png"
       sizes="152x152"
     />
     <link
       rel="apple-touch-icon"
-      href="logo_mangpong_180x180.png"
+      href="/logo_mangpong_180x180.png"
       sizes="180x180"
     />
-    <link rel="apple-touch-icon" href="icon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/icon-192.png" sizes="192x192" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Mangpong Delivery" />
+    <meta name="theme-color" content="#3b82f6" />
     <style>
       body {
         font-family: "Prompt", sans-serif;
@@ -1043,23 +1044,11 @@
       async function testGoogleScriptConnection() {
         try {
           console.log("กำลังทดสอบการเชื่อมต่อกับ URL:", GOOGLE_SCRIPT_URL);
-          const response = await fetch(GOOGLE_SCRIPT_URL, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ action: "test" }),
-            mode: "cors",
-            credentials: "omit"
-          });
-
-          if (!response.ok) {
-            console.error("การเชื่อมต่อล้มเหลว:", response.status, response.statusText);
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          const result = await response.json();
-          console.log("ผลการทดสอบการเชื่อมต่อ:", result);
+          
+          // Use JSONP for testing connection to avoid CORS issues
+          const response = await submitToGoogleSheets({ action: "test" });
+          
+          console.log("ผลการทดสอบการเชื่อมต่อ:", response);
           return true;
         } catch (error) {
           console.error("ไม่สามารถเชื่อมต่อกับ Google Script:", error);
@@ -1711,40 +1700,65 @@
         });
 
       // Google Sheets connection using JSONP
-      async function submitToGoogleSheets(data) {
-        try {
-          const response = await fetch(GOOGLE_SCRIPT_URL, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json", // Changed from text/plain
-            },
-            body: JSON.stringify(data),
-            mode: "cors", // Changed from no-cors
-            // credentials: "omit" removed
-          });
-
-          if (!response.ok) {
-            // Attempt to read error message from response if available
-            let errorMessage = `Server error: ${response.status} ${response.statusText}`;
-            try {
-                const errorData = await response.json();
-                if (errorData && errorData.error) {
-                    errorMessage = errorData.error;
+      function submitToGoogleSheets(data) {
+        return new Promise((resolve, reject) => {
+          try {
+            const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzApRVAYEOsXvLlRgVcXImwB80OeWt9KOFBCmO-yUc_UL5IjCP0g9pdmcb3tOIIAD7z/exec";
+            
+            // Create unique callback name
+            const callbackName = 'callback_' + Date.now() + '_' + Math.floor(Math.random() * 1000000);
+            
+            // Create global callback function
+            window[callbackName] = function(response) {
+              // Clean up
+              delete window[callbackName];
+              const script = document.getElementById('jsonp-script');
+              if (script && script.parentNode) {
+                script.parentNode.removeChild(script);
+              }
+              resolve(response);
+            };
+            
+            // Create query parameters
+            const params = new URLSearchParams({
+              ...data,
+              callback: callbackName,
+              _random: Math.random() // Prevent caching
+            });
+            
+            // Create script tag for JSONP
+            const script = document.createElement('script');
+            script.id = 'jsonp-script';
+            script.src = `${GOOGLE_SCRIPT_URL}?${params.toString()}`;
+            
+            // Handle error
+            script.onerror = function() {
+              delete window[callbackName];
+              if (script.parentNode) {
+                script.parentNode.removeChild(script);
+              }
+              reject(new Error('ไม่สามารถเชื่อมต่อกับ Google Apps Script ได้'));
+            };
+            
+            // Add script to document
+            document.head.appendChild(script);
+            
+            // Set timeout for connection
+            setTimeout(() => {
+              if (window[callbackName]) {
+                delete window[callbackName];
+                const timeoutScript = document.getElementById('jsonp-script');
+                if (timeoutScript && timeoutScript.parentNode) {
+                  timeoutScript.parentNode.removeChild(timeoutScript);
                 }
-            } catch (e) {
-                // If response is not JSON, use default error message
-                console.warn("Could not parse error response as JSON:", e);
-            }
-            throw new Error(errorMessage);
+                reject(new Error('การเชื่อมต่อล้มเหลว: หมดเวลา'));
+              }
+            }, 30000); // 30 seconds
+            
+          } catch (error) {
+            reject(new Error('เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + error.message));
           }
-
-          const result = await response.json(); // Parse JSON response
-          console.log("ส่งข้อมูลสำเร็จ:", result);
-          return result; // Return the actual result from GAS
-        } catch (error) {
-          console.error("Error submitting to Google Sheets via fetch:", error);
-          throw new Error("เกิดข้อผิดพลาดในการเชื่อมต่อ Google Sheets: " + error.message);
-        }
+        });
       }
 
       function collectFormData() {
@@ -2949,18 +2963,15 @@
       });
     </script>
     <script>
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", function () {
-          navigator.serviceWorker
-            .register("service-worker.js")
-            .then(function (registration) {
-              console.log(
-                "ServiceWorker registration successful with scope: ",
-                registration.scope
-              );
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          // Register service worker from the public directory
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(function(registration) {
+              console.log('ServiceWorker registration successful with scope: ', registration.scope);
             })
-            .catch(function (err) {
-              console.log("ServiceWorker registration failed: ", err);
+            .catch(function(err) {
+              console.log('ServiceWorker registration failed: ', err);
             });
         });
       }

@@ -10,20 +10,30 @@ const SHEET_FEES = 'AdditionalFees';
 const SHEET_USERS = 'Users';
 const SHEET_HISTORY = 'JobHistory';
 
+// Helper function to set CORS headers
+function setCORSHeaders(response) {
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Max-Age': '3600'
+  };
+  
+  return response.setHeaders(corsHeaders);
+}
+
 function doGet(e) {
+  // Handle preflight OPTIONS requests
+  if (e.requestMethod === 'OPTIONS') {
+    return setCORSHeaders(ContentService.createTextOutput(''));
+  }
+  
   const CORS_HEADERS = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Max-Age': '3600',
   };
-  
-  // Handle preflight OPTIONS requests
-  if (e.requestMethod === 'OPTIONS') {
-    return ContentService.createTextOutput('')
-      .setHeaders(CORS_HEADERS)
-      .setMimeType(ContentService.MimeType.TEXT);
-  }
   
   const params = e && e.parameter ? e.parameter : {};
   const action = (params.action || '').toLowerCase();
@@ -67,19 +77,17 @@ function doGet(e) {
 }
 
 function doPost(e) {
+  // Handle preflight OPTIONS requests
+  if (e.requestMethod === 'OPTIONS') {
+    return setCORSHeaders(ContentService.createTextOutput(''));
+  }
+  
   const CORS_HEADERS = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Max-Age': '3600',
   };
-  
-  // Handle preflight OPTIONS requests
-  if (e.requestMethod === 'OPTIONS') {
-    return ContentService.createTextOutput('')
-      .setHeaders(CORS_HEADERS)
-      .setMimeType(ContentService.MimeType.TEXT);
-  }
   
   let params = {};
   try {
@@ -674,12 +682,12 @@ function ensureSheets() {
 }
 
 function doOptions(e) {
-  return ContentService.createTextOutput('')
+  return setCORSHeaders(ContentService.createTextOutput('')
     .setMimeType(ContentService.MimeType.TEXT)
     .setHeaders({
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '3600',
-    });
+    }));
 }

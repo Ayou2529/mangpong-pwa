@@ -3,5 +3,4 @@
 
 # Don't ignore these files/folders
 !appsscript.json
-!dist/
-!dist/**
+!code.js

@@ -1,4 +1,4 @@
-// src/utils/api/submitToGoogleSheets.js - Updated API functions for Google Apps Script integration using fetch
+// src/utils/api/submitToGoogleSheets.js - Updated API functions for Google Apps Script integration using JSONP
 
 import {
   safeLocalStorageGetItem,
@@ -227,13 +227,23 @@ function generateLoginResponse(data) {
   }
 }
 
-// Internal function that does the actual submission using fetch
+// Internal function that does the actual submission using JSONP
 export async function submitToGoogleSheetsInternal(data) {
   // Use mock implementation in development mode by checking if we're on localhost
   const isDev =
     window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1';
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname.includes('localhost') ||
+    window.location.protocol === 'file:';
+    
+  console.log('Environment check:', {
+    hostname: window.location.hostname,
+    protocol: window.location.protocol,
+    isDev: isDev
+  });
+  
   if (isDev) {
+    console.log('Using mock implementation for development');
     return mockSubmitToGoogleSheetsInternal(data);
   }
 
@@ -242,36 +252,75 @@ export async function submitToGoogleSheetsInternal(data) {
     throw new Error('Google Script URL ไม่ได้ถูกกำหนดไว้');
   }
 
-  try {
-    console.log('Sending request to:', window.GOOGLE_SCRIPT_URL);
-    console.log('Request data:', data);
+  console.log('Using JSONP to connect to Google Apps Script:', window.GOOGLE_SCRIPT_URL);
+  console.log('Sending data:', data);
 
-    const response = await fetch(window.GOOGLE_SCRIPT_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      mode: 'cors',
-      body: JSON.stringify(data),
-    });
-
-    console.log('Response status:', response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('API Error:', errorText);
-      throw new Error(
-        `HTTP error! status: ${response.status}, message: ${errorText}`,
-      );
+  // Use JSONP instead of fetch to avoid CORS issues
+  return new Promise((resolve, reject) => {
+    try {
+      // Create unique callback name
+      const callbackName = 'callback_' + Date.now() + '_' + Math.floor(Math.random() * 1000000);
+      
+      // Create global callback function
+      window[callbackName] = function(response) {
+        console.log('JSONP response received:', response);
+        
+        // Clean up
+        delete window[callbackName];
+        const script = document.getElementById('jsonp-script-' + callbackName);
+        if (script && script.parentNode) {
+          script.parentNode.removeChild(script);
+        }
+        
+        // Check if response is valid
+        if (response && typeof response === 'object') {
+          resolve(response);
+        } else {
+          reject(new Error('Invalid response format'));
+        }
+      };
+      
+      // Create query parameters
+      const params = new URLSearchParams({
+        ...data,
+        callback: callbackName,
+        _random: Math.random() // Prevent caching
+      });
+      
+      // Create script tag for JSONP
+      const script = document.createElement('script');
+      script.id = 'jsonp-script-' + callbackName;
+      script.src = `${window.GOOGLE_SCRIPT_URL}?${params.toString()}`;
+      
+      // Handle error
+      script.onerror = function() {
+        console.error('JSONP script failed to load');
+        delete window[callbackName];
+        if (script.parentNode) {
+          script.parentNode.removeChild(script);
+        }
+        reject(new Error('ไม่สามารถเชื่อมต่อกับ Google Apps Script ได้'));
+      };
+      
+      // Add script to document
+      document.head.appendChild(script);
+      
+      // Set timeout for connection
+      setTimeout(() => {
+        if (window[callbackName]) {
+          console.error('JSONP request timeout');
+          delete window[callbackName];
+          const timeoutScript = document.getElementById('jsonp-script-' + callbackName);
+          if (timeoutScript && timeoutScript.parentNode) {
+            timeoutScript.parentNode.removeChild(timeoutScript);
+          }
+          reject(new Error('การเชื่อมต่อล้มเหลว: หมดเวลา'));
+        }
+      }, 30000); // 30 seconds
+      
+    } catch (error) {
+      console.error('JSONP error:', error);
+      reject(new Error('เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + error.message));
     }
-
-    const result = await response.json();
-    console.log('API Response:', result);
-    return result;
-  } catch (error) {
-    throw new Error(
-      `ไม่สามารถเชื่อมต่อกับ Google Apps Script ได้: ${error.message}`,
-    );
-  }
+  });
 }

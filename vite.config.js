@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite';
 import { defineConfig } from 'vite'
 import tailwindcss from 'tailwindcss'
+import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [
@@ -9,8 +9,13 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        main: 'index.html'
+        main: resolve(__dirname, 'index.html'),
       }
+    }
+  },
+  server: {
+    mimeTypes: {
+      '.js': 'application/javascript',
     }
   }
 })

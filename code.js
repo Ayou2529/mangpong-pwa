@@ -10,24 +10,21 @@ const SHEET_FEES = 'AdditionalFees';
 const SHEET_USERS = 'Users';
 const SHEET_HISTORY = 'JobHistory';
 
-function doGet(e) {
-  const CORS_HEADERS = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Max-Age': '3600',
-  };
-  
-  // Handle preflight OPTIONS requests
-  if (e.requestMethod === 'OPTIONS') {
-    return ContentService.createTextOutput('')
-      .setHeaders(CORS_HEADERS)
-      .setMimeType(ContentService.MimeType.TEXT);
+// Helper: build JSON or JSONP without setHeaders
+function createJsonOutput(result, callback) {
+  var json = JSON.stringify(result);
+  if (callback && callback !== 'callback') {
+    return ContentService.createTextOutput(callback + '(' + json + ')')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
   }
-  
+  return ContentService.createTextOutput(json)
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doGet(e) {
   const params = e && e.parameter ? e.parameter : {};
   const action = (params.action || '').toLowerCase();
-  const callback = params.callback || 'callback';
+  const callback = params.callback;
 
   // Special case for service worker
   if (params.page === 'service-worker') {
@@ -53,47 +50,15 @@ function doGet(e) {
     };
   }
 
-  // For JSONP requests (when callback is provided), return JSONP response
-  if (callback && callback !== 'callback') {
-    return ContentService.createTextOutput(
-      `${callback}(${JSON.stringify(result)})`,
-    ).setHeaders(CORS_HEADERS).setMimeType(ContentService.MimeType.JAVASCRIPT);
-  }
-  
-  // For regular requests, return JSON response with CORS headers
-  return ContentService.createTextOutput(
-    JSON.stringify(result),
-  ).setHeaders(CORS_HEADERS).setMimeType(ContentService.MimeType.JSON);
+  return createJsonOutput(result, callback);
 }
 
 function doPost(e) {
-  const CORS_HEADERS = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Max-Age': '3600',
-  };
-  
-  // Handle preflight OPTIONS requests
-  if (e.requestMethod === 'OPTIONS') {
-    return ContentService.createTextOutput('')
-      .setHeaders(CORS_HEADERS)
-      .setMimeType(ContentService.MimeType.TEXT);
-  }
-  
   let params = {};
   try {
     params = JSON.parse(e.postData.contents);
   } catch (err) {
-    return ContentService
-      .createTextOutput(
-        JSON.stringify({
-          success: false,
-          error: 'Invalid JSON in request body',
-        }),
-      )
-      .setHeaders(CORS_HEADERS)
-      .setMimeType(ContentService.MimeType.JSON);
+    return createJsonOutput({ success: false, error: 'Invalid JSON in request body' });
   }
 
   const action = (params.action || '').toLowerCase();
@@ -109,10 +74,7 @@ function doPost(e) {
     };
   }
 
-  return ContentService
-    .createTextOutput(JSON.stringify(result))
-    .setHeaders(CORS_HEADERS)
-    .setMimeType(ContentService.MimeType.JSON);
+  return createJsonOutput(result);
 }
 
 function serveWebApp() {
@@ -624,62 +586,32 @@ function handleGetJobById(params) {
 
 function ensureSheets() {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  
-  // Ensure Jobs sheet exists
-  let jobs = ss.getSheetByName(SHEET_JOBS);
-  if (!jobs) jobs = ss.insertSheet(SHEET_JOBS);
-  if (jobs.getLastRow() === 0) {
-    jobs.getRange(1, 1, 1, 11).setValues([[
-      'Timestamp', 'JobId', 'Username', 'Status', 'JobDate', 'Company', 
-      'AssignedBy', 'Contact', 'PickupProvince', 'PickupDistrict', 'TotalAmount',
-    ]]);
-  }
-  
-  // Ensure JobDetails sheet exists
-  let details = ss.getSheetByName(SHEET_DETAILS);
-  if (!details) details = ss.insertSheet(SHEET_DETAILS);
-  if (details.getLastRow() === 0) {
-    details.getRange(1, 1, 1, 10).setValues([[
-      'JobId', 'DestinationCompany', 'DeliveryProvince', 'DeliveryDistrict', 
-      'Recipient', 'Description', 'Amount', 'Sequence', 'Username', 'Timestamp',
-    ]]);
-  }
-  
-  // Ensure AdditionalFees sheet exists
-  let fees = ss.getSheetByName(SHEET_FEES);
-  if (!fees) fees = ss.insertSheet(SHEET_FEES);
-  if (fees.getLastRow() === 0) {
-    fees.getRange(1, 1, 1, 6).setValues([[
-      'JobId', 'Description', 'Amount', 'Sequence', 'Username', 'Timestamp',
-    ]]);
-  }
-  
-  // Ensure Users sheet exists
-  let users = ss.getSheetByName(SHEET_USERS);
-  if (!users) users = ss.insertSheet(SHEET_USERS);
-  if (users.getLastRow() === 0) {
-    users.getRange(1, 1, 1, 8).setValues([[
-      'Timestamp', 'Username', 'Password', 'FullName', 'Phone', 'Email', 'Role', 'LastLogin',
-    ]]);
-  }
-  
-  // Ensure JobHistory sheet exists
-  let history = ss.getSheetByName(SHEET_HISTORY);
-  if (!history) history = ss.insertSheet(SHEET_HISTORY);
-  if (history.getLastRow() === 0) {
-    history.getRange(1, 1, 1, 9).setValues([[
-      'Timestamp', 'JobId', 'Username', 'Action', 'Details', 'OldValue', 'NewValue', 'ModifiedBy', 'IPAddress',
-    ]]);
-  }
+
+  // Expected headers for validation (no auto-create to protect production data)
+  const expectations = {
+    [SHEET_JOBS]: ['Timestamp', 'JobId', 'Username', 'Status', 'JobDate', 'Company', 'AssignedBy', 'Contact', 'PickupProvince', 'PickupDistrict', 'TotalAmount'],
+    [SHEET_DETAILS]: ['JobId', 'DestinationCompany', 'DeliveryProvince', 'DeliveryDistrict', 'Recipient', 'Description', 'Amount', 'Sequence', 'Username', 'Timestamp'],
+    [SHEET_FEES]: ['JobId', 'Description', 'Amount', 'Sequence', 'Username', 'Timestamp'],
+    [SHEET_USERS]: ['Timestamp', 'Username', 'Password', 'FullName', 'Phone', 'Email', 'Role', 'LastLogin'],
+    [SHEET_HISTORY]: ['Timestamp', 'JobId', 'Username', 'Action', 'Details', 'OldValue', 'NewValue', 'ModifiedBy', 'IPAddress'],
+  };
+
+  Object.keys(expectations).forEach(function(sheetName) {
+    var sheet = ss.getSheetByName(sheetName);
+    if (!sheet) {
+      throw new Error('ไม่พบชีตที่จำเป็น: ' + sheetName + ' กรุณาตรวจสอบสเปรดชีต');
+    }
+    var values = sheet.getDataRange().getValues();
+    if (!values || values.length === 0) {
+      throw new Error('ชีต ' + sheetName + ' ไม่มีหัวคอลัมน์ กรุณาเติมหัวคอลัมน์ให้ถูกต้อง');
+    }
+    var headers = values[0];
+    var expected = expectations[sheetName];
+    var missing = expected.filter(function(h) { return headers.indexOf(h) === -1; });
+    if (missing.length > 0) {
+      throw new Error('หัวคอลัมน์ของชีต ' + sheetName + ' ไม่ครบ ขาด: ' + missing.join(', '));
+    }
+  });
 }
 
-function doOptions(e) {
-  return ContentService.createTextOutput('')
-    .setMimeType(ContentService.MimeType.TEXT)
-    .setHeaders({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Max-Age': '3600',
-    });
-}
+// doOptions not required when using JSONP
