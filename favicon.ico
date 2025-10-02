@@ -1,2 +1,10 @@
-// This is a placeholder favicon.ico file to prevent 404 errors
-// In a real implementation, this would be a proper ICO file
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Redirecting to favicon.ico</title>
+  <meta http-equiv="refresh" content="0; url=/icon-192.png" />
+</head>
+<body>
+  <p>If you are not redirected, <a href="/icon-192.png">click here</a> to go to the favicon.</p>
+</body>
+</html>
