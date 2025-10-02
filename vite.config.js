@@ -3,6 +3,7 @@ import tailwindcss from 'tailwindcss'
 import { resolve } from 'path'
 
 export default defineConfig({
+  base: '/mangpong-pwa/',
   plugins: [
     tailwindcss()
   ],
