@@ -1,0 +1,86 @@
+{
+  "mappings": [
+    {
+      "context_file": "/context/business/domain.md",
+      "context_element": "commission-system",
+      "code_files": [
+        {
+          "file": "main.js",
+          "elements": ["calculateCommission", "processPayroll"],
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "context_file": "/context/business/roles.md",
+      "context_element": "messenger",
+      "code_files": [
+        {
+          "file": "main.js",
+          "elements": ["recordDelivery", "trackJobStatus", "viewJobHistory"],
+          "type": "function"
+        },
+        {
+          "file": "index.html",
+          "elements": ["dashboard", "new-job-form", "history-view"],
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "context_file": "/context/business/roles.md",
+      "context_element": "employee",
+      "code_files": [
+        {
+          "file": "main.js",
+          "elements": ["generateReport", "manageUsers"],
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "context_file": "/context/business/roles.md",
+      "context_element": "owner",
+      "code_files": [
+        {
+          "file": "main.js",
+          "elements": ["viewAnalytics", "accessPayroll"],
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "context_file": "/context/technical/architecture.md",
+      "context_element": "frontend-components",
+      "code_files": [
+        {
+          "file": "index.html",
+          "elements": ["header", "dashboard", "job-form", "history-view"],
+          "type": "component"
+        },
+        {
+          "file": "edit.html",
+          "elements": ["edit-form", "image-upload"],
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "context_file": "/context/technical/architecture.md",
+      "context_element": "offline-support",
+      "code_files": [
+        {
+          "file": "main.js",
+          "elements": ["saveOffline", "syncData", "checkConnection"],
+          "type": "function"
+        },
+        {
+          "file": "service-worker.js",
+          "elements": ["fetch", "cache"],
+          "type": "function"
+        }
+      ]
+    }
+  ],
+  "last_generated": "2025-09-15T15:30:00Z"
+}

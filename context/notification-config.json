@@ -1,0 +1,71 @@
+{
+  "channels": {
+    "in_app": {
+      "enabled": true,
+      "priority_threshold": "medium"
+    },
+    "email": {
+      "enabled": true,
+      "priority_threshold": "high",
+      "recipients": ["dev-team@mangpong.com", "project-lead@mangpong.com"]
+    },
+    "chat": {
+      "enabled": true,
+      "platform": "slack",
+      "channel": "#development",
+      "priority_threshold": "medium"
+    },
+    "dashboard": {
+      "enabled": true,
+      "priority_threshold": "low"
+    }
+  },
+  "rules": [
+    {
+      "trigger": "context_version_bump",
+      "conditions": {
+        "version_change": "major_or_minor"
+      },
+      "notification_type": "context_update",
+      "priority": "high",
+      "recipients": "all_team"
+    },
+    {
+      "trigger": "critical_error",
+      "conditions": {
+        "error_priority": "high_or_critical"
+      },
+      "notification_type": "error_alert",
+      "priority": "high",
+      "recipients": "dev_team"
+    },
+    {
+      "trigger": "recurring_error",
+      "conditions": {
+        "occurrence_count": ">= 5"
+      },
+      "notification_type": "error_alert",
+      "priority": "medium",
+      "recipients": "dev_team"
+    },
+    {
+      "trigger": "feature_request",
+      "conditions": {
+        "status": "planned"
+      },
+      "notification_type": "feature_update",
+      "priority": "medium",
+      "recipients": "all_team"
+    }
+  ],
+  "preferences": {
+    "quiet_hours": {
+      "enabled": true,
+      "start": "22:00",
+      "end": "05:00"
+    },
+    "digest_frequency": "daily",
+    "override_for_critical": true
+  },
+  "last_updated": "2025-09-15T16:30:00Z"
+}
