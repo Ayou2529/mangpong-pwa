@@ -98,6 +98,8 @@
       select,
       textarea {
         -webkit-appearance: none;
+        -moz-appearance: none;
+             appearance: none;
         border-radius: 8px;
       }
       /* Floating save button */
@@ -156,7 +158,6 @@
         margin: 1rem;
       }
     </style>
-    <script type="module" crossorigin src="/mangpong-pwa/assets/main-DMUYQGm2.js"></script>
   </head>
   <body>
     <!-- Login Screen -->
@@ -1012,7 +1013,7 @@
         </button>
       </div>
     </div>
-
+
     <script>
       // Global variables
       let currentUser = null;
@@ -2958,7 +2959,7 @@
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
           // Register service worker from the public directory
-          navigator.serviceWorker.register('/service-worker.js')
+          navigator.serviceWorker.register('/mangpong-pwa/service-worker.js')
             .then(function(registration) {
               console.log('ServiceWorker registration successful with scope: ', registration.scope);
             })
