@@ -10,34 +10,21 @@ const SHEET_FEES = 'AdditionalFees';
 const SHEET_USERS = 'Users';
 const SHEET_HISTORY = 'JobHistory';
 
-// Helper function to set CORS headers
-function setCORSHeaders(response) {
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Max-Age': '3600'
-  };
-  
-  return response.setHeaders(corsHeaders);
+// Helper: build JSON or JSONP correctly for GAS
+function createJsonOutput(result, callback) {
+  const json = JSON.stringify(result);
+  if (callback && callback !== 'callback') {
+    return ContentService.createTextOutput(callback + '(' + json + ')')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService.createTextOutput(json)
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 function doGet(e) {
-  // Handle preflight OPTIONS requests
-  if (e.requestMethod === 'OPTIONS') {
-    return setCORSHeaders(ContentService.createTextOutput(''));
-  }
-  
-  const CORS_HEADERS = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Max-Age': '3600',
-  };
-  
   const params = e && e.parameter ? e.parameter : {};
   const action = (params.action || '').toLowerCase();
-  const callback = params.callback || 'callback';
+  const callback = params.callback;
 
   // Special case for service worker
   if (params.page === 'service-worker') {
@@ -63,45 +50,15 @@ function doGet(e) {
     };
   }
 
-  // For JSONP requests (when callback is provided), return JSONP response
-  if (callback && callback !== 'callback') {
-    return ContentService.createTextOutput(
-      `${callback}(${JSON.stringify(result)})`,
-    ).setHeaders(CORS_HEADERS).setMimeType(ContentService.MimeType.JAVASCRIPT);
-  }
-  
-  // For regular requests, return JSON response with CORS headers
-  return ContentService.createTextOutput(
-    JSON.stringify(result),
-  ).setHeaders(CORS_HEADERS).setMimeType(ContentService.MimeType.JSON);
+  return createJsonOutput(result, callback);
 }
 
 function doPost(e) {
-  // Handle preflight OPTIONS requests
-  if (e.requestMethod === 'OPTIONS') {
-    return setCORSHeaders(ContentService.createTextOutput(''));
-  }
-  
-  const CORS_HEADERS = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Max-Age': '3600',
-  };
-  
   let params = {};
   try {
     params = JSON.parse(e.postData.contents);
   } catch (err) {
-    return ContentService
-      .createTextOutput(
-        JSON.stringify({
-          success: false,
-          error: 'Invalid JSON in request body',
-        }),
-      )
-      .setHeaders(CORS_HEADERS)
-      .setMimeType(ContentService.MimeType.JSON);
+    return createJsonOutput({ success: false, error: 'Invalid JSON in request body' });
   }
 
   const action = (params.action || '').toLowerCase();
@@ -117,10 +74,7 @@ function doPost(e) {
     };
   }
 
-  return ContentService
-    .createTextOutput(JSON.stringify(result))
-    .setHeaders(CORS_HEADERS)
-    .setMimeType(ContentService.MimeType.JSON);
+  return createJsonOutput(result);
 }
 
 function serveWebApp() {
@@ -153,6 +107,9 @@ function handleAction(action, params) {
       break;
     case 'getjobbyid':
       result = handleGetJobById(params);
+      break;
+    case 'test':
+      result = { success: true, message: 'Backend connection successful' };
       break;
     default:
       result = { success: false, error: 'Invalid action: ' + action };
@@ -193,7 +150,7 @@ function handleLogin(params) {
 
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
-      if (row[usernameIndex] === username && row[passwordIndex] === password) {
+      if (row[usernameIndex] === username && String(row[passwordIndex]) === String(password)) {
         return {
           success: true,
           user: {
@@ -282,8 +239,9 @@ function handleCreateJob(params) {
       return { success: false, error: 'ไม่พบตารางรายละเอียดงาน' };
     }
     
-    for (let i = 0; i < jobDetails.length; i++) {
-      const detail = jobDetails[i];
+    const parsedDetails = typeof jobDetails === 'string' ? JSON.parse(jobDetails) : jobDetails;
+    for (let i = 0; i < parsedDetails.length; i++) {
+      const detail = parsedDetails[i];
       details.appendRow([
         jobId, detail.destinationCompany, detail.deliveryProvince, 
         detail.deliveryDistrict, detail.recipient, detail.description, 
@@ -292,17 +250,20 @@ function handleCreateJob(params) {
     }
 
     // Save additional fees
-    if (additionalFees && additionalFees.length > 0) {
-      const fees = ss.getSheetByName(SHEET_FEES);
-      if (!fees) {
-        return { success: false, error: 'ไม่พบตารางค่าบริการเพิ่มเติม' };
-      }
-      
-      for (let i = 0; i < additionalFees.length; i++) {
-        const fee = additionalFees[i];
-        fees.appendRow([
-          jobId, fee.description, fee.amount, i + 1, username,
-        ]);
+    if (additionalFees) {
+      const parsedFees = typeof additionalFees === 'string' ? JSON.parse(additionalFees) : additionalFees;
+      if (parsedFees.length > 0) {
+        const fees = ss.getSheetByName(SHEET_FEES);
+        if (!fees) {
+          return { success: false, error: 'ไม่พบตารางค่าบริการเพิ่มเติม' };
+        }
+        
+        for (let i = 0; i < parsedFees.length; i++) {
+          const fee = parsedFees[i];
+          fees.appendRow([
+            jobId, fee.description, fee.amount, i + 1, username,
+          ]);
+        }
       }
     }
 
@@ -396,8 +357,9 @@ function handleUpdateJob(params) {
     }
     
     // Add updated details
-    for (let i = 0; i < jobDetails.length; i++) {
-      const detail = jobDetails[i];
+    const parsedDetails = typeof jobDetails === 'string' ? JSON.parse(jobDetails) : jobDetails;
+    for (let i = 0; i < parsedDetails.length; i++) {
+      const detail = parsedDetails[i];
       details.appendRow([
         jobId, detail.destinationCompany, detail.deliveryProvince, 
         detail.deliveryDistrict, detail.recipient, detail.description, 
@@ -419,12 +381,15 @@ function handleUpdateJob(params) {
       }
       
       // Add updated fees
-      if (additionalFees && additionalFees.length > 0) {
-        for (let i = 0; i < additionalFees.length; i++) {
-          const fee = additionalFees[i];
-          fees.appendRow([
-            jobId, fee.description, fee.amount, i + 1, username,
-          ]);
+      if (additionalFees) {
+        const parsedFees = typeof additionalFees === 'string' ? JSON.parse(additionalFees) : additionalFees;
+        if (parsedFees.length > 0) {
+          for (let i = 0; i < parsedFees.length; i++) {
+            const fee = parsedFees[i];
+            fees.appendRow([
+              jobId, fee.description, fee.amount, i + 1, username,
+            ]);
+          }
         }
       }
     }
@@ -633,61 +598,20 @@ function handleGetJobById(params) {
 function ensureSheets() {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   
-  // Ensure Jobs sheet exists
-  let jobs = ss.getSheetByName(SHEET_JOBS);
-  if (!jobs) jobs = ss.insertSheet(SHEET_JOBS);
-  if (jobs.getLastRow() === 0) {
-    jobs.getRange(1, 1, 1, 11).setValues([[
-      'Timestamp', 'JobId', 'Username', 'Status', 'JobDate', 'Company', 
-      'AssignedBy', 'Contact', 'PickupProvince', 'PickupDistrict', 'TotalAmount',
-    ]]);
-  }
-  
-  // Ensure JobDetails sheet exists
-  let details = ss.getSheetByName(SHEET_DETAILS);
-  if (!details) details = ss.insertSheet(SHEET_DETAILS);
-  if (details.getLastRow() === 0) {
-    details.getRange(1, 1, 1, 10).setValues([[
-      'JobId', 'DestinationCompany', 'DeliveryProvince', 'DeliveryDistrict', 
-      'Recipient', 'Description', 'Amount', 'Sequence', 'Username', 'Timestamp',
-    ]]);
-  }
-  
-  // Ensure AdditionalFees sheet exists
-  let fees = ss.getSheetByName(SHEET_FEES);
-  if (!fees) fees = ss.insertSheet(SHEET_FEES);
-  if (fees.getLastRow() === 0) {
-    fees.getRange(1, 1, 1, 6).setValues([[
-      'JobId', 'Description', 'Amount', 'Sequence', 'Username', 'Timestamp',
-    ]]);
-  }
-  
-  // Ensure Users sheet exists
-  let users = ss.getSheetByName(SHEET_USERS);
-  if (!users) users = ss.insertSheet(SHEET_USERS);
-  if (users.getLastRow() === 0) {
-    users.getRange(1, 1, 1, 8).setValues([[
-      'Timestamp', 'Username', 'Password', 'FullName', 'Phone', 'Email', 'Role', 'LastLogin',
-    ]]);
-  }
-  
-  // Ensure JobHistory sheet exists
-  let history = ss.getSheetByName(SHEET_HISTORY);
-  if (!history) history = ss.insertSheet(SHEET_HISTORY);
-  if (history.getLastRow() === 0) {
-    history.getRange(1, 1, 1, 9).setValues([[
-      'Timestamp', 'JobId', 'Username', 'Action', 'Details', 'OldValue', 'NewValue', 'ModifiedBy', 'IPAddress',
-    ]]);
-  }
-}
+  // Ensure Sheets exist with basic headers if empty
+  const expectations = {
+    [SHEET_JOBS]: ['Timestamp', 'JobId', 'Username', 'Status', 'JobDate', 'Company', 'AssignedBy', 'Contact', 'PickupProvince', 'PickupDistrict', 'TotalAmount'],
+    [SHEET_DETAILS]: ['JobId', 'DestinationCompany', 'DeliveryProvince', 'DeliveryDistrict', 'Recipient', 'Description', 'Amount', 'Sequence', 'Username', 'Timestamp'],
+    [SHEET_FEES]: ['JobId', 'Description', 'Amount', 'Sequence', 'Username', 'Timestamp'],
+    [SHEET_USERS]: ['Timestamp', 'Username', 'Password', 'FullName', 'Phone', 'Email', 'Role', 'LastLogin'],
+    [SHEET_HISTORY]: ['Timestamp', 'JobId', 'Username', 'Action', 'Details', 'OldValue', 'NewValue', 'ModifiedBy', 'IPAddress'],
+  };
 
-function doOptions(e) {
-  return setCORSHeaders(ContentService.createTextOutput('')
-    .setMimeType(ContentService.MimeType.TEXT)
-    .setHeaders({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Max-Age': '3600',
-    }));
+  Object.keys(expectations).forEach(sheetName => {
+    let sheet = ss.getSheetByName(sheetName);
+    if (!sheet) {
+      sheet = ss.insertSheet(sheetName);
+      sheet.appendRow(expectations[sheetName]);
+    }
+  });
 }

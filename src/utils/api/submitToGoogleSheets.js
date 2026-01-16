@@ -229,24 +229,6 @@ function generateLoginResponse(data) {
 
 // Internal function that does the actual submission using JSONP
 export async function submitToGoogleSheetsInternal(data) {
-  // Use mock implementation in development mode by checking if we're on localhost
-  const isDev =
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1' ||
-    window.location.hostname.includes('localhost') ||
-    window.location.protocol === 'file:';
-    
-  console.log('Environment check:', {
-    hostname: window.location.hostname,
-    protocol: window.location.protocol,
-    isDev: isDev
-  });
-  
-  if (isDev) {
-    console.log('Using mock implementation for development');
-    return mockSubmitToGoogleSheetsInternal(data);
-  }
-
   // Check if Google Script URL is defined
   if (!window.GOOGLE_SCRIPT_URL) {
     throw new Error('Google Script URL ไม่ได้ถูกกำหนดไว้');

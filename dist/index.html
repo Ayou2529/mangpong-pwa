@@ -1016,24 +1016,32 @@
     <script>
       // Global variables
       let currentUser = null;
-      const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzApRVAYEOsXvLlRgVcXImwB80OeWt9KOFBCmO-yUc_UL5IjCP0g9pdmcb3tOIIAD7z/exec";
-
-      // ตรวจสอบและตั้งค่า Google Script URL
-      if (!GOOGLE_SCRIPT_URL) {
-        console.error("กรุณากำหนด Google Script URL");
-      }
-      window.GOOGLE_SCRIPT_URL = GOOGLE_SCRIPT_URL;
+      window.GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzApRVAYEOsXvLlRgVcXImwB80OeWt9KOFBCmO-yUc_UL5IjCP0g9pdmcb3tOIIAD7z/exec";
 
       // ทดสอบการเชื่อมต่อกับ Google Script
       async function testGoogleScriptConnection() {
         try {
-          console.log("กำลังทดสอบการเชื่อมต่อกับ URL:", GOOGLE_SCRIPT_URL);
+          console.log("กำลังทดสอบการเชื่อมต่อกับ URL:", window.GOOGLE_SCRIPT_URL);
           
           // Use JSONP for testing connection to avoid CORS issues
-          const response = await submitToGoogleSheets({ action: "test" });
+          const data = { action: "test" };
+          const callbackName = 'callback_' + Date.now();
           
-          console.log("ผลการทดสอบการเชื่อมต่อ:", response);
-          return true;
+          return new Promise((resolve, reject) => {
+            window[callbackName] = function(response) {
+              console.log("ผลการทดสอบการเชื่อมต่อ:", response);
+              delete window[callbackName];
+              const script = document.getElementById('test-jsonp');
+              if (script) script.remove();
+              resolve(true);
+            };
+            
+            const script = document.createElement('script');
+            script.id = 'test-jsonp';
+            script.src = `${window.GOOGLE_SCRIPT_URL}?action=test&callback=${callbackName}`;
+            script.onerror = () => reject(new Error('Connection failed'));
+            document.head.appendChild(script);
+          });
         } catch (error) {
           console.error("ไม่สามารถเชื่อมต่อกับ Google Script:", error);
           return false;
